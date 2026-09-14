@@ -3,136 +3,96 @@
 ## Approach
 
 Reuse the existing production Dockerfile, health module, Zod env validation, migrator
-image target, and repository job logic. Extract callable use-cases from Nest schedulers,
-expose them under `POST /api/internal/jobs/...`, protect those routes with Google OIDC
-validation suitable for Cloud Scheduler, disable in-process crons in production, and add
-GCP-oriented operator documentation and parameterized scripts. Do not alter the VPS
-Compose release path from feature 029.
+image target, and repository job logic. Extract callable use-cases from Nest schedulers
+in `modules/jobs`, expose **one** aggregated endpoint under
+`POST /api/internal/jobs/run`, protect it with Google OIDC suitable for Cloud Scheduler,
+disable in-process crons in production, document GCP ops, and add **GitHub Actions** that
+deploy the API to Cloud Run from `staging` / `main`.
+
+**Phase 1 (done):** Nest job HTTP + OIDC + pool + `CLOUD_RUN.md` (manual gcloud).
+**Phase 2 (this proposal):** Dual-env docs in one GCP project + Actions deploy; Cloudflare
+frontends deferred to feature 046.
 
 ## Confirmed Decisions
 
-- Deploy scope: **API (+ migrator) on Cloud Run documentation/scripts only**; frontends
-  stay on the existing VPS path (option 4B).
-- Tests: **high importance** — `test-engineer` then `implementation-engineer`, then
-  `quality-reviewer`; incremental apply (one `tasks.md` item per turn unless batched).
-- Spec-first: this feature folder is the source of truth before code.
-- Prerequisite **043**: realtime/SSE and `domain_outbox_events` removed; no outbox job;
-  `min-instances` not required for sticky streams.
-
-## Recommended Decisions (awaiting confirmation)
-
-### 1) Job authentication — recommend **public Cloud Run + Nest OIDC on `/internal/*`**
-
-Cloud Run IAM “require authentication” applies to the **whole service**, not per path.
-This API must remain reachable without a Google identity for:
-
-- Browser clients (`web` / `dashboard` / `admin`)
-- Mercado Pago webhooks
-- Public health probes (unless wired differently)
-
-Therefore pure “only IAM, no app check” on a single public API service is not workable
-without an extra edge (Load Balancer / API Gateway) or a second private Cloud Run
-service.
-
-**Recommended design:**
-
-1. Cloud Run service allows unauthenticated invocation (same as today’s public HTTP API).
-2. Cloud Scheduler attaches an **OIDC token** for a dedicated scheduler service account.
-3. Nest guard on `/api/internal/jobs/*` verifies the Google-signed JWT (issuer, audience,
-   and allowed service-account email from env).
-4. No static `x-api-key` as the only control; optional local bypass only for development
-   (e.g. skip OIDC when `NODE_ENV=development` and a documented local header/flag — exact
-   local DX chosen during implementation without weakening production).
-
-Alternative (heavier): split a private “jobs” Cloud Run service with IAM-only access —
-out of scope unless operators prefer two services later.
+- Deploy scope: **API (+ migrator) on Cloud Run**; staging/production API is not Compose.
+- Frontends: **Cloudflare** (feature 046) — not implemented in 042.
+- GCP topology: **one project**, services e.g. `lumina-api-staging` / `lumina-api`,
+  migrator jobs and Scheduler jobs per environment; distinct secrets/SAs.
+- Branches: `staging` → staging Cloud Run; `main` → production Cloud Run.
+- Tests: Nest job/OIDC coverage already delivered (high). Actions/docs = low automated
+  test importance (verify YAML + dry-run docs; no `test-engineer` unless auth logic
+  changes).
+- Spec-first: this folder remains source of truth; review Phase 2 before apply.
+- Prerequisite **043** / **045**: done.
+- Job authentication (**B**): public Cloud Run + Nest OIDC on `/api/internal/jobs/*`.
+- Scheduler (**A**): one HTTP pipeline per environment; cron `0 0 1,11,21 * *`.
+- GCP auth from GitHub: **Workload Identity Federation** (no SA JSON in repo).
 
 ## Architecture
 
 ```text
-Cloud Scheduler (OIDC, scheduler SA)
+GitHub (branch staging | main)
         |
         v
-Cloud Run API (public HTTP for product routes)
-        |
-        +--> Nest public controllers (auth, orders, webhooks, health)
-        |
-        +--> Nest POST /api/internal/jobs/* (OIDC guard)
-                |
-                v
-         existing @repo/db repositories / transactions
-                |
-                v
-         Neon PostgreSQL (pooled DATABASE_URL)
+GitHub Actions + WIF → Artifact Registry → Cloud Run Job (migrator) → Cloud Run service
+                                                                              |
+Cloud Scheduler (per-env SA, OIDC) ──POST /api/internal/jobs/run─────────────┘
+                                                                              |
+                                                                         Neon (per-env DB)
 ```
 
-Migrations:
+Suggested naming (one `PROJECT_ID`):
 
-```text
-build images -> push Artifact Registry -> run migrator job (DATABASE_MIGRATION_URL)
-  -> deploy/revise Cloud Run -> Scheduler targets new revision URL
-```
+| Env | Git branch | Cloud Run service | Scheduler job | Migrator job |
+| --- | ---------- | ----------------- | ------------- | ------------ |
+| Staging | `staging` | `lumina-api-staging` | `lumina-internal-jobs-run-staging` | `lumina-api-migrator-staging` |
+| Production | `main` | `lumina-api` | `lumina-internal-jobs-run` | `lumina-api-migrator` |
+
+GitHub Environments `staging` / `production` hold env-specific vars (service names,
+Scheduler name/SA, stable API OIDC audience, and runtime SA) and WIF provider config.
+**Production** Environment requires manual reviewers before deploy; staging does not. Trigger:
+successful `CI` workflow completion on the matching branch; the deploy workflow checks out the
+verified workflow-run SHA.
 
 ## Internal Job Catalog
 
-| Job | Method / path (under API prefix) | Suggested schedule | Notes |
-|-----|----------------------------------|--------------------|-------|
-| Expire purchase reservations | `POST .../internal/jobs/expire-purchase-reservations` | `* * * * *` | Critical; batch 100; idempotent release |
-| Cleanup stale pending orders | `POST .../internal/jobs/cleanup-stale-pending-orders` | `0 0 1 * *` | Legacy hygiene |
-| Cleanup API error records | `POST .../internal/jobs/cleanup-api-error-records` | `0 0 * * *` | 30-day retention |
-| Cleanup user registration tokens | `POST .../internal/jobs/cleanup-user-registration-tokens` | `0 0 * * *` | |
-| Cleanup owner registration tokens | `POST .../internal/jobs/cleanup-owner-registration-tokens` | `0 0 * * *` | |
-| Cleanup password reset tokens | `POST .../internal/jobs/cleanup-password-reset-tokens` | `0 0 * * *` | |
-| Cleanup account sessions | `POST .../internal/jobs/cleanup-account-sessions` | `0 0 * * *` | Replaces unreliable 14-day `@Interval` |
-| Cleanup staff invitations | `POST .../internal/jobs/cleanup-staff-invitations` | `0 0 * * *` | |
-
-Exact `API_ROUTES` constants follow existing kebab/English conventions in `@repo/common`.
+Unchanged from Phase 1 — see prior table. One Scheduler job **per environment**.
 
 ## Configuration Additions (expected)
 
-| Variable | Sensitivity | Role |
-|----------|-------------|------|
-| Existing API/runtime vars | mixed | Unchanged contract from `deploy/env` |
-| `DATABASE_POOL_MAX` (name TBD) | public | Cap `pg` Pool `max` per instance |
-| `INTERNAL_JOBS_OIDC_AUDIENCE` | public | Expected JWT audience (Cloud Run URL or custom) |
-| `INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS` | public | Comma-separated SA emails allowed to invoke jobs |
-| `ENABLE_IN_PROCESS_SCHEDULERS` | public | Default true in development, false in production |
+Unchanged Nest env contract. Actions need (not in Nest):
 
-Secrets stay in Secret Manager / runtime injection (same classes as today: DB URLs, JWT,
-MP, R2, optional AWS keys).
+| Item | Role |
+|------|------|
+| WIF provider + deploy SA | `gcloud` from Actions without JSON keys |
+| GitHub Environment vars | `PROJECT_ID`, `REGION`, service/job names, AR repo |
+| Secret Manager | Per-env `DATABASE_URL`, JWT, OIDC audience/allowlist, etc. |
 
-## Documentation / Scripts
+## Documentation / CI
 
-Add English `deploy/CLOUD_RUN.md` (or equivalent under `deploy/`) covering:
-
-1. Build API + migrator images  
-2. Push to Artifact Registry  
-3. Deploy Cloud Run  
-4. Env + Secret Manager  
-5. IAM (runtime SA, scheduler SA, `roles/run.invoker` only if a private service is used later)  
-6. Create Scheduler jobs with OIDC  
-7. Manual curl/test with identity token  
-8. Logs  
-9. Rollback revision  
-10. Migrator-before-traffic  
-
-Parameterized shell helpers under `deploy/scripts/` (PROJECT_ID, REGION, SERVICE_NAME,
-IMAGE, SCHEDULER_SA). No hardcoded GCP project values. Do not introduce Terraform in this
-feature.
+- Update `deploy/CLOUD_RUN.md`: dual-env table, branch mapping, two Scheduler jobs,
+  Actions overview + manual fallback `gcloud` commands.
+- Update `deploy/OPERATIONS.md`: API path = Cloud Run; VPS Compose no longer the API
+  control plane for staging/prod; pointer to 046 for Cloudflare frontends.
+- Add `.github/workflows/` deploy workflow(s) for API Cloud Run (after CI succeeds: build/push,
+  migrate, deploy, readiness, and Scheduler OIDC-target checks). Keep existing `ci.yml` as the
+  sole verification workflow.
+- Do **not** reintroduce `cloud-run-*.sh` helpers.
 
 ## Verification
 
-- Focused tests: OIDC/guard rejection; authorized happy path; job failure mapping;
-  purchase expiry idempotency under duplicate invocation (reuse/extend existing scheduler
-  and repository tests).
-- `pnpm --filter @repo/api test` (affected), `pnpm type-check`, `pnpm lint`,
-  `pnpm format:check`.
-- Manual: local POST to internal jobs; document `gcloud` identity-token probe for staging.
+- Phase 1 Nest tests remain green if touched.
+- `pnpm type-check` / lint / format on touched files.
+- Manual: workflow dry-run or staging push after WIF is configured in GCP/GitHub
+  (operator-owned secrets; document required console steps).
 
 ## Risks
 
-- Misconfigured audience/SA list locks out Scheduler or leaves jobs open — fail closed in
-  production when OIDC config is incomplete.
-- Pool exhaustion under high max-instances — document Neon pooler + low per-instance max.
-- Operators forgetting migrator step — docs must order migrate → revise.
-- SSE UX regression under scale-to-zero — document clearly.
+- Misconfigured audience/SA list locks out Scheduler — fail closed (already).
+- Wrong Environment secrets → staging talking to prod Neon — mitigate with naming +
+  Environment isolation + required production approval.
+- Migrator skipped on schema change — workflow must order migrate → deploy.
+- Free-tier: two Scheduler **definitions** (staging + prod) still low monthly
+  invocation count if cadence stays 3×/month each.
+- Cloudflare cutover (046) may leave temporary dual frontend hosting — out of 042.

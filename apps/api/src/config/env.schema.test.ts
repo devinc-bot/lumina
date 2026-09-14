@@ -120,6 +120,12 @@ test('runtime env schema rejects unpaired AWS credentials', () => {
   expect(result.success).toBe(false)
 })
 
+const validInternalJobsOidc = {
+  INTERNAL_JOBS_OIDC_AUDIENCE: 'https://api.example.com',
+  INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS:
+    'scheduler@example.iam.gserviceaccount.com, jobs-runner@example.iam.gserviceaccount.com',
+} as const
+
 const validConfig = {
   PORT: '3000',
   JWT_SECRET: 'test-jwt-secret',
@@ -132,6 +138,7 @@ const validConfig = {
     'https://example.com,https://dashboard.example.com,https://admin.example.com',
   TRUST_PROXY_HOPS: '1',
   NODE_ENV: 'production',
+  ...validInternalJobsOidc,
 }
 
 test('upload env does not require or expose R2_UPLOAD_PREFIX', () => {
@@ -398,4 +405,176 @@ test('accepts a complete API runtime environment without DATABASE_URL', () => {
   if (result.success) {
     expect(result.data).not.toHaveProperty('DATABASE_URL')
   }
+})
+
+test('accepts explicit internal jobs OIDC and pool settings in production', () => {
+  expect(apiConfigSchema.parse(validConfig)).toMatchObject({
+    INTERNAL_JOBS_OIDC_AUDIENCE: validInternalJobsOidc.INTERNAL_JOBS_OIDC_AUDIENCE,
+    INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS:
+      validInternalJobsOidc.INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS,
+    ENABLE_IN_PROCESS_SCHEDULERS: false,
+    DATABASE_POOL_MAX: 10,
+  })
+})
+
+test('defaults DATABASE_POOL_MAX to 10 when omitted', () => {
+  expect(apiConfigSchema.parse(validConfig)).toMatchObject({
+    DATABASE_POOL_MAX: 10,
+  })
+})
+
+test('accepts an explicit DATABASE_POOL_MAX override', () => {
+  expect(
+    apiConfigSchema.parse({
+      ...validConfig,
+      DATABASE_POOL_MAX: '5',
+    })
+  ).toMatchObject({
+    DATABASE_POOL_MAX: 5,
+  })
+})
+
+test('rejects a non-positive DATABASE_POOL_MAX', () => {
+  const zero = apiConfigSchema.safeParse({ ...validConfig, DATABASE_POOL_MAX: '0' })
+  const negative = apiConfigSchema.safeParse({ ...validConfig, DATABASE_POOL_MAX: '-1' })
+  const nonInteger = apiConfigSchema.safeParse({ ...validConfig, DATABASE_POOL_MAX: '1.5' })
+
+  expect(zero.success).toBe(false)
+  expect(negative.success).toBe(false)
+  expect(nonInteger.success).toBe(false)
+})
+
+test('defaults ENABLE_IN_PROCESS_SCHEDULERS to false when omitted', () => {
+  expect(apiConfigSchema.parse(validConfig)).toMatchObject({
+    ENABLE_IN_PROCESS_SCHEDULERS: false,
+  })
+})
+
+test('parses ENABLE_IN_PROCESS_SCHEDULERS true/false', () => {
+  expect(
+    apiConfigSchema.parse({
+      ...validConfig,
+      ENABLE_IN_PROCESS_SCHEDULERS: 'true',
+    })
+  ).toMatchObject({
+    ENABLE_IN_PROCESS_SCHEDULERS: true,
+  })
+  expect(
+    apiConfigSchema.parse({
+      ...validConfig,
+      NODE_ENV: 'development',
+      TRUST_PROXY_HOPS: '0',
+      ENABLE_IN_PROCESS_SCHEDULERS: 'false',
+    })
+  ).toMatchObject({
+    ENABLE_IN_PROCESS_SCHEDULERS: false,
+  })
+})
+
+test('allows empty internal jobs OIDC config in development', () => {
+  expect(
+    apiConfigSchema.parse({
+      ...validConfig,
+      NODE_ENV: 'development',
+      TRUST_PROXY_HOPS: '0',
+      INTERNAL_JOBS_OIDC_AUDIENCE: '',
+      INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS: '',
+    })
+  ).toMatchObject({
+    INTERNAL_JOBS_OIDC_AUDIENCE: '',
+    INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS: '',
+  })
+})
+
+test('allows omitted internal jobs OIDC config in development', () => {
+  const {
+    INTERNAL_JOBS_OIDC_AUDIENCE: _audience,
+    INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS: _accounts,
+    ...withoutOidc
+  } = {
+    ...validConfig,
+    NODE_ENV: 'development',
+    TRUST_PROXY_HOPS: '0',
+  }
+
+  expect(apiConfigSchema.parse(withoutOidc)).toMatchObject({
+    INTERNAL_JOBS_OIDC_AUDIENCE: '',
+    INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS: '',
+  })
+})
+
+test('allows empty internal jobs OIDC config in test', () => {
+  expect(
+    apiConfigSchema.parse({
+      ...validConfig,
+      NODE_ENV: 'test',
+      INTERNAL_JOBS_OIDC_AUDIENCE: '',
+      INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS: '',
+    })
+  ).toMatchObject({
+    INTERNAL_JOBS_OIDC_AUDIENCE: '',
+    INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS: '',
+  })
+})
+
+function expectProductionOidcFailure(result: ReturnType<typeof apiConfigSchema.safeParse>): void {
+  expect(result.success).toBe(false)
+  if (result.success) {
+    return
+  }
+
+  const issuePaths = result.error.issues.flatMap((issue) => issue.path.map(String))
+  const issueMessages = result.error.issues.map((issue) => issue.message)
+  expect(
+    issuePaths.some((path) => path.includes('INTERNAL_JOBS_OIDC')) ||
+      issueMessages.some((message) =>
+        /INTERNAL_JOBS_OIDC|OIDC|audience|service account/i.test(message)
+      )
+  ).toBe(true)
+}
+
+test('rejects empty INTERNAL_JOBS_OIDC_AUDIENCE in production', () => {
+  expectProductionOidcFailure(
+    apiConfigSchema.safeParse({
+      ...validConfig,
+      INTERNAL_JOBS_OIDC_AUDIENCE: '',
+    })
+  )
+})
+
+test('rejects empty INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS in production', () => {
+  expectProductionOidcFailure(
+    apiConfigSchema.safeParse({
+      ...validConfig,
+      INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS: '',
+    })
+  )
+})
+
+test('rejects omitted internal jobs OIDC config in production', () => {
+  const {
+    INTERNAL_JOBS_OIDC_AUDIENCE: _audience,
+    INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS: _accounts,
+    ...withoutOidc
+  } = validConfig
+
+  expectProductionOidcFailure(apiConfigSchema.safeParse(withoutOidc))
+})
+
+test('rejects whitespace-only INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS in production', () => {
+  expectProductionOidcFailure(
+    apiConfigSchema.safeParse({
+      ...validConfig,
+      INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS: '  ,  ',
+    })
+  )
+})
+
+test('rejects whitespace-only INTERNAL_JOBS_OIDC_AUDIENCE in production', () => {
+  expectProductionOidcFailure(
+    apiConfigSchema.safeParse({
+      ...validConfig,
+      INTERNAL_JOBS_OIDC_AUDIENCE: '   ',
+    })
+  )
 })

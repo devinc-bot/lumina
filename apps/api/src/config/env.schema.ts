@@ -134,6 +134,13 @@ function parseCorsOrigins(value: string): string[] {
     .filter(Boolean)
 }
 
+function hasNonEmptyServiceAccount(value: string): boolean {
+  return value
+    .split(',')
+    .map((entry) => entry.trim())
+    .some((entry) => entry.length > 0)
+}
+
 export const apiConfigSchema = z
   .object({
     PORT: z.coerce.number().default(3000),
@@ -148,6 +155,13 @@ export const apiConfigSchema = z
     TRUST_PROXY_HOPS: z.coerce.number().int().nonnegative(),
     ...rateLimitEnvSchema,
     NODE_ENV: z.enum([MODE.DEVELOPMENT, MODE.PRODUCTION, MODE.TEST]).default(MODE.DEVELOPMENT),
+    INTERNAL_JOBS_OIDC_AUDIENCE: z.string().default(''),
+    INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS: z.string().default(''),
+    ENABLE_IN_PROCESS_SCHEDULERS: z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((value) => value === 'true'),
+    DATABASE_POOL_MAX: positiveInt(10),
   })
   .superRefine((config, context) => {
     const origins = [config.API_PUBLIC_URL, config.WEB_URL, config.DASHBOARD_URL, config.ADMIN_URL]
@@ -171,6 +185,25 @@ export const apiConfigSchema = z
         path: ['TRUST_PROXY_HOPS'],
         message: 'TRUST_PROXY_HOPS must be at least 1 in production.',
       })
+    }
+
+    if (config.NODE_ENV === MODE.PRODUCTION) {
+      if (config.INTERNAL_JOBS_OIDC_AUDIENCE.trim().length === 0) {
+        context.addIssue({
+          code: 'custom',
+          path: ['INTERNAL_JOBS_OIDC_AUDIENCE'],
+          message: 'INTERNAL_JOBS_OIDC_AUDIENCE must be set to a non-empty value in production.',
+        })
+      }
+
+      if (!hasNonEmptyServiceAccount(config.INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS)) {
+        context.addIssue({
+          code: 'custom',
+          path: ['INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS'],
+          message:
+            'INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS must include at least one service account in production.',
+        })
+      }
     }
   })
   .transform((config) => {
