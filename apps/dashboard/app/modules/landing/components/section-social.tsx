@@ -6,7 +6,7 @@ export function SectionSocial() {
   const { t } = useTranslation('dashboardLanding')
 
   return (
-    <section aria-labelledby="social-heading" className="scroll-mt-28">
+    <section aria-labelledby="social-heading" className="scroll-mt-32">
       <div className={`${LANDING_MAX} py-[clamp(4rem,8vw,6.5rem)]`}>
         <div className="mb-12 max-w-2xl">
           <span className={`${LANDING_EYEBROW} mb-2 block`}>{t('social.eyebrow')}</span>

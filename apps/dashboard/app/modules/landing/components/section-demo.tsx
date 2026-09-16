@@ -45,7 +45,7 @@ export function SectionDemo() {
     <section
       id="demo"
       aria-labelledby="demo-heading"
-      className="relative z-20 mt-10 scroll-mt-28 sm:mt-14"
+      className="relative z-20 mt-10 scroll-mt-32 sm:mt-14"
     >
       <div className={`${LANDING_MAX} pb-[clamp(4rem,8vw,7rem)]`}>
         <div className="rounded-app-xl bg-surface-container-low/95 p-4 glass-panel backdrop-blur-xl">

@@ -51,7 +51,7 @@ export function SectionHero() {
       <div
         className={cn(
           LANDING_MAX,
-          'relative z-10 flex flex-1 flex-col justify-end gap-6 pt-28 pb-10 md:pt-32 md:pb-14'
+          'relative z-10 flex flex-1 flex-col justify-end gap-6 pt-36 pb-10 md:pt-36 md:pb-14'
         )}
       >
         <div

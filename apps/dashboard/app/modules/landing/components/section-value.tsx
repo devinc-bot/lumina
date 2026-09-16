@@ -14,7 +14,7 @@ export function SectionValue() {
   const { t } = useTranslation('dashboardLanding')
 
   return (
-    <section id="value" aria-labelledby="value-heading" className="scroll-mt-28">
+    <section id="value" aria-labelledby="value-heading" className="scroll-mt-32">
       <div className={`${LANDING_MAX} py-[clamp(4rem,8vw,6.5rem)]`}>
         <div className="overflow-hidden rounded-app-xl bg-surface-container-lowest p-8 md:p-14">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">

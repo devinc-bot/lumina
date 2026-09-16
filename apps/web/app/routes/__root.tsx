@@ -4,7 +4,7 @@ import { QueryClientProvider, type QueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { installZodI18n } from '@repo/i18n'
 import { I18nProvider } from '@repo/i18n/client'
-import { APP_LOGO_SRC, THEME_BOOT_SCRIPT, ThemeProvider, Toaster } from '@repo/ui'
+import { APP_FAVICON_SRC, THEME_BOOT_SCRIPT, ThemeProvider, Toaster } from '@repo/ui'
 import globalsCssUrl from '@repo/ui/globals.css?url'
 import viewTransitionsCssUrl from '@repo/ui/view-transitions.css?url'
 import {
@@ -23,8 +23,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
     ],
     links: [
-      { rel: 'icon', type: 'image/png', href: APP_LOGO_SRC },
-      { rel: 'apple-touch-icon', href: APP_LOGO_SRC },
+      { rel: 'icon', type: 'image/png', href: APP_FAVICON_SRC },
+      { rel: 'apple-touch-icon', href: APP_FAVICON_SRC },
       { rel: 'stylesheet', href: globalsCssUrl },
       { rel: 'stylesheet', href: viewTransitionsCssUrl },
     ],
