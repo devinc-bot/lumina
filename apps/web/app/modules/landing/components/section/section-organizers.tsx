@@ -21,7 +21,7 @@ export function SectionOrganizers({ className }: SectionOrganizersProps) {
     <section
       id="organizadores"
       aria-labelledby="organizers-heading"
-      className={cn('scroll-mt-24 border-t border-outline-variant/30', className)}
+      className={cn('scroll-mt-32 border-t border-outline-variant/30', className)}
     >
       <Container className={LANDING_SECTION_Y}>
         <div className="relative overflow-hidden rounded-app-xl bg-surface-container p-8 sm:p-10 lg:p-12">

@@ -23,7 +23,7 @@ export function SectionClarity({ className }: SectionClarityProps) {
       id="claridad"
       aria-labelledby="clarity-heading"
       className={cn(
-        'scroll-mt-24 border-y border-outline-variant/30 bg-surface-container-lowest',
+        'scroll-mt-32 border-y border-outline-variant/30 bg-surface-container-lowest',
         className
       )}
     >

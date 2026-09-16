@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { handleSectionNavClick } from '@repo/common'
+import { LandingLogo } from '@repo/ui'
 import { LANDING_MAX } from '../constants/layout'
 
 const FOOTER_LINKS = [
@@ -22,10 +23,7 @@ export function LandingFooter() {
         <div className="flex flex-col items-start justify-between gap-10 pb-10 md:flex-row">
           <div className="max-w-sm">
             <div className="mb-3 inline-flex items-center gap-1.5">
-              <span className="font-display text-lg font-bold tracking-tight text-on-surface">
-                {t('header.brand')}
-              </span>
-              <span className="size-2 rounded-full bg-primary" aria-hidden />
+              <LandingLogo alt={t('header.brand')} />
             </div>
             <p className="text-sm leading-relaxed text-on-surface-variant">{t('footer.tagline')}</p>
           </div>

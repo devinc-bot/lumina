@@ -14,7 +14,7 @@ export function SectionAudiences() {
   const { t } = useTranslation('dashboardLanding')
 
   return (
-    <section id="audiences" aria-labelledby="audiences-heading" className="scroll-mt-28">
+    <section id="audiences" aria-labelledby="audiences-heading" className="scroll-mt-32">
       <div className={`${LANDING_MAX} space-y-12 py-[clamp(4rem,8vw,6.5rem)]`}>
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12">
           <div className="space-y-4 lg:col-span-6">

@@ -128,6 +128,12 @@ export {
 } from './components/ui/app-logo.tsx'
 export { GoogleMark, type GoogleMarkProps } from './components/ui/google-mark.tsx'
 export {
+  LandingLogo,
+  LANDING_LOGO_SRC,
+  APP_FAVICON_SRC,
+  type LandingLogoProps,
+} from './components/ui/landing-logo.tsx'
+export {
   Select,
   SelectContent,
   SelectField,

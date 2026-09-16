@@ -6,6 +6,7 @@ import { handleSectionNavClick } from '@repo/common'
 import {
   Button,
   LanguageToggle,
+  LandingLogo,
   Sheet,
   SheetClose,
   SheetContent,
@@ -34,14 +35,7 @@ const LANDING_NAV = [
 function BrandMark() {
   const { t } = useTranslation('dashboardLanding')
 
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className="font-display text-sm font-bold tracking-[0.08em] text-on-surface uppercase sm:text-base">
-        {t('header.brand')}
-      </span>
-      <span className="size-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
-    </span>
-  )
+  return <LandingLogo alt={t('header.brand')} size="header" />
 }
 
 export function LandingHeader() {
@@ -69,14 +63,14 @@ export function LandingHeader() {
       <div className={LANDING_MAX}>
         <div
           className={cn(
-            'pointer-events-auto flex h-15 w-full items-center justify-between gap-2 rounded-app-lg px-4 glass-panel sm:gap-3 sm:px-4',
+            'pointer-events-auto flex h-24 w-full items-center justify-between gap-2 rounded-app-lg px-2 glass-panel sm:gap-3 sm:px-4',
             'bg-surface-container/70 backdrop-blur-xl supports-backdrop-filter:bg-surface-container/70'
           )}
         >
           <Link
             to="/"
             className={cn(
-              'flex shrink-0 items-center rounded-full px-6 transition-opacity duration-(--duration-instant) ease-emphasized hover:opacity-80',
+              'flex h-20 shrink-0 items-center rounded-full px-0 transition-opacity duration-(--duration-instant) ease-emphasized hover:opacity-80 sm:px-2',
               LANDING_FOCUS_RING
             )}
           >

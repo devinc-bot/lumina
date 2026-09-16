@@ -14,7 +14,7 @@ export function SectionFeatures() {
   const { t } = useTranslation('dashboardLanding')
 
   return (
-    <section id="features" aria-labelledby="features-heading" className="scroll-mt-28">
+    <section id="features" aria-labelledby="features-heading" className="scroll-mt-32">
       <div
         className={`${LANDING_MAX} grid grid-cols-1 items-start gap-12 py-[clamp(4rem,8vw,6.5rem)] lg:grid-cols-12`}
       >

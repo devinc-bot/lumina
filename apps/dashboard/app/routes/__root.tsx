@@ -3,7 +3,7 @@ import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanst
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import {
-  APP_LOGO_SRC,
+  APP_FAVICON_SRC,
   ErrorBoundaryView,
   NotFoundView,
   THEME_BOOT_SCRIPT,
@@ -29,8 +29,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { title: `${commonEs.appNameDisplay} · Panel` },
     ],
     links: [
-      { rel: 'icon', type: 'image/png', href: APP_LOGO_SRC },
-      { rel: 'apple-touch-icon', href: APP_LOGO_SRC },
+      { rel: 'icon', type: 'image/png', href: APP_FAVICON_SRC },
+      { rel: 'apple-touch-icon', href: APP_FAVICON_SRC },
       { rel: 'stylesheet', href: globalsCssUrl },
       { rel: 'stylesheet', href: viewTransitionsCssUrl },
     ],
