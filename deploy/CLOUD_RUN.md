@@ -2,6 +2,10 @@
 
 Canonical runbook for the **Nest API (+ migrator)** on Google Cloud Run (scale-to-zero).
 
+For the copy/paste PowerShell bootstrap sequence used for staging, see
+[CLOUD_RUN_BOOTSTRAP.md](./CLOUD_RUN_BOOTSTRAP.md). It also documents how to review and safely
+disable unused Google APIs.
+
 **Topology:** one GCP project, two environments (staging + production). Each environment has its
 own Cloud Run service, migrator Job, Cloud Scheduler job, Neon database, and Secret Manager
 secrets.

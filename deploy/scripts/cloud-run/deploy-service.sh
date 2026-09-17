@@ -13,9 +13,13 @@ ARGS=(
   --image="${API_IMAGE}"
   --allow-unauthenticated
   --min-instances=0
+  --max-instances=2
   --port=3000
-  --timeout=320s
-  --update-env-vars=NODE_ENV=production,ENABLE_IN_PROCESS_SCHEDULERS=false,DATABASE_POOL_MAX=10
+  --cpu=1
+  --memory=512Mi
+  --concurrency=40
+  --timeout=180s
+  --update-env-vars=NODE_ENV=production,ENABLE_IN_PROCESS_SCHEDULERS=false,DATABASE_POOL_MAX=3
 )
 if [ -n "${RUNTIME_SERVICE_ACCOUNT:-}" ]; then
   ARGS+=(--service-account="${RUNTIME_SERVICE_ACCOUNT}")
