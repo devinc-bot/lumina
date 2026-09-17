@@ -1,0 +1,86 @@
+name: Deploy API
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+    branches:
+      - staging
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-api-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      REGION: ${{ vars.GCP_REGION }}
+      SERVICE_NAME: ${{ vars.SERVICE_NAME }}
+      MIGRATOR_JOB_NAME: ${{ vars.MIGRATOR_JOB_NAME }}
+      SCHEDULER_JOB_NAME: ${{ vars.SCHEDULER_JOB_NAME }}
+      REPOSITORY: ${{ vars.AR_REPO }}
+      RUNTIME_SERVICE_ACCOUNT: ${{ vars.RUNTIME_SERVICE_ACCOUNT }}
+      SCHEDULER_SERVICE_ACCOUNT: ${{ vars.SCHEDULER_SERVICE_ACCOUNT }}
+      INTERNAL_JOBS_OIDC_AUDIENCE: ${{ vars.INTERNAL_JOBS_OIDC_AUDIENCE }}
+      API_IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.AR_REPO }}/api:${{ github.event.workflow_run.head_sha }}
+      MIGRATOR_IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.AR_REPO }}/migrator:${{ github.event.workflow_run.head_sha }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Validate deploy configuration
+        run: bash deploy/scripts/cloud-run/validate-deploy-config.sh
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: bash deploy/scripts/cloud-run/configure-docker.sh
+
+      - name: Build API image
+        run: bash deploy/scripts/cloud-run/build-api-image.sh
+
+      - name: Push API image
+        run: bash deploy/scripts/cloud-run/push-api-image.sh
+
+      - name: Build migrator image
+        run: bash deploy/scripts/cloud-run/build-migrator-image.sh
+
+      - name: Push migrator image
+        run: bash deploy/scripts/cloud-run/push-migrator-image.sh
+
+      - name: Update migrator Cloud Run Job
+        run: bash deploy/scripts/cloud-run/update-migrator-job.sh
+
+      - name: Execute migrator Job
+        run: bash deploy/scripts/cloud-run/execute-migrator-job.sh
+
+      - name: Deploy to Cloud Run
+        run: bash deploy/scripts/cloud-run/deploy-service.sh
+
+      - name: Probe API readiness
+        run: bash deploy/scripts/cloud-run/probe-health.sh
+
+      - name: Verify Scheduler OIDC target
+        run: bash deploy/scripts/cloud-run/verify-scheduler-config.sh
