@@ -64,7 +64,7 @@ export function SectionEvents({ showAuthCtas = true, className }: SectionEventsP
     <section
       id="eventos"
       aria-labelledby="events-heading"
-      className={cn('scroll-mt-24 border-t border-outline-variant/30', className)}
+      className={cn('scroll-mt-32 border-t border-outline-variant/30', className)}
     >
       <Container className={LANDING_SECTION_Y}>
         <div className="max-w-2xl space-y-3">

@@ -2,7 +2,7 @@ import type { MouseEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useRouterState } from '@tanstack/react-router'
 import { handleSectionNavClick, sectionIdFromHash } from '@repo/common'
-import { Link, cn } from '@repo/ui'
+import { LandingLogo, Link, cn } from '@repo/ui'
 import { clientEnv } from '~/config/env'
 import { Container } from '~/modules/common/components/container'
 import { WEB_ROUTES } from '~/modules/common/constants/routes'
@@ -97,11 +97,8 @@ export function LandingFooter() {
       <Container className="py-14 sm:py-16">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-4">
-            <Link to={WEB_ROUTES.home()} className="px-0">
-              <span className="font-display text-lg font-bold tracking-[0.08em] text-on-surface uppercase">
-                {t('nav.brand')}
-              </span>
-              <span className="size-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
+            <Link to={WEB_ROUTES.home()} className="h-20 px-0">
+              <LandingLogo alt={t('nav.brand')} />
             </Link>
             <p className="mt-3 max-w-sm text-sm leading-relaxed text-on-surface-variant">
               {t('footer.tagline')}

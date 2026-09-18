@@ -3,6 +3,7 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import tsConfigPaths from 'vite-tsconfig-paths'
+import { NODE_SSR_BUILD_CONFIG } from '../../packages/common/src/config/node-ssr'
 
 const ADMIN_BUILD_ENV_KEY = 'VITE_API_URL'
 
@@ -31,6 +32,7 @@ export default defineConfig(({ mode }) => {
   validateAdminBuildEnv(env[ADMIN_BUILD_ENV_KEY])
 
   return {
+    ...NODE_SSR_BUILD_CONFIG,
     plugins: [
       tailwindcss(),
       tsConfigPaths(),

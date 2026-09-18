@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import tsConfigPaths from 'vite-tsconfig-paths'
 import { z } from 'zod'
+import { NODE_SSR_BUILD_CONFIG } from '../../packages/common/src/config/node-ssr'
 
 const WEB_BUILD_ENV_KEYS = {
   apiUrl: 'VITE_API_URL',
@@ -51,6 +52,7 @@ export default defineConfig(({ mode }) => {
   validateBuildEmail(WEB_BUILD_ENV_KEYS.supportEmail, env[WEB_BUILD_ENV_KEYS.supportEmail])
 
   return {
+    ...NODE_SSR_BUILD_CONFIG,
     plugins: [
       tailwindcss(),
       tsConfigPaths(),

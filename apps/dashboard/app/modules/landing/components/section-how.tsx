@@ -16,7 +16,7 @@ export function SectionHow() {
   const { ref, runEntrance } = useRevealEntrance()
 
   return (
-    <section id="how" aria-labelledby="how-heading" className="scroll-mt-28">
+    <section id="how" aria-labelledby="how-heading" className="scroll-mt-32">
       <div className={`${LANDING_MAX} py-[clamp(4rem,8vw,6.5rem)]`}>
         <div className="mb-12 max-w-2xl">
           <span className={`${LANDING_EYEBROW} mb-2 block`}>{t('how.eyebrow')}</span>

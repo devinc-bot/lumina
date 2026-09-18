@@ -7,7 +7,7 @@ export function SectionFaq() {
   const { t } = useTranslation('dashboardLanding')
 
   return (
-    <section id="faq" aria-labelledby="faq-heading" className="scroll-mt-28">
+    <section id="faq" aria-labelledby="faq-heading" className="scroll-mt-32">
       <div className="mx-auto w-full max-w-4xl px-margin-mobile py-[clamp(4rem,8vw,6.5rem)] md:px-margin-desktop">
         <div className="mb-12 text-center">
           <span className={`${LANDING_EYEBROW} mb-2 block`}>{t('faq.eyebrow')}</span>

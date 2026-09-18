@@ -84,7 +84,7 @@ export function LandingPage() {
           as="section"
           id="como-funciona"
           aria-labelledby="how-heading"
-          className={cn(LANDING_SECTION_Y, 'scroll-mt-24')}
+          className={cn(LANDING_SECTION_Y, 'scroll-mt-32')}
         >
           <div className="max-w-2xl space-y-3">
             <span className="flex items-center gap-2 font-label text-xs font-semibold tracking-wider text-primary uppercase">
