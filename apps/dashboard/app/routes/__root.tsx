@@ -12,7 +12,7 @@ import {
 } from '@repo/ui'
 import { I18nProvider } from '@repo/i18n/client'
 import { installZodI18n } from '@repo/i18n'
-import commonEs from '@repo/i18n/locales/common/es.json'
+import commonEs from '@repo/i18n/locales/common/es.json' with { type: 'json' }
 import globalsCssUrl from '@repo/ui/globals.css?url'
 import viewTransitionsCssUrl from '@repo/ui/view-transitions.css?url'
 import { DASHBOARD_ROUTES } from '~/modules/common/constants/routes'
