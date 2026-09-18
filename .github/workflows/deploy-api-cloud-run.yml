@@ -8,19 +8,20 @@ on:
       - completed
     branches:
       - staging
+      - main
 
 permissions:
   contents: read
 
 concurrency:
-  group: deploy-api-staging
+  group: deploy-api-${{ github.event.workflow_run.head_branch == 'main' && 'production' || github.event.workflow_run.head_branch }}
   cancel-in-progress: false
 
 jobs:
   deploy:
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    environment: staging
+    environment: ${{ github.event.workflow_run.head_branch == 'main' && 'production' || 'staging' }}
     permissions:
       contents: read
       id-token: write
@@ -46,39 +47,48 @@ jobs:
       - name: Validate deploy configuration
         run: bash deploy/scripts/cloud-run/validate-deploy-config.sh
 
+      # Workload Identity Federation → impersonate the deploy SA (no JSON keys).
       - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
+      # Install gcloud CLI on the runner (uses credentials from the auth step).
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      # docker ↔ Artifact Registry auth for this region.
       - name: Configure Docker
         run: bash deploy/scripts/cloud-run/configure-docker.sh
 
+      # API image (Dockerfile target "runtime") → Artifact Registry as api:<sha>.
       - name: Build API image
         run: bash deploy/scripts/cloud-run/build-api-image.sh
 
       - name: Push API image
         run: bash deploy/scripts/cloud-run/push-api-image.sh
 
+      # Migrator image (Dockerfile target "migrator": Drizzle + SQL) → migrator:<sha>.
       - name: Build migrator image
         run: bash deploy/scripts/cloud-run/build-migrator-image.sh
 
       - name: Push migrator image
         run: bash deploy/scripts/cloud-run/push-migrator-image.sh
 
+      # Point the Cloud Run Job at the new migrator image (definition only).
       - name: Update migrator Cloud Run Job
         run: bash deploy/scripts/cloud-run/update-migrator-job.sh
 
+      # Run migrations once and wait; must succeed before API rollout.
       - name: Execute migrator Job
         run: bash deploy/scripts/cloud-run/execute-migrator-job.sh
 
+      # Roll out the API service to the new api:<sha> image.
       - name: Deploy to Cloud Run
         run: bash deploy/scripts/cloud-run/deploy-service.sh
 
+      # GET /api/health/ready on the live service URL (with retries).
       - name: Probe API readiness
         run: bash deploy/scripts/cloud-run/probe-health.sh
 

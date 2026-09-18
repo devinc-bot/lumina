@@ -18,6 +18,7 @@ export const API_ERRORS_PREFIX = '/errors' as const
 export const API_USERS_PREFIX = '/users' as const
 export const API_ORGANIZATIONS_PREFIX = '/organizations' as const
 export const API_LEGAL_DOCUMENTS_PREFIX = '/legal-documents' as const
+export const API_INTERNAL_JOBS_PREFIX = '/internal/jobs' as const
 const routeSegment = (value: string) => (value.startsWith(':') ? value : encodeURIComponent(value))
 
 export const API_ROUTES = {
@@ -190,6 +191,12 @@ export const API_ROUTES = {
       getPublishedByType: (type: string) => `/public/${routeSegment(type)}` as const,
       saveDraft: (type: string) => `/${routeSegment(type)}/draft` as const,
       publish: (type: string) => `/${routeSegment(type)}/publish` as const,
+    },
+  },
+  internalJobs: {
+    prefix: API_INTERNAL_JOBS_PREFIX,
+    path: {
+      run: () => '/run' as const,
     },
   },
 } as const

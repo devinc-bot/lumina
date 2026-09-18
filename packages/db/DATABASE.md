@@ -19,6 +19,7 @@ All API database access belongs in repositories. NestJS services import reposito
 | Variable                 | Purpose                                                            |
 | ------------------------ | ------------------------------------------------------------------ |
 | `DATABASE_URL`           | Pooled Neon URL for application runtime                            |
+| `DATABASE_POOL_MAX`      | Max connections in the runtime `pg` Pool (default `10`)            |
 | `DATABASE_MIGRATION_URL` | Direct Neon URL for migrations, seeds, and administrative commands |
 
 `@repo/db` reads injected process variables first. For host development, it loads

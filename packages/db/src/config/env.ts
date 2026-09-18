@@ -7,9 +7,13 @@ export const databaseEnvSchema = z.object({
 
 export type DatabaseEnv = z.infer<typeof databaseEnvSchema>
 
-export const runtimeDatabaseEnvSchema = databaseEnvSchema.pick({
-  DATABASE_URL: true,
-})
+export const runtimeDatabaseEnvSchema = databaseEnvSchema
+  .pick({
+    DATABASE_URL: true,
+  })
+  .extend({
+    DATABASE_POOL_MAX: z.coerce.number().int().positive().default(10),
+  })
 
 export type RuntimeDatabaseEnv = z.infer<typeof runtimeDatabaseEnvSchema>
 
