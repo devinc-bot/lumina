@@ -30,9 +30,9 @@ Attach these Cloudflare-managed TLS hostnames after the first Worker deploy:
 - `dash-staging.lumina-events.com` → `lumina-dashboard-staging`
 - `admin-staging.lumina-events.com` → `lumina-admin-staging`
 
-The `Deploy Frontends` workflow runs after successful CI on `staging` and deploys the
-verified SHA. Confirm each hostname loads, its assets resolve, and browser API calls to
-`VITE_API_URL` do not fail CORS.
+Manually run `CI` for the `staging` branch from GitHub Actions. A successful run starts the
+`Deploy Frontends` workflow, which deploys the verified SHA. Confirm each hostname loads, its
+assets resolve, and browser API calls to `VITE_API_URL` do not fail CORS.
 
 ## Retry, cache, and rollback
 

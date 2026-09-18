@@ -68,10 +68,10 @@ Cloud Run service and migrator Job names.
 
 Workflow: [`.github/workflows/deploy-api-cloud-run.yml`](../.github/workflows/deploy-api-cloud-run.yml).
 
-| Trigger                    | Behavior                                                       |
-| -------------------------- | -------------------------------------------------------------- |
-| Successful CI on `staging` | Deploy CI's verified commit to GitHub Environment `staging`    |
-| Successful CI on `main`    | Deploy CI's verified commit to GitHub Environment `production` |
+| Trigger                                        | Behavior                                                       |
+| ---------------------------------------------- | -------------------------------------------------------------- |
+| Successful manually dispatched CI on `staging` | Deploy CI's verified commit to GitHub Environment `staging`    |
+| Successful manually dispatched CI on `main`    | Deploy CI's verified commit to GitHub Environment `production` |
 
 `workflow_run` starts this workflow only after the named `CI` workflow (types, lint, format, unit,
 and end-to-end checks) completes successfully on `staging` or `main`; it checks out and deploys

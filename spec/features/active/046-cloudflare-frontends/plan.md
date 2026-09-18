@@ -14,18 +14,18 @@ staging task. Workers build from the workspace source, using only intentional pu
 
 ## Architecture Decisions
 
-| Decision | Choice | Rationale |
-| --- | --- | --- |
-| Hosting unit | One Worker per app | Independent domains, failures, and re-runs; no cross-app routing layer. |
-| SSR runtime | TanStack Start Cloudflare Vite integration | Keeps current server rendering rather than converting the apps to static SPAs. |
-| Deploy trigger | `workflow_run` after successful `CI` on `staging` | Deploys the exact verified `head_sha`, matching the API workflow. |
-| Credentials | GitHub `staging` Environment secret `CLOUDFLARE_API_TOKEN` and variable `CLOUDFLARE_ACCOUNT_ID` | Keeps Cloudflare credentials out of the repository and production scope. |
-| Public config | GitHub `staging` Environment variables | `VITE_*` values are compiled into client output and must contain no secrets. |
+| Decision       | Choice                                                                                          | Rationale                                                                      |
+| -------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Hosting unit   | One Worker per app                                                                              | Independent domains, failures, and re-runs; no cross-app routing layer.        |
+| SSR runtime    | TanStack Start Cloudflare Vite integration                                                      | Keeps current server rendering rather than converting the apps to static SPAs. |
+| Deploy trigger | `workflow_run` after successful manually dispatched `CI` on `staging`                           | Deploys the exact verified `head_sha`, matching the API workflow.              |
+| Credentials    | GitHub `staging` Environment secret `CLOUDFLARE_API_TOKEN` and variable `CLOUDFLARE_ACCOUNT_ID` | Keeps Cloudflare credentials out of the repository and production scope.       |
+| Public config  | GitHub `staging` Environment variables                                                          | `VITE_*` values are compiled into client output and must contain no secrets.   |
 
 ## Deployment Flow
 
 ```text
-push to staging -> CI succeeds -> Deploy Frontends workflow
+manual CI run on staging -> CI succeeds -> Deploy Frontends workflow
   -> checkout CI head_sha -> install frozen lockfile
   -> deploy web Worker -> deploy dashboard Worker -> deploy admin Worker
   -> Cloudflare custom hostnames/TLS -> browser -> Cloud Run API
@@ -49,19 +49,19 @@ before the frontend release.
 
 ## File Changes
 
-| File | Action | Description |
-| --- | --- | --- |
-| `apps/{web,dashboard,admin}/package.json` | Modify | Add pinned Cloudflare build/deploy dependencies and deploy scripts. |
-| `apps/{web,dashboard,admin}/vite.config.ts` | Modify | Add the Cloudflare SSR Vite plugin. |
-| `apps/{web,dashboard,admin}/wrangler.jsonc` | Create | Name each staging Worker and configure compatibility, Node support, and Start entry. |
-| `pnpm-lock.yaml` | Modify | Lock the new dependencies. |
-| `.github/workflows/deploy-frontends-cloudflare.yml` | Create | Deploy the verified staging SHA with Environment-scoped configuration. |
-| `deploy/CLOUDFLARE.md` | Create | One-time account, DNS/TLS, secrets, deployment, and verification runbook. |
-| `deploy/env/staging.build.env.example` | Modify | Record the staging public build origins. |
-| `deploy/env/staging.runtime.env.example` | Modify | Record the native API and three Cloudflare frontend origins. |
-| `deploy/CLOUD_RUN_BOOTSTRAP.md` / `deploy/CLOUD_RUN.md` | Modify | Align the dashboard origin and native Cloud Run API/OIDC, OAuth, and webhook URLs. |
+| File                                                       | Action | Description                                                                                      |
+| ---------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------ |
+| `apps/{web,dashboard,admin}/package.json`                  | Modify | Add pinned Cloudflare build/deploy dependencies and deploy scripts.                              |
+| `apps/{web,dashboard,admin}/vite.config.ts`                | Modify | Add the Cloudflare SSR Vite plugin.                                                              |
+| `apps/{web,dashboard,admin}/wrangler.jsonc`                | Create | Name each staging Worker and configure compatibility, Node support, and Start entry.             |
+| `pnpm-lock.yaml`                                           | Modify | Lock the new dependencies.                                                                       |
+| `.github/workflows/deploy-frontends-cloudflare.yml`        | Create | Deploy the verified staging SHA with Environment-scoped configuration.                           |
+| `deploy/CLOUDFLARE.md`                                     | Create | One-time account, DNS/TLS, secrets, deployment, and verification runbook.                        |
+| `deploy/env/staging.build.env.example`                     | Modify | Record the staging public build origins.                                                         |
+| `deploy/env/staging.runtime.env.example`                   | Modify | Record the native API and three Cloudflare frontend origins.                                     |
+| `deploy/CLOUD_RUN_BOOTSTRAP.md` / `deploy/CLOUD_RUN.md`    | Modify | Align the dashboard origin and native Cloud Run API/OIDC, OAuth, and webhook URLs.               |
 | `apps/api/src/config/env.schema.ts` / `env.schema.test.ts` | Modify | Permit Cloudflare frontend origins with the native Cloud Run API origin and cover that contract. |
-| `apps/api/package.json` | Modify | Remove the no-longer-used `tldts` dependency. |
+| `apps/api/package.json`                                    | Modify | Remove the no-longer-used `tldts` dependency.                                                    |
 
 ## Verification Strategy
 
@@ -81,5 +81,5 @@ is enabled only after those prerequisites are present. Production remains out of
 ## Open Questions
 
 - [ ] Record the native staging Cloud Run service URL as GitHub `staging` Environment
-  variable `VITE_API_URL` and confirm `${VITE_API_URL}/api/health/ready` returns HTTP
-  200 before T6 enables automated deployment.
+      variable `VITE_API_URL` and confirm `${VITE_API_URL}/api/health/ready` returns HTTP
+      200 before T6 enables automated deployment.

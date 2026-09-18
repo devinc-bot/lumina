@@ -475,7 +475,9 @@ intentionally limited to `staging`; production remains disabled until its indepe
 complete.
 
 After the workflow pull request is merged into `main`, merge or push the verified API changes to
-`staging`. A successful `CI` workflow on `staging` triggers deployment of that exact CI SHA.
+`staging`. Manually run `CI` for `staging`; a successful run triggers deployment of that exact CI
+SHA. Dispatching `CI` from `main` follows the production deployment path and remains subject to
+the `production` Environment's approval rules.
 
 ## 13. List and disable unused Google APIs
 
