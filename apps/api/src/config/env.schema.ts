@@ -1,5 +1,4 @@
 import { IMAGE_OPTIMIZATION, IMAGE_UPLOAD_MAX_BYTES } from '@repo/validators'
-import { getDomain } from 'tldts'
 import { z } from 'zod'
 import { RATE_LIMIT_POLICY_DEFAULTS, RATE_LIMIT_PROFILE } from './rate-limit.policy'
 
@@ -118,15 +117,6 @@ const rateLimitEnvSchema = {
   RATE_LIMIT_GEO_TTL_MS: positiveInt(RATE_LIMIT_POLICY_DEFAULTS[RATE_LIMIT_PROFILE.GEO].ttlMs),
 } as const
 
-function getSchemefulSite(url: string): string {
-  const { protocol, hostname } = new URL(url)
-  // Resolve the registrable domain so api.example.com and dashboard.example.com
-  // share https://example.com, while api.foo.co.uk and bar.co.uk do not share a site.
-  const registrableDomain = getDomain(hostname) ?? hostname
-
-  return `${protocol}//${registrableDomain}`
-}
-
 function parseCorsOrigins(value: string): string[] {
   return value
     .split(',')
@@ -164,21 +154,6 @@ export const apiConfigSchema = z
     DATABASE_POOL_MAX: positiveInt(10),
   })
   .superRefine((config, context) => {
-    const origins = [config.API_PUBLIC_URL, config.WEB_URL, config.DASHBOARD_URL, config.ADMIN_URL]
-    const expectedSite = getSchemefulSite(config.API_PUBLIC_URL)
-    const isLocalDevelopmentTopology = config.NODE_ENV === MODE.DEVELOPMENT
-
-    if (
-      !isLocalDevelopmentTopology &&
-      origins.some((origin) => getSchemefulSite(origin) !== expectedSite)
-    ) {
-      context.addIssue({
-        code: 'custom',
-        message:
-          'API_PUBLIC_URL, WEB_URL, DASHBOARD_URL, and ADMIN_URL must share a schemeful site.',
-      })
-    }
-
     if (config.NODE_ENV === MODE.PRODUCTION && config.TRUST_PROXY_HOPS === 0) {
       context.addIssue({
         code: 'custom',

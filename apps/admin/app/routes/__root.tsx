@@ -4,7 +4,7 @@ import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanst
 import { useTranslation } from 'react-i18next'
 import { installZodI18n } from '@repo/i18n'
 import { I18nProvider } from '@repo/i18n/client'
-import commonEs from '@repo/i18n/locales/common/es.json'
+import commonEs from '@repo/i18n/locales/common/es.json' with { type: 'json' }
 import {
   APP_LOGO_SRC,
   ErrorBoundaryView,

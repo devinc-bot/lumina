@@ -207,24 +207,24 @@ Create GitHub Environments `staging` and `production`. Require reviewers on `pro
 
 ### Staging secrets
 
-| Name | Value |
-| --- | --- |
-| `GCP_PROJECT_ID` | GCP project id |
-| `GCP_WORKLOAD_IDENTITY_PROVIDER` | Full WIF provider resource name |
-| `GCP_SERVICE_ACCOUNT` | `lumina-api-deploy-staging@PROJECT_ID.iam.gserviceaccount.com` |
+| Name                             | Value                                                          |
+| -------------------------------- | -------------------------------------------------------------- |
+| `GCP_PROJECT_ID`                 | GCP project id                                                 |
+| `GCP_WORKLOAD_IDENTITY_PROVIDER` | Full WIF provider resource name                                |
+| `GCP_SERVICE_ACCOUNT`            | `lumina-api-deploy-staging@PROJECT_ID.iam.gserviceaccount.com` |
 
 ### Staging variables
 
-| Name | Value |
-| --- | --- |
-| `GCP_REGION` | `southamerica-east1` |
-| `AR_REPO` | `lumina` |
-| `SERVICE_NAME` | `lumina-api-staging` |
-| `MIGRATOR_JOB_NAME` | `lumina-api-migrator-staging` |
-| `RUNTIME_SERVICE_ACCOUNT` | `lumina-api-runtime-staging@PROJECT_ID.iam.gserviceaccount.com` |
-| `SCHEDULER_JOB_NAME` | `lumina-internal-jobs-run-staging` |
-| `SCHEDULER_SERVICE_ACCOUNT` | `lumina-scheduler-staging@PROJECT_ID.iam.gserviceaccount.com` |
-| `INTERNAL_JOBS_OIDC_AUDIENCE` | `https://api-staging.lumina-events.com` |
+| Name                          | Value                                                           |
+| ----------------------------- | --------------------------------------------------------------- |
+| `GCP_REGION`                  | `southamerica-east1`                                            |
+| `AR_REPO`                     | `lumina`                                                        |
+| `SERVICE_NAME`                | `lumina-api-staging`                                            |
+| `MIGRATOR_JOB_NAME`           | `lumina-api-migrator-staging`                                   |
+| `RUNTIME_SERVICE_ACCOUNT`     | `lumina-api-runtime-staging@PROJECT_ID.iam.gserviceaccount.com` |
+| `SCHEDULER_JOB_NAME`          | `lumina-internal-jobs-run-staging`                              |
+| `SCHEDULER_SERVICE_ACCOUNT`   | `lumina-scheduler-staging@PROJECT_ID.iam.gserviceaccount.com`   |
+| `INTERNAL_JOBS_OIDC_AUDIENCE` | Native staging Cloud Run service URL                            |
 
 Use the equivalent production names only after production secrets, domains, and approval controls
 are ready. The OIDC audience must be the same exact HTTPS value in the GitHub variable, Cloud
@@ -295,14 +295,15 @@ The deploy identity must not receive `roles/secretmanager.secretAccessor`.
 
 Use distinct staging credentials; do not reuse production credentials.
 
-- **Google OAuth:** create a web client for staging with exact redirect URI
-  `https://api-staging.lumina-events.com/api/auth/google/callback`. Store its client id and client
-  secret in the matching Secret Manager secrets.
+- **Google OAuth:** create a distinct staging web client. Configure its exact redirect URI only
+  after section 11 has printed `$SERVICE_URL`:
+  `$SERVICE_URL/api/auth/google/callback`. Store its client id and client secret in the matching
+  Secret Manager secrets.
 - **AWS SES:** create a dedicated staging IAM user with `ses:SendEmail`; verify the `MAIL_FROM`
   identity in `sa-east-1`. Store its access key pair in Secret Manager.
-- **Mercado Pago:** use test credentials and configure the test webhook URL as
-  `https://api-staging.lumina-events.com/api/mercado-pago/webhook`. Store the access token and
-  webhook secret in Secret Manager; set `MERCADOPAGO_TEST_MODE=true`.
+- **Mercado Pago:** use test credentials and configure the test webhook URL only after section 11
+  as `$SERVICE_URL/api/mercado-pago/webhook`. Store the access token and webhook secret in Secret
+  Manager; set `MERCADOPAGO_TEST_MODE=true`.
 - **Cloudflare R2:** create private bucket `lumina-staging`; create an `Object Read & Write` API
   token limited to that bucket. Attach public custom domain
   `assets-staging.lumina-events.com` only for public event/media objects. Store the R2 access key
@@ -367,6 +368,9 @@ $SERVICE_NAME = "lumina-api-staging"
 $MAIL_FROM = Read-Host "MAIL_FROM (verified in SES)"
 $MAIL_SMOKE_TO = Read-Host "MAIL_SMOKE_TO"
 $R2_ACCOUNT_ID = Read-Host "R2_ACCOUNT_ID"
+# For the first deploy only, use a valid temporary HTTPS URL. Its only purpose is to
+# let the service start so status.url can be retrieved in section 11.
+$API_PUBLIC_URL = Read-Host "API_PUBLIC_URL (temporary HTTPS URL for first deploy, or native service URL)"
 
 gcloud run deploy $SERVICE_NAME `
   --project=$PROJECT_ID `
@@ -381,7 +385,7 @@ gcloud run deploy $SERVICE_NAME `
   --memory=512Mi `
   --concurrency=40 `
   --timeout=180s `
-  --set-env-vars="NODE_ENV=production,ENABLE_IN_PROCESS_SCHEDULERS=false,DATABASE_POOL_MAX=3,API_PUBLIC_URL=https://api-staging.lumina-events.com,WEB_URL=https://staging.lumina-events.com,DASHBOARD_URL=https://dashboard-staging.lumina-events.com,ADMIN_URL=https://admin-staging.lumina-events.com,TRUST_PROXY_HOPS=1,AWS_REGION=sa-east-1,MAIL_FROM=$MAIL_FROM,MAIL_SMOKE_TO=$MAIL_SMOKE_TO,MERCADOPAGO_TEST_MODE=true,R2_ACCOUNT_ID=$R2_ACCOUNT_ID,R2_BUCKET=lumina-staging,R2_PUBLIC_BASE_URL=https://assets-staging.lumina-events.com" `
+  --set-env-vars="NODE_ENV=production,ENABLE_IN_PROCESS_SCHEDULERS=false,DATABASE_POOL_MAX=3,API_PUBLIC_URL=$API_PUBLIC_URL,WEB_URL=https://staging.lumina-events.com,DASHBOARD_URL=https://dash-staging.lumina-events.com,ADMIN_URL=https://admin-staging.lumina-events.com,TRUST_PROXY_HOPS=1,AWS_REGION=sa-east-1,MAIL_FROM=$MAIL_FROM,MAIL_SMOKE_TO=$MAIL_SMOKE_TO,MERCADOPAGO_TEST_MODE=true,R2_ACCOUNT_ID=$R2_ACCOUNT_ID,R2_BUCKET=lumina-staging,R2_PUBLIC_BASE_URL=https://assets-staging.lumina-events.com" `
   --set-secrets="DATABASE_URL=lumina-staging-database-url:latest,JWT_SECRET=lumina-staging-jwt-secret:latest,REFRESH_TOKEN_SECRET=lumina-staging-refresh-token-secret:latest,GOOGLE_CLIENT_ID=lumina-staging-google-client-id:latest,GOOGLE_CLIENT_SECRET=lumina-staging-google-client-secret:latest,AWS_ACCESS_KEY_ID=lumina-staging-aws-access-key-id:latest,AWS_SECRET_ACCESS_KEY=lumina-staging-aws-secret-access-key:latest,MERCADOPAGO_ACCESS_TOKEN=lumina-staging-mercadopago-access-token:latest,MERCADOPAGO_WEBHOOK_SECRET=lumina-staging-mercadopago-webhook-secret:latest,R2_ACCESS_KEY_ID=lumina-staging-r2-access-key-id:latest,R2_SECRET_ACCESS_KEY=lumina-staging-r2-secret-access-key:latest,INTERNAL_JOBS_OIDC_AUDIENCE=lumina-staging-internal-jobs-oidc-audience:latest,INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS=lumina-staging-internal-jobs-oidc-allowed-service-accounts:latest"
 ```
 
@@ -398,6 +402,24 @@ $SERVICE_URL = gcloud run services describe lumina-api-staging `
 
 $SERVICE_URL
 
+# Replace the temporary bootstrap URL with the native Cloud Run URL. This is required
+# before configuring OAuth, webhooks, Scheduler OIDC, or Cloudflare frontend builds.
+$API_PUBLIC_URL = $SERVICE_URL
+gcloud run services update lumina-api-staging `
+  --project=$PROJECT_ID `
+  --region=$REGION `
+  --update-env-vars="API_PUBLIC_URL=$API_PUBLIC_URL"
+
+# Update the bound Secret Manager value and create a new revision, so the API validates
+# Scheduler tokens against the native service URL. The audience must match exactly.
+$API_PUBLIC_URL | gcloud secrets versions add lumina-staging-internal-jobs-oidc-audience `
+  --project=$PROJECT_ID `
+  --data-file=-
+gcloud run services update lumina-api-staging `
+  --project=$PROJECT_ID `
+  --region=$REGION `
+  --update-env-vars="API_PUBLIC_URL=$API_PUBLIC_URL"
+
 $response = Invoke-WebRequest `
   -Uri "$SERVICE_URL/api/health/ready" `
   -SkipHttpErrorCheck
@@ -411,7 +433,7 @@ Expect HTTP `200`. Then create the one staging Scheduler job:
 ```powershell
 $SCHEDULER_JOB_NAME = "lumina-internal-jobs-run-staging"
 $SCHEDULER_SA = "lumina-scheduler-staging@$PROJECT_ID.iam.gserviceaccount.com"
-$AUDIENCE = "https://api-staging.lumina-events.com"
+$AUDIENCE = $API_PUBLIC_URL
 $URI = "$SERVICE_URL/api/internal/jobs/run"
 
 gcloud scheduler jobs create http $SCHEDULER_JOB_NAME `

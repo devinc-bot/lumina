@@ -187,7 +187,7 @@ test('accepts local subdomain origins during development', () => {
   })
 })
 
-test('retains same-site validation for local subdomain origins in production', () => {
+test('accepts local subdomain origins in production', () => {
   const result = apiConfigSchema.safeParse({
     ...validConfig,
     API_PUBLIC_URL: 'http://localhost:3000',
@@ -196,7 +196,7 @@ test('retains same-site validation for local subdomain origins in production', (
     ADMIN_URL: 'http://admin.localhost:3003',
   })
 
-  expect(result.success).toBe(false)
+  expect(result.success).toBe(true)
 })
 
 test('defaults CORS origins to the three application URLs and accepts extra origins', () => {
@@ -224,16 +224,19 @@ test('defaults CORS origins to the three application URLs and accepts extra orig
   ])
 })
 
-test('rejects a deployment whose origins do not share a schemeful site', () => {
+test('accepts a Cloud Run API origin with Cloudflare frontend origins', () => {
   const result = apiConfigSchema.safeParse({
     ...validConfig,
-    ADMIN_URL: 'https://admin.example.net',
+    API_PUBLIC_URL: 'https://lumina-api-staging-123.run.app',
+    WEB_URL: 'https://staging.lumina-events.com',
+    DASHBOARD_URL: 'https://dash-staging.lumina-events.com',
+    ADMIN_URL: 'https://admin-staging.lumina-events.com',
   })
 
-  expect(result.success).toBe(false)
+  expect(result.success).toBe(true)
 })
 
-test('rejects public-suffix and IP-address site mismatches', () => {
+test('accepts public-suffix and IP-address origin combinations', () => {
   const publicSuffixResult = apiConfigSchema.safeParse({
     ...validConfig,
     API_PUBLIC_URL: 'https://api.foo.co.uk',
@@ -249,8 +252,8 @@ test('rejects public-suffix and IP-address site mismatches', () => {
     ADMIN_URL: 'https://192.0.2.1',
   })
 
-  expect(publicSuffixResult.success).toBe(false)
-  expect(ipAddressResult.success).toBe(false)
+  expect(publicSuffixResult.success).toBe(true)
+  expect(ipAddressResult.success).toBe(true)
 })
 
 test('defaults omitted rate-limit pairs to the approved policy budgets', () => {

@@ -38,8 +38,8 @@ manual `gcloud` / `docker` sections below as bootstrap and fallback. Deploy shel
 | Cloud Run service                 | `lumina-api-staging`               | `lumina-api`               |
 | Migrator Job                      | `lumina-api-migrator-staging`      | `lumina-api-migrator`      |
 | Scheduler job                     | `lumina-internal-jobs-run-staging` | `lumina-internal-jobs-run` |
-| Runtime SA (**required**)          | `lumina-api-runtime-staging@…`     | `lumina-api-runtime@…`     |
-| Scheduler SA (**required**)        | `lumina-scheduler-staging@…`       | `lumina-scheduler@…`       |
+| Runtime SA (**required**)         | `lumina-api-runtime-staging@…`     | `lumina-api-runtime@…`     |
+| Scheduler SA (**required**)       | `lumina-scheduler-staging@…`       | `lumina-scheduler@…`       |
 | Deploy SA (**required** separate) | `lumina-api-deploy-staging@…`      | `lumina-api-deploy@…`      |
 
 Prefer **per-environment runtime and scheduler service accounts** so IAM and OIDC allowlists stay
@@ -68,10 +68,10 @@ Cloud Run service and migrator Job names.
 
 Workflow: [`.github/workflows/deploy-api-cloud-run.yml`](../.github/workflows/deploy-api-cloud-run.yml).
 
-| Trigger                   | Behavior                                                          |
-| ------------------------- | ----------------------------------------------------------------- |
-| Successful CI on `staging` | Deploy CI's verified commit to GitHub Environment `staging`      |
-| Successful CI on `main`    | Deploy CI's verified commit to GitHub Environment `production`   |
+| Trigger                    | Behavior                                                       |
+| -------------------------- | -------------------------------------------------------------- |
+| Successful CI on `staging` | Deploy CI's verified commit to GitHub Environment `staging`    |
+| Successful CI on `main`    | Deploy CI's verified commit to GitHub Environment `production` |
 
 `workflow_run` starts this workflow only after the named `CI` workflow (types, lint, format, unit,
 and end-to-end checks) completes successfully on `staging` or `main`; it checks out and deploys
@@ -95,15 +95,15 @@ Configure these on **both** `staging` and `production` Environments (values diff
 
 ### Required GitHub Environment variables
 
-| Variable                      | Purpose                                                                                  |
-| ----------------------------- | ---------------------------------------------------------------------------------------- |
-| `GCP_REGION`                  | e.g. `southamerica-east1`                                                                |
-| `AR_REPO`                     | Artifact Registry Docker repository id (e.g. `lumina`)                                   |
-| `SERVICE_NAME`                | Cloud Run service (`lumina-api-staging` / `lumina-api`)                                  |
-| `MIGRATOR_JOB_NAME`           | Migrator Job name                                                                        |
-| `RUNTIME_SERVICE_ACCOUNT`     | Required Cloud Run service / Job runtime SA email                                        |
-| `SCHEDULER_JOB_NAME`          | Required Cloud Scheduler job name                                                        |
-| `SCHEDULER_SERVICE_ACCOUNT`   | Required Scheduler OIDC service-account email                                            |
+| Variable                      | Purpose                                                                                 |
+| ----------------------------- | --------------------------------------------------------------------------------------- |
+| `GCP_REGION`                  | e.g. `southamerica-east1`                                                               |
+| `AR_REPO`                     | Artifact Registry Docker repository id (e.g. `lumina`)                                  |
+| `SERVICE_NAME`                | Cloud Run service (`lumina-api-staging` / `lumina-api`)                                 |
+| `MIGRATOR_JOB_NAME`           | Migrator Job name                                                                       |
+| `RUNTIME_SERVICE_ACCOUNT`     | Required Cloud Run service / Job runtime SA email                                       |
+| `SCHEDULER_JOB_NAME`          | Required Cloud Scheduler job name                                                       |
+| `SCHEDULER_SERVICE_ACCOUNT`   | Required Scheduler OIDC service-account email                                           |
 | `INTERNAL_JOBS_OIDC_AUDIENCE` | Required HTTPS audience; exactly matches Scheduler and the runtime Secret Manager value |
 
 ### One-time GCP + GitHub setup (operator)
@@ -123,9 +123,10 @@ Configure these on **both** `staging` and `production` Environments (values diff
 5. Set the Environment **secrets** and **variables** in the tables above
    (`GCP_SERVICE_ACCOUNT` = that env’s deploy SA).
 6. Bootstrap each environment once with the manual sections below (including `--set-secrets` and
-   Scheduler). Set `INTERNAL_JOBS_OIDC_AUDIENCE` to the stable API public origin in both GitHub
-   Environment variables and the runtime Secret Manager value. After that, CI mainly updates
-   images and re-runs the migrator while verifying the Scheduler URI, audience, and SA.
+   Scheduler). Set `API_PUBLIC_URL` and `INTERNAL_JOBS_OIDC_AUDIENCE` to the native Cloud Run
+   service URL in both GitHub Environment variables and the runtime Secret Manager value. After
+   that, CI mainly updates images and re-runs the migrator while verifying the Scheduler URI,
+   audience, and SA.
 
 ### Secrets on subsequent deploys
 
@@ -236,10 +237,10 @@ export SERVICE_URL=$(gcloud run services describe "$SERVICE_NAME" \
   --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')
 ```
 
-Keep the customer-facing custom origin in `API_PUBLIC_URL` and use that same stable HTTPS origin
-as `INTERNAL_JOBS_OIDC_AUDIENCE`. Cloud Scheduler calls the native `SERVICE_URL`, but its OIDC
-token audience must use the exact audience value from GitHub Environment variables and the runtime
-Secret Manager binding. This keeps audience validation stable if the native Cloud Run URL changes.
+Use the native `SERVICE_URL` as `API_PUBLIC_URL` and `INTERNAL_JOBS_OIDC_AUDIENCE`. Cloud Scheduler
+calls the same native URL, and its OIDC token audience must exactly match the GitHub Environment
+variable and runtime Secret Manager binding. If the service is recreated and its URL changes,
+update all three values together before scheduling calls or deploying frontends.
 
 Order for a full release: build/push → **migrate** → deploy/revise API → confirm Scheduler URI.
 
@@ -250,7 +251,7 @@ secrets. Cloud Run–specific vars:
 
 | Variable                                      | Notes                                                    |
 | --------------------------------------------- | -------------------------------------------------------- |
-| `INTERNAL_JOBS_OIDC_AUDIENCE`                 | Stable API public origin; must exactly match Scheduler   |
+| `INTERNAL_JOBS_OIDC_AUDIENCE`                 | Native Cloud Run URL; must exactly match Scheduler       |
 | `INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS` | Scheduler SA email(s) for **this** environment           |
 | `ENABLE_IN_PROCESS_SCHEDULERS`                | `false` on Cloud Run                                     |
 | `DATABASE_POOL_MAX`                           | Per-instance pool cap (default `10`); keep low with Neon |
@@ -279,8 +280,8 @@ gcloud iam service-accounts create lumina-scheduler --project="$PROJECT_ID" || t
 ## 7) One Cloud Scheduler job per environment
 
 Create or update the job for the environment whose `SERVICE_URL` / `SCHEDULER_*` you exported.
-Set `INTERNAL_JOBS_OIDC_AUDIENCE` to the stable API public origin and persist that exact value in
-the runtime Secret Manager binding before creating the job:
+Set `INTERNAL_JOBS_OIDC_AUDIENCE` to that native service URL and persist that exact value in the
+runtime Secret Manager binding before creating the job:
 
 ```bash
 URI="${SERVICE_URL%/}/api/internal/jobs/run"
