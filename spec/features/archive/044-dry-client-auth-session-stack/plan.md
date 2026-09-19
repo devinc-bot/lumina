@@ -16,14 +16,14 @@ for `CLIENT_APP`, cookie name, env/`API_URL`, and admin-only guards.
 
 ## Technical Design
 
-| Factory / constant | Inputs | Outputs |
-| --- | --- | --- |
-| `SESSION_DURATION_MS` | — | shared max-age |
-| `ACCESS_TOKEN_COOKIE_NAME` by `CLIENT_APP` (optional map) or caller passes name | `CLIENT_APP` or string | cookie name |
-| `createAuthStorage` | `cookieName`, `maxAgeMs?` | save/get/clear/getAccessTokenSync |
-| `createSessionCleanup` | `clearAuthSession` | register + `clearLocalSession` |
-| `createSessionService` | `api`, `app`, `clearAuthSession`, `messages` | fetch/refresh/logout + `SessionFetchError` |
-| `createQueryFactoryAuthOptions` (or inline helper) | `app`, token getters, `clearLocalSession`, `isSsr` | options fragment for `new QueryFactory` |
+| Factory / constant                                                              | Inputs                                             | Outputs                                    |
+| ------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------ |
+| `SESSION_DURATION_MS`                                                           | —                                                  | shared max-age                             |
+| `ACCESS_TOKEN_COOKIE_NAME` by `CLIENT_APP` (optional map) or caller passes name | `CLIENT_APP` or string                             | cookie name                                |
+| `createAuthStorage`                                                             | `cookieName`, `maxAgeMs?`                          | save/get/clear/getAccessTokenSync          |
+| `createSessionCleanup`                                                          | `clearAuthSession`                                 | register + `clearLocalSession`             |
+| `createSessionService`                                                          | `api`, `app`, `clearAuthSession`, `messages`       | fetch/refresh/logout + `SessionFetchError` |
+| `createQueryFactoryAuthOptions` (or inline helper)                              | `app`, token getters, `clearLocalSession`, `isSsr` | options fragment for `new QueryFactory`    |
 
 ## Migration Notes
 

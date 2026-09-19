@@ -48,10 +48,10 @@ Update `FilesService`:
 ## Contracts and API
 
 1. `@repo/validators`: avatar max bytes, `AVATAR_OPTIMIZATION` (256, quality ~80), multipart field name constant (e.g. `avatar`).
-2. `@repo/types` / `API_ROUTES.settings`:  
-   - `PUT` (or `POST`) multipart upload avatar  
+2. `@repo/types` / `API_ROUTES.settings`:
+   - `PUT` (or `POST`) multipart upload avatar
    - `DELETE` remove avatar  
-   Paths under `/settings/avatar` (exact path helpers in `API_ROUTES`).
+     Paths under `/settings/avatar` (exact path helpers in `API_ROUTES`).
 3. Settings module use cases dispatch by JWT role (`USER` | `OWNER`); reject `STAFF`.
 4. Controllers validate MIME/size at the boundary; use cases orchestrate optimize → upload → asset row → profile FK → cleanup.
 5. Response: return updated profile/session-compatible payload including `avatar: string | null` so clients can update stores without a full page reload.

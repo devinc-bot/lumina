@@ -44,10 +44,10 @@ Cloud Scheduler (per-env SA, OIDC) ──POST /api/internal/jobs/run────
 
 Suggested naming (one `PROJECT_ID`):
 
-| Env | Git branch | Cloud Run service | Scheduler job | Migrator job |
-| --- | ---------- | ----------------- | ------------- | ------------ |
-| Staging | `staging` | `lumina-api-staging` | `lumina-internal-jobs-run-staging` | `lumina-api-migrator-staging` |
-| Production | `main` | `lumina-api` | `lumina-internal-jobs-run` | `lumina-api-migrator` |
+| Env        | Git branch | Cloud Run service    | Scheduler job                      | Migrator job                  |
+| ---------- | ---------- | -------------------- | ---------------------------------- | ----------------------------- |
+| Staging    | `staging`  | `lumina-api-staging` | `lumina-internal-jobs-run-staging` | `lumina-api-migrator-staging` |
+| Production | `main`     | `lumina-api`         | `lumina-internal-jobs-run`         | `lumina-api-migrator`         |
 
 GitHub Environments `staging` / `production` hold env-specific vars (service names,
 Scheduler name/SA, stable API OIDC audience, and runtime SA) and WIF provider config.
@@ -63,11 +63,11 @@ Unchanged from Phase 1 — see prior table. One Scheduler job **per environment*
 
 Unchanged Nest env contract. Actions need (not in Nest):
 
-| Item | Role |
-|------|------|
-| WIF provider + deploy SA | `gcloud` from Actions without JSON keys |
-| GitHub Environment vars | `PROJECT_ID`, `REGION`, service/job names, AR repo |
-| Secret Manager | Per-env `DATABASE_URL`, JWT, OIDC audience/allowlist, etc. |
+| Item                     | Role                                                       |
+| ------------------------ | ---------------------------------------------------------- |
+| WIF provider + deploy SA | `gcloud` from Actions without JSON keys                    |
+| GitHub Environment vars  | `PROJECT_ID`, `REGION`, service/job names, AR repo         |
+| Secret Manager           | Per-env `DATABASE_URL`, JWT, OIDC audience/allowlist, etc. |
 
 ## Documentation / CI
 

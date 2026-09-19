@@ -12,9 +12,11 @@ Operators can validate tickets at the door, but there is no way to review which 
 ## Capabilities
 
 ### New Capabilities
+
 - `scanned-tickets-history`: Operator review of scanned tickets per event, authorized by organization membership, with purchaser/operator/ticket details and pagination.
 
 ### Modified Capabilities
+
 - `qr-ticket-check-in`: The successful scan now records the operator identity on `tickets_sold`, replacing the earlier "no column or migration" constraint for this feature.
 
 ## Impact

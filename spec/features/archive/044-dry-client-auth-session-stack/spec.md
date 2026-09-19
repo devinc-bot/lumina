@@ -34,7 +34,7 @@ per-app cookies, refresh payloads, SSR rules, and admin-only role gating.
 - RF-3: THE SYSTEM SHALL provide `createSessionCleanup({ clearAuthSession })` that
   registers a store-clear callback and clears cookies + store via `clearLocalSession`.
 - RF-4: THE SYSTEM SHALL provide `createSessionService({ api, app, clearAuthSession,
-  messages })` for `fetchSession`, `refreshAuthSession`, and `logoutAuthSession`, with
+messages })` for `fetchSession`, `refreshAuthSession`, and `logoutAuthSession`, with
   injectable i18n message getters (no `@repo/i18n` dependency in `@repo/common`).
 - RF-5: WHEN configuring QueryFactory refresh on the client, THE SYSTEM SHALL send
   `{ app: CLIENT_APP.* }` matching the current app and SHALL omit refresh wiring under

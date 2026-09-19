@@ -6,7 +6,11 @@ import { RolesGuard } from '~/modules/common/components/roles-guard'
 import { RequireCurrentLegalAcceptance } from '~/modules/legal-documents/components/require-current-legal-acceptance'
 
 export const Route = createFileRoute('/_app')({
-  errorComponent: ({ error, reset }) => <AppErrorBoundaryView error={error} reset={reset} />,
+  errorComponent: ({ error, reset }) => {
+    const routeError = error instanceof Error ? error : new Error(String(error))
+
+    return <AppErrorBoundaryView error={routeError} reset={reset} />
+  },
   component: AppLayout,
 })
 

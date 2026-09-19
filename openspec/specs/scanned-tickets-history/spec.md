@@ -1,8 +1,11 @@
 # scanned-tickets-history Specification
 
 ## Purpose
+
 TBD - created by archiving change scanned-tickets-history. Update Purpose after archive.
+
 ## Requirements
+
 ### Requirement: Operators can review scanned tickets for an event
 
 The dashboard SHALL expose a **Historial** view inside the QR Ticket page for `owner` and `staff` accounts. An authenticated operator SHALL be able to select one of their organization's events and view the scanned tickets of that event. The API MUST enforce the same allowed roles and organization membership independently of the dashboard UI.
@@ -126,4 +129,3 @@ The **Historial** tab, event selector, table headers, and fallback text SHALL be
 - **GIVEN** the dashboard is running in either Spanish or English
 - **WHEN** the operator opens the **Historial** tab
 - **THEN** its labels, headers, and empty state render in the active locale
-

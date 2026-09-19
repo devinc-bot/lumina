@@ -158,11 +158,7 @@ export function EventsDiscoverFiltersPanel({
         )}
       >
         {showPendingHint ? (
-          <p
-            id={applyHintId}
-            className="min-h-4 text-xs"
-            aria-live="polite"
-          >
+          <p id={applyHintId} className="min-h-4 text-xs" aria-live="polite">
             {showPending ? (
               <span className="text-primary">{t('discover.filters.pendingChanges')}</span>
             ) : (

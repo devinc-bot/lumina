@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AppLogo, VT, vtStyle } from '@repo/ui'
+import { LandingLogo, VT, vtStyle } from '@repo/ui'
 import { WEB_ROUTES } from '~/modules/common/constants/routes'
 
 export function AuthPageLayout({ children }: { children: ReactNode }) {
@@ -18,10 +18,9 @@ export function AuthPageLayout({ children }: { children: ReactNode }) {
       <header className="relative z-10 px-6 py-5 sm:px-8" style={vtStyle(VT.siteHeader)}>
         <Link
           to={WEB_ROUTES.home()}
-          className="inline-flex items-center gap-2 font-display text-lg font-bold tracking-tight text-on-surface transition-opacity duration-150 hover:opacity-80"
+          className="inline-flex transition-opacity duration-150 hover:opacity-80"
         >
-          <AppLogo />
-          <span>{t('appName')}</span>
+          <LandingLogo alt={t('appName')} size="header" />
         </Link>
       </header>
 

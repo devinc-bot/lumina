@@ -35,20 +35,20 @@ Validation: positive integers; omit → spec defaults. Update:
 
 ## Route annotations
 
-| Area | IP profile | User profile |
-| --- | --- | --- |
-| Default (no annotation) | `public` | — |
-| Authenticated general controllers | `authenticated` | — |
-| Login + Google OAuth | `login` | — |
-| Register request, legacy register, forgot-password | `authSensitive` | — |
-| Register confirm, reset-password | `authConfirm` | — |
-| Refresh | `refresh` | — |
-| `POST /api/orders` | `purchase` | `purchase` |
-| Purchased-ticket QR | `qr` | `qr` |
-| Create check-in | `checkIn` | `checkIn` |
-| Geo IP locate | `authenticated` or skip IP override; user `geo` | `geo` |
-| Public event SSE and purchase SSE | `sse` | — |
-| Health, readiness, Mercado Pago webhook | skip | — |
+| Area                                               | IP profile                                      | User profile |
+| -------------------------------------------------- | ----------------------------------------------- | ------------ |
+| Default (no annotation)                            | `public`                                        | —            |
+| Authenticated general controllers                  | `authenticated`                                 | —            |
+| Login + Google OAuth                               | `login`                                         | —            |
+| Register request, legacy register, forgot-password | `authSensitive`                                 | —            |
+| Register confirm, reset-password                   | `authConfirm`                                   | —            |
+| Refresh                                            | `refresh`                                       | —            |
+| `POST /api/orders`                                 | `purchase`                                      | `purchase`   |
+| Purchased-ticket QR                                | `qr`                                            | `qr`         |
+| Create check-in                                    | `checkIn`                                       | `checkIn`    |
+| Geo IP locate                                      | `authenticated` or skip IP override; user `geo` | `geo`        |
+| Public event SSE and purchase SSE                  | `sse`                                           | —            |
+| Health, readiness, Mercado Pago webhook            | skip                                            | —            |
 
 Logout stays on the public/authenticated IP default (not a sensitive mutation). Invitation preview/accept stay on `public` unless review tightens them.
 

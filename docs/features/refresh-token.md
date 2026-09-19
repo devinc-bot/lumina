@@ -14,15 +14,15 @@ El refresh token permite emitir access tokens de vida corta sin obligar al usuar
 
 La tabla `account_sessions` conserva múltiples sesiones por cuenta y aplicación cliente. El repositorio limita las sesiones activas a siete por cuenta, sin distinguir la app en ese límite.
 
-| Campo                 | Uso                                                                               |
-| --------------------- | --------------------------------------------------------------------------------- |
-| `documentId`          | Identificador público de la sesión. Debe viajar en contratos, no el `id` interno. |
-| `clientApp`           | Aísla las sesiones de `web`, `dashboard` y `admin`.                               |
-| `refreshTokenHash`    | Hash persistido del secreto; nunca se devuelve al cliente.                        |
-| `refreshTokenVersion` | Versión para rotación atómica y detección de replay.                              |
-| `expiresAt`           | Límite de renovación de la sesión.                                                |
+| Campo                 | Uso                                                                                         |
+| --------------------- | ------------------------------------------------------------------------------------------- |
+| `documentId`          | Identificador público de la sesión. Debe viajar en contratos, no el `id` interno.           |
+| `clientApp`           | Aísla las sesiones de `web`, `dashboard` y `admin`.                                         |
+| `refreshTokenHash`    | Hash persistido del secreto; nunca se devuelve al cliente.                                  |
+| `refreshTokenVersion` | Versión para rotación atómica y detección de replay.                                        |
+| `expiresAt`           | Límite de renovación de la sesión.                                                          |
 | `revokedAt`           | Marca la revocación lógica de flujos no gestionados; la limpieza posterior elimina la fila. |
-| Metadatos             | IP, dispositivo, user-agent y ubicación aproximada para auditoría.                |
+| Metadatos             | IP, dispositivo, user-agent y ubicación aproximada para auditoría.                          |
 
 ## Operaciones disponibles en persistencia
 

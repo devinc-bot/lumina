@@ -7,7 +7,7 @@ import { buildApiPath, forwardApiSetCookieHeaders, throwApiServiceError } from '
 import { API_ROUTES, api } from '~/config/api'
 
 export const loginFn = createServerFn({ method: 'POST' })
-  .inputValidator(loginSchema)
+  .validator(loginSchema)
   .handler(async ({ data }): Promise<LoginResponse> => {
     try {
       return forwardApiSetCookieHeaders(
