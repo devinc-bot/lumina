@@ -8,6 +8,27 @@ normalized with their consumers and lockfile. Each slice will review official
 documentation, make only required code/configuration corrections, install through
 pnpm, and run focused verification before moving to the next slice.
 
+The root `packageManager` field pins pnpm 12.4.2 exactly. Existing `pnpm/action-setup` steps
+resolve that version from the root manifest, keeping local Corepack and CI package-manager
+selection aligned. The pin omits an integrity suffix to retain compatibility with Corepack versions
+that accept only a semver version in this field.
+
+`setup.sh` provides a repeatable shell setup path: it installs and selects the Node.js LTS through
+`nvm`, clears Corepack's cache, installs the pinned pnpm version globally, and reports the active
+pnpm version. It requires a Bash environment with the Unix `nvm` implementation, such as Git Bash
+or WSL; it does not run in stock PowerShell with nvm-windows. `.gitattributes` preserves LF line
+endings for the script on Windows workstations.
+
+pnpm 12 reads workspace-level package extensions and peer dependency rules from
+`pnpm-workspace.yaml`, so those settings move from the legacy root manifest field. The seven-day
+minimum-release-age policy remains enabled; dependencies blocked by it are re-resolved to older,
+eligible versions rather than adding policy exceptions. Strict mode prevents pnpm from adding
+minimum-release-age exclusions automatically when an ineligible lockfile is encountered.
+
+The root workspace catalog owns the shared React, Zod, TypeScript, and Node type versions.
+Workspace manifests use the `catalog:` protocol, preventing those version declarations from
+drifting while retaining exact resolved versions.
+
 ## Migration Slices
 
 | Slice               | Scope                                                 | Key risks                                      | Verification                                          |
@@ -21,8 +42,8 @@ pnpm, and run focused verification before moving to the next slice.
 
 - TypeScript 7 requires supported tsconfig options; the root configuration already
   uses `ES2022` and `bundler` module resolution, which are compatible.
-- Vite 8 requires Node `^20.19.0 || >=22.12.0`; GitHub workflows use Node 22, so
-  local and deployment documentation must remain aligned.
+- Vite 8 requires Node `^20.19.0 || >=22.12.0`; the Node 24 LTS baseline meets that requirement,
+  so local and deployment documentation must remain aligned.
 - Nest 12 is an ESM migration and cannot be treated as a manifest-only bump; it is
   isolated from frontend and cleanup work.
 - i18n peer declarations must use versions compatible with all workspace consumers;

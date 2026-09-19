@@ -2,6 +2,24 @@ packages:
   - 'apps/*'
   - 'packages/*'
 
+catalog:
+  '@types/node': '26.5.1'
+  react: '19.3.0'
+  react-dom: '19.3.0'
+  typescript: '7.0.2'
+  zod: '4.6.2'
+
+packageExtensions:
+  'tsconfck@*':
+    peerDependencies:
+      typescript: '>=5.0.0'
+
+peerDependencyRules:
+  allowedVersions:
+    'tsconfck>typescript': '7.0.2'
+    'react-i18next>typescript': '7.0.2'
+    typescript: '7.0.2'
+
 allowBuilds:
   '@nestjs/core': true
   '@parcel/watcher': true
@@ -18,7 +36,7 @@ nodeLinker: isolated
 
 # Supply chain hardening (mas restrictivo que los defaults de pnpm 11)
 minimumReleaseAge: 10080 # 7 dias (default pnpm 11 = 1440 = 1 dia)
-minimumReleaseAgeStrict: false # paquetes sin campo "time" en el registry son warning, no error
+minimumReleaseAgeStrict: true # no agrega excepciones automaticas para paquetes recientes
 blockExoticSubdeps: true # bloquea github:/git:/file: en transitivas (default)
 strictDepBuilds: true # falla si una dep nueva quiere correr scripts (default)
 saveExact: true # equivalente al viejo save-exact de .npmrc

@@ -1,6 +1,9 @@
 {
   "name": "repo",
   "private": true,
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "dev": "pnpm --parallel --filter \"./apps/*\" dev",
     "dev:web": "pnpm --filter @repo/web dev",
@@ -33,28 +36,12 @@
     "@playwright/test": "1.63.0",
     "@testing-library/react": "16.3.3",
     "husky": "9.1.7",
-    "jsdom": "30.1.0",
+    "jsdom": "30.0.1",
     "lint-staged": "17.5.1",
-    "oxfmt": "0.68.0",
+    "oxfmt": "0.67.0",
     "oxlint": "1.82.0",
-    "typescript": "7.0.2",
-    "vitest": "5.0.1"
+    "typescript": "catalog:",
+    "vitest": "5.0.0"
   },
-  "packageManager": "pnpm@11.0.9+sha512.34ce82e6780233cf9cad8685029a8f81d2e06196c5a9bad98879f7424940c6817c4e4524fb7d38b8553ceed48b9758b8ebaf1abd3600c232c4c8cf7366086f38",
-  "pnpm": {
-    "packageExtensions": {
-      "tsconfck@*": {
-        "peerDependencies": {
-          "typescript": ">=5.0.0"
-        }
-      }
-    },
-    "peerDependencyRules": {
-      "allowedVersions": {
-        "tsconfck>typescript": "7.0.2",
-        "react-i18next>typescript": "7.0.2",
-        "typescript": "7.0.2"
-      }
-    }
-  }
+  "packageManager": "pnpm@12.4.2"
 }

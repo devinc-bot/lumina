@@ -75,7 +75,7 @@ verification passes.
 - [x] **T9. Integrate the suites into CI**
   - Extend the CI workflow established by feature 029, or add the minimal workflow if it remains
     absent when this task starts.
-  - Use Node 22 and the repository-pinned pnpm version.
+  - Use Node 24 and the repository-pinned pnpm version.
   - Run static checks and Vitest before Playwright.
   - Install Chromium and its system dependencies without installing other browsers.
   - Upload Playwright diagnostics only on failure.

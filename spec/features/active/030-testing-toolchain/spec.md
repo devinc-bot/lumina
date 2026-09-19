@@ -52,7 +52,7 @@ until a concrete test requires it.
 ## Non-Functional Requirements
 
 - Dependencies MUST use exact versions and the pnpm lockfile MUST remain committed.
-- Vitest MUST run with Node 20 or newer; Node 22 is the target local and CI baseline.
+- Vitest MUST run with Node 20 or newer; Node 24 is the target local and CI baseline.
 - Unit tests MUST default to a Node environment; jsdom MUST be enabled only for component tests that
   need DOM APIs.
 - The first Playwright suite MUST use Chromium only and MUST avoid database mutation, seeded accounts,

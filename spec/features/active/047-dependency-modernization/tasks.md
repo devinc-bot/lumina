@@ -25,3 +25,15 @@ Verification record:
 - Re-running those two commands is pending a runner with Node.js and pnpm: the
   active verification shell no longer exposes either executable. No project code
   failure is being attributed to that environment limitation.
+
+- [x] T9: Pin the root package manager to pnpm 12.4.2 exactly, and verify GitHub Actions resolves
+      its package-manager version from that manifest.
+
+- [x] T10: Add a shell setup script that selects the Node.js LTS and resets and installs the pinned
+      pnpm version through Corepack.
+
+- [ ] T11: Move pnpm 12 workspace settings to `pnpm-workspace.yaml` and resolve only dependency
+      versions eligible under the seven-day minimum-release-age policy.
+
+- [x] T12: Centralize shared React, Zod, TypeScript, and Node type versions in the root pnpm
+      catalog and reference them through `catalog:`.
