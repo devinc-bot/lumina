@@ -1,7 +1,8 @@
 import type { AccountSessionResponse } from '@repo/types'
+import type { TFunction } from 'i18next'
 import type { AccountSessionsLabels } from '../components/account-sessions.tsx'
 
-type Translate = (key: string, options?: Record<string, unknown>) => string
+type Translate = TFunction<'settings'>
 
 export function buildAccountSessionsLabels(t: Translate, language: string): AccountSessionsLabels {
   return {

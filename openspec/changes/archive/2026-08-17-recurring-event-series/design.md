@@ -7,6 +7,7 @@ This MVP needs owners to create a bounded schedule while retaining concrete, ind
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Store a series that identifies the owner-visible recurrence configuration and groups generated events.
 - Generate all selected weekday occurrences through an inclusive, required end date in one atomic create operation.
 - Preserve the source event duration for every occurrence and store each generated date as ordinary event timestamps.
@@ -14,6 +15,7 @@ This MVP needs owners to create a bounded schedule while retaining concrete, ind
 - Preserve event independence for tickets, edits, publishing, and cancellation.
 
 **Non-Goals:**
+
 - Background generation, open-ended recurrence, ticket templates, shared stock, bulk occurrence changes, or public series grouping.
 - Location- or organization-level timezone management.
 - Ordinal monthly rules, such as the first Friday, or excluded dates.

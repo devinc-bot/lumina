@@ -75,19 +75,19 @@ The NestJS API has no global HTTP rate limiter. Login, refresh, catalog, checkou
 
 TTL values are milliseconds. Duplicate purchase/QR/check-in rows are the IP layer and the user layer with the same budget. These defaults are approved for this iteration; operators override them with env vars.
 
-| Profile | Applied to | Tracker | Limit | TTL (ms) |
-| --- | --- | --- | --- | --- |
-| `public` | Default for non-excluded handlers, including public catalog and public organization profile | IP | 120 | 60000 |
-| `authenticated` | Authenticated general handlers (settings, session, dashboard reads, owner CRUD, admin reads) | IP | 240 | 60000 |
-| `login` | `POST /api/auth/login`, Google OAuth start/callback | IP | 10 | 900000 |
-| `authSensitive` | Register request, legacy register, forgot-password | IP | 5 | 900000 |
-| `authConfirm` | Register confirm, reset-password | IP | 20 | 900000 |
-| `refresh` | `POST /api/auth/refresh` | IP | 30 | 60000 |
-| `purchase` | Create order / start payment | IP and user | 10 | 60000 |
-| `qr` | Issue purchased-ticket QR | IP and user | 20 | 60000 |
-| `checkIn` | Create check-in | IP and user | 60 | 60000 |
-| `geo` | `GET /api/geo/ip-locate` | user | 30 | 60000 |
-| `sse` | Public event SSE and purchase SSE open | IP | 20 | 60000 |
+| Profile         | Applied to                                                                                   | Tracker     | Limit | TTL (ms) |
+| --------------- | -------------------------------------------------------------------------------------------- | ----------- | ----- | -------- |
+| `public`        | Default for non-excluded handlers, including public catalog and public organization profile  | IP          | 120   | 60000    |
+| `authenticated` | Authenticated general handlers (settings, session, dashboard reads, owner CRUD, admin reads) | IP          | 240   | 60000    |
+| `login`         | `POST /api/auth/login`, Google OAuth start/callback                                          | IP          | 10    | 900000   |
+| `authSensitive` | Register request, legacy register, forgot-password                                           | IP          | 5     | 900000   |
+| `authConfirm`   | Register confirm, reset-password                                                             | IP          | 20    | 900000   |
+| `refresh`       | `POST /api/auth/refresh`                                                                     | IP          | 30    | 60000    |
+| `purchase`      | Create order / start payment                                                                 | IP and user | 10    | 60000    |
+| `qr`            | Issue purchased-ticket QR                                                                    | IP and user | 20    | 60000    |
+| `checkIn`       | Create check-in                                                                              | IP and user | 60    | 60000    |
+| `geo`           | `GET /api/geo/ip-locate`                                                                     | user        | 30    | 60000    |
+| `sse`           | Public event SSE and purchase SSE open                                                       | IP          | 20    | 60000    |
 
 Excluded: `GET /api/health`, `GET /api/health/ready`, `POST /api/mercado-pago/webhook`.
 

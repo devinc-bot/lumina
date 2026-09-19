@@ -1,0 +1,50 @@
+# Plan 047 - Dependency Modernization
+
+## Technical Approach
+
+Deliver the work as independent migration slices rather than a blind all-at-once
+upgrade. The current workspace already contains direct-version changes that must be
+normalized with their consumers and lockfile. Each slice will review official
+documentation, make only required code/configuration corrections, install through
+pnpm, and run focused verification before moving to the next slice.
+
+## Migration Slices
+
+| Slice               | Scope                                                 | Key risks                                      | Verification                                          |
+| ------------------- | ----------------------------------------------------- | ---------------------------------------------- | ----------------------------------------------------- |
+| Cleanup             | Remove proven-unused direct dependencies              | Accidental removal of build-time use           | Manifest/lockfile install and affected builds         |
+| Frontend toolchain  | TypeScript, Vite, React, TanStack, i18n, Tailwind     | Vite 8 and typed i18n compatibility            | Type-check and builds for all frontends               |
+| API runtime         | Nest, Multer, Drizzle, AWS SDK                        | Nest 12 ESM and upload compatibility           | API tests, type-check, build, health startup          |
+| UI and test tooling | Radix, Tiptap, charts, maps, crop, Vitest, Playwright | Public component APIs and test runtime changes | UI build, component tests, Storybook where applicable |
+
+## Compatibility Decisions
+
+- TypeScript 7 requires supported tsconfig options; the root configuration already
+  uses `ES2022` and `bundler` module resolution, which are compatible.
+- Vite 8 requires Node `^20.19.0 || >=22.12.0`; GitHub workflows use Node 22, so
+  local and deployment documentation must remain aligned.
+- Nest 12 is an ESM migration and cannot be treated as a manifest-only bump; it is
+  isolated from frontend and cleanup work.
+- i18n peer declarations must use versions compatible with all workspace consumers;
+  exact incompatible peer declarations are corrected before installation.
+
+## Files Expected to Change
+
+| Area                  | Files                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------ |
+| Dependency manifests  | Root, app, and shared-package `package.json` files                                   |
+| Resolution            | `pnpm-lock.yaml`                                                                     |
+| Migration corrections | Only source/configuration files required by official migration guidance              |
+| Documentation         | These three feature artifacts and any runtime documentation affected by requirements |
+
+## Verification Strategy
+
+- `pnpm install --frozen-lockfile`
+- Focused type-check/build/test commands for the affected package or app
+- `pnpm lint`, `pnpm format:check`, and `git diff --check` before each completed slice
+- CI validation from a clean Linux installation for final confirmation
+
+## Rollback
+
+Each slice is committed independently. Reverting its manifest edits and matching lockfile
+changes restores the prior dependency graph without affecting other modernization slices.

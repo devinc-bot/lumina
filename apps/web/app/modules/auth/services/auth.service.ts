@@ -33,7 +33,7 @@ async function postAuthWithCookies<T>(path: string, data: unknown, fallback: str
 }
 
 export const loginFn = createServerFn({ method: 'POST' })
-  .inputValidator(loginSchema)
+  .validator(loginSchema)
   .handler(async ({ data }): Promise<LoginResponse> => {
     return postAuthWithCookies<LoginResponse>(
       buildApiPath(API_ROUTES.auth, API_ROUTES.auth.path.login()),
@@ -43,7 +43,7 @@ export const loginFn = createServerFn({ method: 'POST' })
   })
 
 export const requestRegisterUserFn = createServerFn({ method: 'POST' })
-  .inputValidator(registerSchema)
+  .validator(registerSchema)
   .handler(async ({ data }): Promise<void> => {
     return postAuth<void>(
       buildApiPath(API_ROUTES.auth, API_ROUTES.auth.path.registerUserRequest()),
@@ -53,7 +53,7 @@ export const requestRegisterUserFn = createServerFn({ method: 'POST' })
   })
 
 export const confirmUserRegistrationFn = createServerFn({ method: 'POST' })
-  .inputValidator(confirmUserRegistrationSchema)
+  .validator(confirmUserRegistrationSchema)
   .handler(async ({ data }): Promise<LoginResponse> => {
     return postAuthWithCookies<LoginResponse>(
       buildApiPath(API_ROUTES.auth, API_ROUTES.auth.path.registerUserConfirm()),
@@ -63,7 +63,7 @@ export const confirmUserRegistrationFn = createServerFn({ method: 'POST' })
   })
 
 export const forgotPasswordFn = createServerFn({ method: 'POST' })
-  .inputValidator(forgotPasswordSchema)
+  .validator(forgotPasswordSchema)
   .handler(async ({ data }): Promise<void> => {
     return postAuth<void>(
       buildApiPath(API_ROUTES.auth, API_ROUTES.auth.path.forgotPassword()),
@@ -73,7 +73,7 @@ export const forgotPasswordFn = createServerFn({ method: 'POST' })
   })
 
 export const resetPasswordFn = createServerFn({ method: 'POST' })
-  .inputValidator(resetPasswordSchema)
+  .validator(resetPasswordSchema)
   .handler(async ({ data }): Promise<void> => {
     return postAuth<void>(
       buildApiPath(API_ROUTES.auth, API_ROUTES.auth.path.resetPassword()),

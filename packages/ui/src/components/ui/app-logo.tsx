@@ -2,8 +2,8 @@ import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../lib/utils'
 
-/** Public path served by each app (apps/web|dashboard/public/landing/logo.png). */
-export const APP_LOGO_SRC = '/landing/logo.png'
+/** Public path served by each app (apps/web|dashboard|admin/public/landing/favicon.png). */
+export const APP_LOGO_SRC = '/landing/favicon.png'
 
 const appLogoVariants = cva('shrink-0 object-contain', {
   variants: {

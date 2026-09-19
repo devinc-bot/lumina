@@ -22,6 +22,7 @@ Owners need to schedule repeating nightlife programming without manually creatin
 ## Capabilities
 
 ### New Capabilities
+
 - `recurring-event-series`: Create a bounded recurring schedule, persist its series metadata, and generate independently sellable event occurrences.
 
 ### Modified Capabilities

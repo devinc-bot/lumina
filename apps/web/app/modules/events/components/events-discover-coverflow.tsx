@@ -227,10 +227,7 @@ export function EventsDiscoverCoverflow({
         <p className="sr-only" role="status">
           {t('discover.coverflow.loading')}
         </p>
-        <Skeleton
-          className="aspect-19/9 w-full rounded-app-lg bg-surface-high/80"
-          aria-hidden
-        />
+        <Skeleton className="aspect-19/9 w-full rounded-app-lg bg-surface-high/80" aria-hidden />
         {/* Reserve control-strip height to limit CLS when 2+ slides mount after load. */}
         <div className="flex flex-col items-center gap-3 p-4 text-center sm:p-5" aria-hidden>
           <Skeleton className="h-14 w-48 max-w-full rounded-full bg-surface-high/60" />

@@ -3,9 +3,8 @@ import { cloudflare } from '@cloudflare/vite-plugin'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import tsConfigPaths from 'vite-tsconfig-paths'
 import { z } from 'zod'
-import { NODE_SSR_BUILD_CONFIG } from '../../packages/common/src/config/node-ssr'
+import { NODE_SSR_BUILD_CONFIG } from '../../packages/common/src/config/node-ssr.ts'
 
 const DASHBOARD_BUILD_ENV_KEYS = {
   apiUrl: 'VITE_API_URL',
@@ -58,12 +57,14 @@ export default defineConfig(({ mode }) => {
     plugins: [
       cloudflare({ viteEnvironment: { name: 'ssr' } }),
       tailwindcss(),
-      tsConfigPaths(),
       tanstackStart({
         srcDirectory: 'app',
       }),
       react(),
     ],
+    resolve: {
+      tsconfigPaths: true,
+    },
     server: {
       host: DASHBOARD_DEVELOPMENT_SERVER.host,
       allowedHosts: [DASHBOARD_DEVELOPMENT_SERVER.hostname],
