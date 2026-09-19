@@ -5,6 +5,9 @@ node_modules/
 dist/
 .vinxi/
 .output/
+apps/web/.wrangler/
+apps/dashboard/.wrangler/
+apps/admin/.wrangler/
 *.tsbuildinfo
 pnpm-debug.log
 local.db*

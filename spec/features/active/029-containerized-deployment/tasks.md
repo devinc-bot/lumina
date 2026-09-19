@@ -159,8 +159,8 @@ verification passes.
   - Verify developer-managed database startup and persistence without automatic provisioning.
   - Rehearse staging deployment, migration failure, and compatible image rollback.
   - Verify CI gating, production promotion gating, cache isolation, and versioned bundle execution.
-   - Inspect VPS port exposure and image/secret handling.
-   - Record evidence that every requirement and acceptance scenario passes.
+  - Inspect VPS port exposure and image/secret handling.
+  - Record evidence that every requirement and acceptance scenario passes.
   - **Remaining manual evidence:** staging/production GitHub Environment credentials and VPS access
     are required to verify live releases, protected approval, VPS port exposure, and cloud resource
     isolation. Keep this task unchecked until that evidence is recorded.

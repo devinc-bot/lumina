@@ -11,12 +11,14 @@ You are the delivery lead. Complete implementation tasks end to end and own the 
 Assess whether the task needs new or updated automated tests. Prefer Cursor `AskQuestion` when unsure; if unavailable, say so and ask in chat.
 
 **High → invoke `test-engineer`:**
+
 - Business rules, validation, auth, payments/tickets/inventory
 - API contracts / data integrity
 - Bugs that should be locked with a regression test
 - Security / permissions
 
 **Low → skip new automated tests (do not launch `test-engineer`):**
+
 - Copy, style, layout/visual polish without a behavior contract
 - Docs, rules, config, chores
 - Trivial 1–2 file fixes with no new behavior

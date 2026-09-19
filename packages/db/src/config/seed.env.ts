@@ -1,9 +1,9 @@
 import { resolve } from 'node:path'
+import { loadEnvFile } from 'node:process'
 import { fileURLToPath } from 'node:url'
-import { config } from 'dotenv'
 import { seedEnvSchema } from '@repo/validators'
 
-config({ path: resolve(fileURLToPath(new URL('.', import.meta.url)), '../../.env') })
+loadEnvFile(resolve(fileURLToPath(new URL('.', import.meta.url)), '../../.env'))
 
 const result = seedEnvSchema.safeParse(process.env)
 

@@ -30,4 +30,3 @@
 - [x] 5.4 API allow-list after JWT for stale `user`/`owner`; skip admin, staff, anonymous
 - [x] 5.5 Web dedicated `/legal-acceptance` + redirect of other authenticated routes
 - [x] 5.6 Dashboard dedicated page + redirect for owners
-

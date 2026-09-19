@@ -26,17 +26,15 @@
     "@repo/types": "workspace:*",
     "@repo/validators": "workspace:*",
     "bcryptjs": "3.0.3",
-    "dotenv": "17.4.2",
     "drizzle-orm": "0.45.2",
     "pg": "8.23.0",
-    "zod": "4.4.3"
+    "zod": "4.6.2"
   },
   "devDependencies": {
-    "@types/bcryptjs": "2.4.6",
-    "@types/node": "26.1.2",
-    "@types/pg": "8.21.0",
-    "drizzle-kit": "0.31.1",
-    "tsx": "4.19.4",
+    "@types/node": "26.6.1",
+    "@types/pg": "8.23.1",
+    "drizzle-kit": "0.31.10",
+    "tsx": "4.23.13",
     "typescript": "7.0.2"
   }
 }

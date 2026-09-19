@@ -6,12 +6,12 @@ Adapt the provided editorial HTML mock into the existing `apps/web` landing modu
 
 ## Affected layers
 
-| Layer | Change |
-| ----- | ------ |
+| Layer                         | Change                                                  |
+| ----------------------------- | ------------------------------------------------------- |
 | `apps/web` landing components | Restyle/restructure sections, header/footer if approved |
-| `apps/web/public/landing/` | Optional asset replace |
-| `@repo/i18n` `landing` ES/EN | Copy refresh from mock |
-| Tests | **None** — do not add or update landing tests |
+| `apps/web/public/landing/`    | Optional asset replace                                  |
+| `@repo/i18n` `landing` ES/EN  | Copy refresh from mock                                  |
+| Tests                         | **None** — do not add or update landing tests           |
 
 ## Technical notes
 

@@ -13,9 +13,11 @@ Event organizers must currently calculate and enter an exact end date and time. 
 ## Capabilities
 
 ### New Capabilities
+
 - `event-duration-selection`: Event scheduling with an approved duration selector and server-calculated end timestamp.
 
 ### Modified Capabilities
+
 - None.
 
 ## Impact

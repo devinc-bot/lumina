@@ -1,6 +1,12 @@
 import { useEffect } from 'react'
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query'
-import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
+import {
+  HeadContent,
+  Outlet,
+  Scripts,
+  createRootRouteWithContext,
+  type ErrorComponentProps,
+} from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { installZodI18n } from '@repo/i18n'
 import { I18nProvider } from '@repo/i18n/client'
@@ -81,7 +87,9 @@ function ErrorContent({ error, reset }: { error: Error; reset: () => void }) {
   )
 }
 
-function RootErrorBoundary({ error, reset }: { error: Error; reset: () => void }) {
+function RootErrorBoundary({ error, reset }: ErrorComponentProps) {
+  const routeError = error instanceof Error ? error : new Error(String(error))
+
   return (
     <html lang="es" data-theme="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
       <head>
@@ -90,7 +98,7 @@ function RootErrorBoundary({ error, reset }: { error: Error; reset: () => void }
       <body>
         <I18nProvider>
           <ThemeProvider>
-            <ErrorContent error={error} reset={reset} />
+            <ErrorContent error={routeError} reset={reset} />
           </ThemeProvider>
         </I18nProvider>
         <Scripts />

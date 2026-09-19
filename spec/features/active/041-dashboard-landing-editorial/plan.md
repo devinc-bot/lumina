@@ -6,12 +6,12 @@ Adapt the provided B2B editorial HTML mock into the existing `apps/dashboard` la
 
 ## Affected layers
 
-| Layer | Change |
-| ----- | ------ |
-| `apps/dashboard` landing components | Restyle/restructure sections, header, footer |
-| `apps/dashboard/public/landing/` | Optional asset replace (pending Open Question) |
-| `@repo/i18n` `dashboard-landing` ES/EN | Copy refresh from mock (honest claims pending) |
-| Tests | Pending Open Question (skip like 039 vs update existing suite) |
+| Layer                                  | Change                                                         |
+| -------------------------------------- | -------------------------------------------------------------- |
+| `apps/dashboard` landing components    | Restyle/restructure sections, header, footer                   |
+| `apps/dashboard/public/landing/`       | Optional asset replace (pending Open Question)                 |
+| `@repo/i18n` `dashboard-landing` ES/EN | Copy refresh from mock (honest claims pending)                 |
+| Tests                                  | Pending Open Question (skip like 039 vs update existing suite) |
 
 ## Technical notes
 

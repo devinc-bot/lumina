@@ -3,6 +3,7 @@
   "ignorePatterns": [
     ".claude/**",
     ".agents/**",
+    ".worktrees/**",
     "**/node_modules/**",
     "**/routeTree.gen.ts",
     "packages/db/src/migrations-postgresql/meta/**"

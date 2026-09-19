@@ -4,7 +4,7 @@ export const LANDING_LOGO_SRC = '/landing/isotipo.png'
 export const APP_FAVICON_SRC = '/landing/favicon.png'
 
 const LANDING_LOGO_SIZES = {
-  header: { dimension: 80, className: 'size-20' },
+  header: { dimension: 56, className: 'size-14' },
   footer: { dimension: 80, className: 'size-20' },
 } as const
 

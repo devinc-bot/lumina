@@ -1,5 +1,11 @@
 import { useEffect } from 'react'
-import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
+import {
+  HeadContent,
+  Outlet,
+  Scripts,
+  createRootRouteWithContext,
+  type ErrorComponentProps,
+} from '@tanstack/react-router'
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import {
@@ -49,8 +55,9 @@ function DocumentLang() {
   return null
 }
 
-function RootErrorBoundary({ error, reset }: { error: Error; reset: () => void }) {
+function RootErrorBoundary({ error, reset }: ErrorComponentProps) {
   const { t } = useTranslation('dashboard')
+  const routeError = error instanceof Error ? error : new Error(String(error))
 
   return (
     <html lang="es" data-theme="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
@@ -59,7 +66,7 @@ function RootErrorBoundary({ error, reset }: { error: Error; reset: () => void }
       </head>
       <body>
         <ErrorBoundaryView
-          error={error}
+          error={routeError}
           reset={reset}
           brandLabel={commonEs.appNameUpper}
           homeTo={DASHBOARD_ROUTES.home()}

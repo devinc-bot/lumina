@@ -181,29 +181,29 @@ environment values.
 
 ## Affected Areas
 
-| Path                                        | Planned change                                                   |
-| ------------------------------------------- | ---------------------------------------------------------------- |
-| `.dockerignore`                             | Exclude secrets and unnecessary build context                    |
-| `deploy/Dockerfile.frontend`               | Centralize parameterized frontend build and runtime stages       |
-| `apps/{web,dashboard,admin}/Dockerfile`     | Remove duplicated frontend build definitions after migration     |
-| `apps/api/Dockerfile`                       | Add independent API, migrator, and database-tool targets         |
-| `deploy/tanstack-start-server.mjs`          | Run built TanStack Fetch handlers and static client assets       |
-| `docker-compose.yml`                        | Define immutable VPS services, migration job, and networks       |
-| `deploy/Caddyfile`                          | Route environment hostnames and terminate TLS                    |
-| `deploy/env/*.example`                      | Document sanitized environment contracts                         |
-| `deploy/scripts/`                           | Add migration-gated deployment and rollback commands             |
-| `apps/api/package.json`                     | Establish a production runtime command                           |
-| `apps/api/src/main.ts`                      | Add container binding and graceful shutdown as needed            |
-| `apps/api/src/modules/common/`              | Add or extend health endpoints as needed                         |
-| `apps/{web,dashboard,admin}/package.json`   | Establish production server commands                             |
-| `apps/{web,dashboard,admin}/vite.config.ts` | Configure verified production server output as needed            |
-| `packages/db/package.json`                  | Expose a container-safe migration command                        |
-| `packages/db/src/config/env.server.ts`      | Prefer injected environment over a required local file           |
-| `.github/workflows/ci.yml`                  | Validate cached builds with explicit public test inputs          |
-| `.github/workflows/release.yml`             | Publish and deploy staging or protected production releases      |
-| `.github/workflows/publish-images.yml`      | Remove after release workflow replacement                        |
-| `.github/workflows/deploy-*.yml`            | Remove duplicated environment-specific deployment workflows      |
-| `deploy/OPERATIONS.md`                      | Document automatic staging and protected production promotion    |
+| Path                                        | Planned change                                                |
+| ------------------------------------------- | ------------------------------------------------------------- |
+| `.dockerignore`                             | Exclude secrets and unnecessary build context                 |
+| `deploy/Dockerfile.frontend`                | Centralize parameterized frontend build and runtime stages    |
+| `apps/{web,dashboard,admin}/Dockerfile`     | Remove duplicated frontend build definitions after migration  |
+| `apps/api/Dockerfile`                       | Add independent API, migrator, and database-tool targets      |
+| `deploy/tanstack-start-server.mjs`          | Run built TanStack Fetch handlers and static client assets    |
+| `docker-compose.yml`                        | Define immutable VPS services, migration job, and networks    |
+| `deploy/Caddyfile`                          | Route environment hostnames and terminate TLS                 |
+| `deploy/env/*.example`                      | Document sanitized environment contracts                      |
+| `deploy/scripts/`                           | Add migration-gated deployment and rollback commands          |
+| `apps/api/package.json`                     | Establish a production runtime command                        |
+| `apps/api/src/main.ts`                      | Add container binding and graceful shutdown as needed         |
+| `apps/api/src/modules/common/`              | Add or extend health endpoints as needed                      |
+| `apps/{web,dashboard,admin}/package.json`   | Establish production server commands                          |
+| `apps/{web,dashboard,admin}/vite.config.ts` | Configure verified production server output as needed         |
+| `packages/db/package.json`                  | Expose a container-safe migration command                     |
+| `packages/db/src/config/env.server.ts`      | Prefer injected environment over a required local file        |
+| `.github/workflows/ci.yml`                  | Validate cached builds with explicit public test inputs       |
+| `.github/workflows/release.yml`             | Publish and deploy staging or protected production releases   |
+| `.github/workflows/publish-images.yml`      | Remove after release workflow replacement                     |
+| `.github/workflows/deploy-*.yml`            | Remove duplicated environment-specific deployment workflows   |
+| `deploy/OPERATIONS.md`                      | Document automatic staging and protected production promotion |
 
 Paths may be consolidated during implementation when that reduces duplication without changing the
 requirements.

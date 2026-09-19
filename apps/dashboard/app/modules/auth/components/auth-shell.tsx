@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AppLogo } from '@repo/ui'
+import { LandingLogo } from '@repo/ui'
 
 interface AuthShellProps {
   children: ReactNode
@@ -19,12 +19,8 @@ export function AuthShell({ children }: AuthShellProps) {
       />
 
       <header className="relative z-10 px-6 py-5 sm:px-8">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 font-display text-lg font-bold tracking-tight text-on-surface transition-opacity duration-150 hover:opacity-80"
-        >
-          <AppLogo />
-          <span>{t('appName')}</span>
+        <Link to="/" className="inline-flex transition-opacity duration-150 hover:opacity-80">
+          <LandingLogo alt={t('appName')} size="header" />
         </Link>
       </header>
 
