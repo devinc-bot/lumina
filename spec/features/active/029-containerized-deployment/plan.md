@@ -8,7 +8,9 @@ Use the monorepo root as build context with two maintained build definitions:
 - `deploy/Dockerfile.frontend` accepts a validated application name and port and produces independent
   `web`, `dashboard`, and `admin` runtime images.
 
-Use a Debian slim Node 22 base and the repository-pinned pnpm version. Copy workspace manifests
+Use a Debian slim Node 24 LTS base and the repository-pinned pnpm version. Declare the same Node
+24 LTS major in the root `engines` field and `.nvmrc`, and use it in GitHub Actions. Copy
+workspace manifests
 before source files, install filtered dependencies with `pnpm install --frozen-lockfile`, cache the
 pnpm store with BuildKit, preserve workspace package resolution, and copy only deployed runtime
 artifacts into non-root production stages.

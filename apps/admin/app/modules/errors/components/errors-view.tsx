@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ApiErrorRecordResponse } from '@repo/types'
 import { ErrorDeleteDialog } from '~/modules/errors/components/error-delete-dialog'
@@ -41,9 +41,10 @@ export function ErrorsView() {
     setPage(1)
   }
 
-  useEffect(() => {
+  function handleFiltersChange(nextFilters: ErrorRecordsFilters) {
+    setFilters(nextFilters)
     setPage(1)
-  }, [filters])
+  }
 
   const { data, isError, isLoading, refetch } = useApiErrorRecords({
     page,
@@ -53,11 +54,6 @@ export function ErrorsView() {
     from: dateInputToStartOfDay(filters.from),
     to: dateInputToEndOfDay(filters.to),
   })
-
-  useEffect(() => {
-    if (!data || data.totalPages === 0) return
-    if (page > data.totalPages) setPage(data.totalPages)
-  }, [data, page])
 
   const pagination: ErrorRecordsPagination | undefined = data
     ? {
@@ -82,7 +78,7 @@ export function ErrorsView() {
         <p className="text-sm text-ink-muted">{t('errors.description')}</p>
       </header>
 
-      <ErrorsFilters filters={filters} onChange={setFilters} onReset={resetFilters} />
+      <ErrorsFilters filters={filters} onChange={handleFiltersChange} onReset={resetFilters} />
 
       <ErrorsTable
         records={data?.data ?? []}

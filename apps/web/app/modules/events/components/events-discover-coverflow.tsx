@@ -51,7 +51,7 @@ export function EventsDiscoverCoverflow({
   const [loadedIndexes, setLoadedIndexes] = useState<ReadonlySet<number>>(() => new Set([0]))
   const tweenFactor = useRef(0)
   const tweenNodes = useRef<Array<HTMLElement | null>>([])
-  const autoplay = useRef(
+  const [autoplay] = useState(() =>
     Autoplay({
       delay: AUTOPLAY_DELAY_MS,
       stopOnInteraction: false,
@@ -201,12 +201,12 @@ export function EventsDiscoverCoverflow({
     if (!api || slides.length < 2) return
 
     if (reduceMotion) {
-      autoplay.current.stop()
+      autoplay.stop()
       return
     }
 
-    void autoplay.current.play()
-  }, [api, reduceMotion, slides.length])
+    void autoplay.play()
+  }, [api, autoplay, reduceMotion, slides.length])
 
   if (isLoading) {
     return (
@@ -265,7 +265,7 @@ export function EventsDiscoverCoverflow({
           align: showControls ? 'center' : 'start',
           loop: showControls,
         }}
-        plugins={showControls ? [autoplay.current] : undefined}
+        plugins={showControls ? [autoplay] : undefined}
         className="relative w-full"
         aria-label={t('discover.coverflow.ariaLabel')}
       >

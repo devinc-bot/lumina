@@ -53,6 +53,8 @@ definition. The API Dockerfile MUST also expose an explicit one-shot database mi
 
 Long-running production containers MUST use production application output, run as a non-root user,
 support graceful termination, and expose only their service port to the internal Compose network.
+All development, CI, and containerized application surfaces MUST use the same active Node.js LTS
+major version.
 
 ### R2. Development Database
 

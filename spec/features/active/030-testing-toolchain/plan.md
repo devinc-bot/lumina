@@ -29,7 +29,7 @@ Continue using `@nestjs/testing`, which is already installed by `apps/api`. Do n
 MSW, Testing Library `jest-dom`, `user-event`, a coverage provider, or a database container in this
 iteration.
 
-Before installation, confirm current compatible releases against Node 22, Vite 7, React 19, and each
+Before installation, confirm current compatible releases against Node 24, Vite 7, React 19, and each
 package's peer dependency contract. Pin the selected versions exactly per `STYLEGUIDE.md`.
 
 ## Vitest Configuration
@@ -122,7 +122,7 @@ Integrate with the repository's GitHub Actions work from feature 029 rather than
 quality workflow. If the workflow does not exist when this feature is applied, add one minimal CI
 workflow or coordinate the dependency before completing the CI task.
 
-The test jobs use Node 22 and the repository-pinned pnpm version:
+The test jobs use Node 24 and the repository-pinned pnpm version:
 
 1. Install dependencies with `pnpm install --frozen-lockfile`.
 2. Run `pnpm check` and `pnpm test`.

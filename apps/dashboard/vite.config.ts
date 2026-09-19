@@ -65,6 +65,9 @@ export default defineConfig(({ mode }) => {
     resolve: {
       tsconfigPaths: true,
     },
+    optimizeDeps: {
+      exclude: ['maplibre-gl'],
+    },
     server: {
       host: DASHBOARD_DEVELOPMENT_SERVER.host,
       allowedHosts: [DASHBOARD_DEVELOPMENT_SERVER.hostname],

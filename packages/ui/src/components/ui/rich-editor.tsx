@@ -85,13 +85,16 @@ function RichEditor({
   const editorId = id ?? generatedId
   const errorId = error ? `${editorId}-error` : undefined
   const hasError = Boolean(error)
-  const initialContent = React.useRef(value ?? defaultValue)
+  const initialContent = value ?? defaultValue
   const onChangeRef = React.useRef(onChange)
-  onChangeRef.current = onChange
+
+  React.useEffect(() => {
+    onChangeRef.current = onChange
+  }, [onChange])
 
   const editor = useEditor({
     extensions: [StarterKit],
-    content: initialContent.current,
+    content: initialContent,
     editable: !disabled,
     immediatelyRender: false,
     editorProps: {

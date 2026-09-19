@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Map, MapControls, MapMarker, MapPinMarker, MarkerContent, useMap } from '@repo/ui'
 import {
@@ -20,6 +20,8 @@ type LocationMapProps = {
   className?: string
 }
 
+const subscribeToClient = () => () => undefined
+
 function MapClickToPlace({
   enabled,
   onPlace,
@@ -29,7 +31,10 @@ function MapClickToPlace({
 }) {
   const { map } = useMap()
   const onPlaceRef = useRef(onPlace)
-  onPlaceRef.current = onPlace
+
+  useEffect(() => {
+    onPlaceRef.current = onPlace
+  }, [onPlace])
 
   useEffect(() => {
     if (!map || !enabled) {
@@ -89,19 +94,22 @@ export function LocationMap({
   className,
 }: LocationMapProps) {
   const { t } = useTranslation('locations')
-  const [mounted, setMounted] = useState(false)
+  const mounted = useSyncExternalStore(
+    subscribeToClient,
+    () => true,
+    () => false
+  )
   const didRequestGeo = useRef(false)
   const onCoordinatesChangeRef = useRef(onCoordinatesChange)
-  onCoordinatesChangeRef.current = onCoordinatesChange
+
+  useEffect(() => {
+    onCoordinatesChangeRef.current = onCoordinatesChange
+  }, [onCoordinatesChange])
 
   const hasPin = latitude !== null && longitude !== null
   const initialCenter: [number, number] = hasPin
     ? [longitude, latitude]
     : [DEFAULT_LOCATION_MAP_CENTER.longitude, DEFAULT_LOCATION_MAP_CENTER.latitude]
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   useEffect(() => {
     if (!mounted || hasPin || didRequestGeo.current) {

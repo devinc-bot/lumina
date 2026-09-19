@@ -104,7 +104,10 @@ export const FilePreview = ({
   const [isLoading, setIsLoading] = useState(!isLocalFile)
 
   const filesRef = useRef(files)
-  filesRef.current = files
+
+  useEffect(() => {
+    filesRef.current = files
+  }, [files])
 
   useEffect(() => {
     if (!(file instanceof File)) {
@@ -185,7 +188,7 @@ export const FilePreview = ({
 
     void run()
     return () => controller.abort()
-  }, [endpoint, file, key])
+  }, [endpoint, file, files, key])
 
   return (
     <figure className={cn('overflow-hidden rounded-lg border border-border bg-card', className)}>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ScannedTicketHistoryItem } from '@repo/types'
 import {
@@ -166,17 +166,6 @@ export function ScannedTicketsHistory() {
   const eventsQuery = useEvents({ page: 1, limit: EVENTS_SELECTOR_PAGE_SIZE, hasSales: true })
   const historyQuery = useScannedTicketsHistory({ eventId, page, limit: HISTORY_PAGE_SIZE })
 
-  useEffect(() => {
-    setPage(1)
-  }, [eventId])
-
-  useEffect(() => {
-    if (!historyQuery.data || historyQuery.data.totalPages === 0) return
-    if (page > historyQuery.data.totalPages) {
-      setPage(historyQuery.data.totalPages)
-    }
-  }, [historyQuery.data, page])
-
   const events = eventsQuery.data?.data ?? []
   const items = historyQuery.data?.data ?? []
   const hasSelection = Boolean(eventId)
@@ -195,7 +184,13 @@ export function ScannedTicketsHistory() {
   return (
     <section className="space-y-4" aria-labelledby="scanned-tickets-history-heading">
       <div className="w-full sm:w-72">
-        <Select value={eventId} onValueChange={setEventId}>
+        <Select
+          value={eventId}
+          onValueChange={(nextEventId) => {
+            setEventId(nextEventId)
+            setPage(1)
+          }}
+        >
           <SelectTrigger aria-label={t('pages.qrTicket.history.selectLabel')}>
             <SelectValue placeholder={t('pages.qrTicket.history.selectPlaceholder')} />
           </SelectTrigger>

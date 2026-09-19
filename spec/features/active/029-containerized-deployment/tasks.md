@@ -146,6 +146,11 @@ verification passes.
 
 ## Documentation and Acceptance
 
+- [x] **T22. Align project execution with Node.js 24 LTS**
+  - Use Node 24 in GitHub Actions and all application Docker build and runtime stages.
+  - Declare the Node 24 major for local development and package consumers.
+  - Verify all Node-version declarations resolve to the same LTS major.
+
 - [x] **T16. Add the operations guide**
   - Document prerequisites, DNS and TLS, VPS layout, environment files, GHCR access, development,
     migrations, deployments, rollback, Neon recovery, secret rotation, and troubleshooting.

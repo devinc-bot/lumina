@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Map,
@@ -18,6 +18,8 @@ type EventDetailMapProps = {
   addressText: string | null
 }
 
+const subscribeToClient = () => () => undefined
+
 export function EventDetailMap({
   latitude,
   longitude,
@@ -26,12 +28,12 @@ export function EventDetailMap({
 }: EventDetailMapProps) {
   const { t } = useTranslation('events')
   const { theme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const mounted = useSyncExternalStore(
+    subscribeToClient,
+    () => true,
+    () => false
+  )
   const markerLabel = locationName.trim() || addressText || t('discover.detail.map')
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   if (!mounted) {
     return (

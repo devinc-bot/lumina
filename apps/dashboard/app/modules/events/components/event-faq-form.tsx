@@ -1,4 +1,4 @@
-import { useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { useEffect, useImperativeHandle, useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { useTranslation } from 'react-i18next'
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react'
@@ -78,16 +78,16 @@ function faqTriggerLabel(faq: EventFaqFormItem, emptyLabel: string): string {
 export function EventFaqForm({ ref, defaultFaqs, onDirtyChange }: EventFaqFormProps) {
   const { t } = useTranslation('events')
   const resolveFieldError = useResolveFieldError()
-  const initialSnapshotRef = useRef(snapshotFaqs(defaultFaqs))
-  const initialFaqsRef = useRef(toFormItems(defaultFaqs))
+  const [initialSnapshot] = useState(() => snapshotFaqs(defaultFaqs))
+  const [initialFaqs] = useState(() => toFormItems(defaultFaqs))
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [openItems, setOpenItems] = useState<string[]>(() => {
-    const firstId = initialFaqsRef.current[0]?.id
+    const firstId = initialFaqs[0]?.id
     return firstId ? [firstId] : []
   })
 
   const form = useForm({
-    defaultValues: { faqs: initialFaqsRef.current },
+    defaultValues: { faqs: initialFaqs },
     onSubmit: () => {
       // Submission is orchestrated by the parent page; this form only validates.
     },
@@ -118,7 +118,7 @@ export function EventFaqForm({ ref, defaultFaqs, onDirtyChange }: EventFaqFormPr
         {(faqs) => (
           <FaqDirtyReporter
             faqs={toPayload(faqs)}
-            initialSnapshot={initialSnapshotRef.current}
+            initialSnapshot={initialSnapshot}
             onDirtyChange={onDirtyChange}
           />
         )}

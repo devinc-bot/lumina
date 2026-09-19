@@ -20,10 +20,12 @@ export function StaffInvitationSuccessPanel({
   const [timeRemaining, setTimeRemaining] = useState(() =>
     formatInvitationTimeRemaining(invitation.expiresAt)
   )
+  const [now, setNow] = useState(Date.now)
 
   useEffect(() => {
     const interval = window.setInterval(() => {
       setTimeRemaining(formatInvitationTimeRemaining(invitation.expiresAt))
+      setNow(Date.now())
     }, 1000)
 
     return () => window.clearInterval(interval)
@@ -40,7 +42,7 @@ export function StaffInvitationSuccessPanel({
     }
   }
 
-  const isExpired = invitation.expiresAt <= Date.now()
+  const isExpired = invitation.expiresAt <= now
   const hasSecurityWord = invitation.hasSecurityWord
   const expiryDuration =
     (

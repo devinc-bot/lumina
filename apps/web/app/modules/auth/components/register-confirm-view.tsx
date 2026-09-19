@@ -13,20 +13,18 @@ export function RegisterConfirmView({ token }: RegisterConfirmViewProps) {
   const { t } = useTranslation('auth')
   const confirm = useConfirmUserRegistration()
   const startedRef = useRef(false)
-  const mutateRef = useRef(confirm.mutateAsync)
-  mutateRef.current = confirm.mutateAsync
   const [localError, setLocalError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!token || startedRef.current) return
     startedRef.current = true
 
-    void mutateRef.current({ token }).catch((error: unknown) => {
+    void confirm.mutateAsync({ token }).catch((error: unknown) => {
       const message =
         error instanceof Error && error.message ? error.message : t('register.confirm.invalidToken')
       setLocalError(message)
     })
-  }, [token, t])
+  }, [confirm, token, t])
 
   const errorMessage = localError ?? (confirm.isError ? confirm.error.message : null)
 

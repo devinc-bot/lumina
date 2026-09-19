@@ -29,6 +29,10 @@ removes dependencies only when repository evidence confirms they are unused.
   package-export use, THE SYSTEM SHALL remove it from its declaring manifest.
 - RF-4: THE SYSTEM SHALL keep production, development, peer, and workspace
   dependency declarations mutually compatible.
+- RF-5: WHEN the React Compiler lint rules identify a synchronous Effect state
+  update, impure render expression, or render-time ref access introduced or
+  exposed by the frontend upgrade, THE SYSTEM SHALL use the documented React
+  pattern without changing the affected user flow.
 
 ## Non-Functional Requirements
 
