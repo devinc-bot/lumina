@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button, toast } from '@repo/ui'
@@ -31,13 +31,6 @@ export function EventsManagementView() {
     () => (data?.data ?? []).map((event) => eventResponseToRecordItem(event)),
     [data]
   )
-
-  useEffect(() => {
-    if (!data || data.totalPages === 0) return
-    if (page > data.totalPages) {
-      setPage(data.totalPages)
-    }
-  }, [data, page])
 
   const pagination: EventRecordsPagination | undefined = data
     ? {

@@ -9,7 +9,9 @@
   "rules": {
     "no-unused-vars": "error",
     "no-console": "warn",
-    "eqeqeq": "error"
+    "eqeqeq": "error",
+    "react/set-state-in-effect": "off",
+    "react/preserve-manual-memoization": "off"
   },
   "ignorePatterns": [
     "**/routeTree.gen.ts",

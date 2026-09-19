@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { TICKET_SALES_FILTER, type TicketSalesFilter } from '@repo/types'
@@ -60,10 +60,6 @@ export function TicketsManagementView() {
 
   const status = activeTab
 
-  useEffect(() => {
-    setPage(1)
-  }, [activeTab, salesFilter])
-
   const { data } = useTickets({
     status,
     page,
@@ -75,13 +71,6 @@ export function TicketsManagementView() {
     () => (data?.data ?? []).map((ticket) => ticketResponseToRecordItem(ticket)),
     [data]
   )
-
-  useEffect(() => {
-    if (!data || data.totalPages === 0) return
-    if (page > data.totalPages) {
-      setPage(data.totalPages)
-    }
-  }, [data, page])
 
   const pagination: TicketRecordsPagination | undefined = data
     ? {
@@ -141,7 +130,10 @@ export function TicketsManagementView() {
     <PageLayout title={t('page.title')} description={t('page.description')}>
       <Tabs
         value={activeTab}
-        onValueChange={(value) => setActiveTab(value as TicketTab)}
+        onValueChange={(value) => {
+          setActiveTab(value as TicketTab)
+          setPage(1)
+        }}
         className="flex flex-col gap-4"
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -159,6 +151,7 @@ export function TicketsManagementView() {
             onValueChange={(value) => {
               if (isTicketSalesFilterOption(value)) {
                 setSalesFilter(value)
+                setPage(1)
               }
             }}
           >

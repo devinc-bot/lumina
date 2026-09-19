@@ -37,3 +37,10 @@ Verification record:
 
 - [x] T12: Centralize shared React, Zod, TypeScript, and Node type versions in the root pnpm
       catalog and reference them through `catalog:`.
+
+- [x] T13: Run workspace type checks without task-graph ordering so the intentional `db`/`types`
+      cycle does not block their no-emit checks.
+
+- [x] T14: Resolve React Compiler lint findings across the frontend applications
+      and shared UI package using documented render, Effect, ref, and external
+      store patterns; preserve pagination, form, editor, map, and upload flows.

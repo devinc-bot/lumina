@@ -17,7 +17,7 @@
     "build:dashboard": "pnpm --filter @repo/dashboard build",
     "build:admin": "pnpm --filter @repo/admin build",
     "build:api": "pnpm --filter @repo/api build",
-    "type-check": "pnpm --recursive type-check",
+    "type-check": "pnpm --recursive --no-sort type-check",
     "lint": "oxlint -c oxlint.json .",
     "lint:fix": "oxlint -c oxlint.json --fix .",
     "format": "oxfmt --write .",

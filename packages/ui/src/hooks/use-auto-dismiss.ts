@@ -2,7 +2,10 @@ import { useEffect, useRef } from 'react'
 
 export function useAutoDismiss(active: boolean, delayMs: number, onDismiss: () => void) {
   const onDismissRef = useRef(onDismiss)
-  onDismissRef.current = onDismiss
+
+  useEffect(() => {
+    onDismissRef.current = onDismiss
+  }, [onDismiss])
 
   useEffect(() => {
     if (!active) {

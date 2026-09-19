@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AdminUserListItemResponse } from '@repo/types'
 import { useAdminUsers } from '~/modules/users/queries/use-users-queries'
@@ -33,9 +33,10 @@ export function UsersView() {
     setPage(1)
   }
 
-  useEffect(() => {
+  function handleFiltersChange(nextFilters: AdminUsersFilters) {
+    setFilters(nextFilters)
     setPage(1)
-  }, [filters])
+  }
 
   const { data, isError, isLoading, refetch } = useAdminUsers({
     page,
@@ -43,11 +44,6 @@ export function UsersView() {
     email: filters.email.trim() || undefined,
     role: filters.role === FILTER_ALL ? undefined : (filters.role as AdminUserRole),
   })
-
-  useEffect(() => {
-    if (!data || data.totalPages === 0) return
-    if (page > data.totalPages) setPage(data.totalPages)
-  }, [data, page])
 
   const pagination: AdminUsersPagination | undefined = data
     ? {
@@ -65,7 +61,7 @@ export function UsersView() {
         <p className="text-sm text-ink-muted">{t('users.description')}</p>
       </header>
 
-      <UsersFilters filters={filters} onChange={setFilters} onReset={resetFilters} />
+      <UsersFilters filters={filters} onChange={handleFiltersChange} onReset={resetFilters} />
 
       <UsersTable
         users={data?.data ?? []}

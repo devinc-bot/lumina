@@ -29,14 +29,19 @@ The root workspace catalog owns the shared React, Zod, TypeScript, and Node type
 Workspace manifests use the `catalog:` protocol, preventing those version declarations from
 drifting while retaining exact resolved versions.
 
+The `db` and `types` packages intentionally form a source-level dependency cycle. The root
+type-check command disables recursive task ordering only for `tsc --noEmit`, where neither package
+produces an artifact for the other to consume; build and other recursive tasks retain graph ordering.
+
 ## Migration Slices
 
-| Slice               | Scope                                                 | Key risks                                      | Verification                                          |
-| ------------------- | ----------------------------------------------------- | ---------------------------------------------- | ----------------------------------------------------- |
-| Cleanup             | Remove proven-unused direct dependencies              | Accidental removal of build-time use           | Manifest/lockfile install and affected builds         |
-| Frontend toolchain  | TypeScript, Vite, React, TanStack, i18n, Tailwind     | Vite 8 and typed i18n compatibility            | Type-check and builds for all frontends               |
-| API runtime         | Nest, Multer, Drizzle, AWS SDK                        | Nest 12 ESM and upload compatibility           | API tests, type-check, build, health startup          |
-| UI and test tooling | Radix, Tiptap, charts, maps, crop, Vitest, Playwright | Public component APIs and test runtime changes | UI build, component tests, Storybook where applicable |
+| Slice               | Scope                                                 | Key risks                                       | Verification                                          |
+| ------------------- | ----------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------- |
+| Cleanup             | Remove proven-unused direct dependencies              | Accidental removal of build-time use            | Manifest/lockfile install and affected builds         |
+| Frontend toolchain  | TypeScript, Vite, React, TanStack, i18n, Tailwind     | Vite 8 and typed i18n compatibility             | Type-check and builds for all frontends               |
+| API runtime         | Nest, Multer, Drizzle, AWS SDK                        | Nest 12 ESM and upload compatibility            | API tests, type-check, build, health startup          |
+| UI and test tooling | Radix, Tiptap, charts, maps, crop, Vitest, Playwright | Public component APIs and test runtime changes  | UI build, component tests, Storybook where applicable |
+| React Compiler lint | `web`, `dashboard`, `admin`, and `ui` React warnings  | Pagination resets and browser/SDK subscriptions | Focused tests, workspace lint, type-check             |
 
 ## Compatibility Decisions
 
@@ -48,6 +53,12 @@ drifting while retaining exact resolved versions.
   isolated from frontend and cleanup work.
 - i18n peer declarations must use versions compatible with all workspace consumers;
   exact incompatible peer declarations are corrected before installation.
+- React Compiler warnings that indicate impure render work or render-time ref
+  access are corrected at their source. `set-state-in-effect` and
+  `preserve-manual-memoization` remain disabled because this workspace uses
+  Effects to synchronize browser APIs, SDK instances, and query-driven UI state;
+  the compiler rules cannot distinguish those required synchronizations from
+  derived state.
 
 ## Files Expected to Change
 
