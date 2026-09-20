@@ -15,14 +15,14 @@ plane or deploy production.
 
 ## User Stories
 
-- H1: As an operator, I want the three frontends deployed to Cloudflare after I manually
-  run CI for `staging` so that the staging release matches the API environment.
+- H1: As an operator, I want the three frontends deployed to Cloudflare after CI succeeds
+  for a push to `staging` so that the staging release matches the API environment.
 - H2: As an operator, I want every staging frontend to use the matching Cloud Run
   API origin so clients never mix environments.
 
 ## Functional Requirements (EARS Acceptance Criteria)
 
-- RF-1: WHEN an operator manually runs CI successfully for `staging`, THE SYSTEM SHALL serve
+- RF-1: WHEN CI succeeds for a push to `staging`, THE SYSTEM SHALL serve
   `web`, `dashboard`, and `admin` through separate Cloudflare Workers.
 - RF-2: THE SYSTEM SHALL build the staging frontends with the public API and
   cross-application URLs that correspond to the staging environment.
@@ -33,7 +33,7 @@ plane or deploy production.
 ## Non-Functional Requirements
 
 - No secrets in frontend bundles beyond intentional public `VITE_*` values.
-- Use GitHub Actions after successful manually initiated CI, aligned with the Cloud Run staging
+- Use GitHub Actions after successful CI for a push to `staging`, aligned with the Cloud Run staging
   branch model.
 - English ops docs under `deploy/`.
 
@@ -71,7 +71,7 @@ plane or deploy production.
   SSR; static-only Cloudflare Pages is not suitable.
 - Use one Cloudflare account and three staging Workers. Production will be planned as
   a separate follow-up.
-- Publish after successful manually initiated CI for the `staging` branch. Include all three
+- Publish after successful CI for a push to the `staging` branch. Include all three
   frontends in this iteration.
 - The API uses its native Cloud Run service URL, not a custom API domain (confirmed
   2026-09-17).

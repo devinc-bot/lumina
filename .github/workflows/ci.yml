@@ -1,6 +1,11 @@
 name: CI
 
 on:
+  push:
+    branches:
+      - staging
+      - main
+  pull_request:
   workflow_dispatch:
 
 permissions:
