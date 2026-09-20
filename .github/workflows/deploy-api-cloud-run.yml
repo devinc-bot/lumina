@@ -54,6 +54,12 @@ jobs:
       # Install gcloud CLI on the runner (uses credentials from the auth step).
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v3
+        env:
+          CLOUDSDK_CORE_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+          CLOUDSDK_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+          GCLOUD_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+          GOOGLE_CLOUD_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
