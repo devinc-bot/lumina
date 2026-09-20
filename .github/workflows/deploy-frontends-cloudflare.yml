@@ -36,7 +36,7 @@ jobs:
           cache: pnpm
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @repo/web deploy
+      - run: pnpm --filter @repo/web run deploy
 
   deploy-dashboard:
     runs-on: ubuntu-latest
@@ -59,7 +59,7 @@ jobs:
           cache: pnpm
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @repo/dashboard deploy
+      - run: pnpm --filter @repo/dashboard run deploy
 
   deploy-admin:
     runs-on: ubuntu-latest
@@ -81,4 +81,4 @@ jobs:
           cache: pnpm
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @repo/admin deploy
+      - run: pnpm --filter @repo/admin run deploy
