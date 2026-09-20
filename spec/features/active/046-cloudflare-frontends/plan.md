@@ -18,14 +18,14 @@ staging task. Workers build from the workspace source, using only intentional pu
 | -------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | Hosting unit   | One Worker per app                                                                              | Independent domains, failures, and re-runs; no cross-app routing layer.        |
 | SSR runtime    | TanStack Start Cloudflare Vite integration                                                      | Keeps current server rendering rather than converting the apps to static SPAs. |
-| Deploy trigger | `workflow_run` after successful manually dispatched `CI` on `staging`                           | Deploys the exact verified `head_sha`, matching the API workflow.              |
+| Deploy trigger | `workflow_run` after successful `CI` for a push to `staging`                                    | Deploys the exact verified `head_sha`, matching the API workflow.              |
 | Credentials    | GitHub `staging` Environment secret `CLOUDFLARE_API_TOKEN` and variable `CLOUDFLARE_ACCOUNT_ID` | Keeps Cloudflare credentials out of the repository and production scope.       |
 | Public config  | GitHub `staging` Environment variables                                                          | `VITE_*` values are compiled into client output and must contain no secrets.   |
 
 ## Deployment Flow
 
 ```text
-manual CI run on staging -> CI succeeds -> Deploy Frontends workflow
+push to staging -> CI succeeds -> Deploy Frontends workflow
   -> checkout CI head_sha -> install frozen lockfile
   -> deploy web Worker -> deploy dashboard Worker -> deploy admin Worker
   -> Cloudflare custom hostnames/TLS -> browser -> Cloud Run API

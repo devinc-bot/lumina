@@ -1,27 +1,22 @@
 name: Deploy API
 
 on:
-  workflow_run:
-    workflows:
-      - CI
-    types:
-      - completed
+  push:
     branches:
       - staging
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: deploy-api-${{ github.event.workflow_run.head_branch == 'main' && 'production' || github.event.workflow_run.head_branch }}
+  group: deploy-api-staging
   cancel-in-progress: false
 
 jobs:
   deploy:
-    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    environment: ${{ github.event.workflow_run.head_branch == 'main' && 'production' || 'staging' }}
+    environment: staging
     permissions:
       contents: read
       id-token: write
@@ -35,14 +30,16 @@ jobs:
       RUNTIME_SERVICE_ACCOUNT: ${{ vars.RUNTIME_SERVICE_ACCOUNT }}
       SCHEDULER_SERVICE_ACCOUNT: ${{ vars.SCHEDULER_SERVICE_ACCOUNT }}
       INTERNAL_JOBS_OIDC_AUDIENCE: ${{ vars.INTERNAL_JOBS_OIDC_AUDIENCE }}
-      API_IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.AR_REPO }}/api:${{ github.event.workflow_run.head_sha }}
-      MIGRATOR_IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.AR_REPO }}/migrator:${{ github.event.workflow_run.head_sha }}
+      API_IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.AR_REPO }}/api:${{ github.sha }}
+      API_CACHE_IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.AR_REPO }}/api-cache:staging
+      MIGRATOR_IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.AR_REPO }}/migrator:${{ github.sha }}
+      MIGRATOR_CACHE_IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.AR_REPO }}/migrator-cache:staging
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.sha }}
 
       - name: Validate deploy configuration
         run: bash deploy/scripts/cloud-run/validate-deploy-config.sh
@@ -62,19 +59,32 @@ jobs:
       - name: Configure Docker
         run: bash deploy/scripts/cloud-run/configure-docker.sh
 
-      # API image (Dockerfile target "runtime") → Artifact Registry as api:<sha>.
-      - name: Build API image
-        run: bash deploy/scripts/cloud-run/build-api-image.sh
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Push API image
-        run: bash deploy/scripts/cloud-run/push-api-image.sh
+      # API image (Dockerfile target "runtime") → Artifact Registry as api:<sha>.
+      - name: Build and push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          target: runtime
+          push: true
+          tags: ${{ env.API_IMAGE }}
+          cache-from: type=registry,ref=${{ env.API_CACHE_IMAGE }}
+          cache-to: type=registry,ref=${{ env.API_CACHE_IMAGE }},mode=max
 
       # Migrator image (Dockerfile target "migrator": Drizzle + SQL) → migrator:<sha>.
-      - name: Build migrator image
-        run: bash deploy/scripts/cloud-run/build-migrator-image.sh
-
-      - name: Push migrator image
-        run: bash deploy/scripts/cloud-run/push-migrator-image.sh
+      - name: Build and push migrator image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          target: migrator
+          push: true
+          tags: ${{ env.MIGRATOR_IMAGE }}
+          cache-from: type=registry,ref=${{ env.MIGRATOR_CACHE_IMAGE }}
+          cache-to: type=registry,ref=${{ env.MIGRATOR_CACHE_IMAGE }},mode=max
 
       # Point the Cloud Run Job at the new migrator image (definition only).
       - name: Update migrator Cloud Run Job
