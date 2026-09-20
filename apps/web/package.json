@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "deploy": "wrangler deploy",
+    "deploy": "pnpm run build && wrangler deploy",
     "start": "node server.mjs",
     "type-check": "tsc --noEmit"
   },
