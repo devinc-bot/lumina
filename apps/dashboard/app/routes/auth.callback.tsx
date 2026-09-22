@@ -26,7 +26,8 @@ function AuthCallbackPage() {
         await useSessionStore.getState().loadSession()
         const to = await resolvePostAuthPath(DASHBOARD_ROUTES.home())
         await navigate({ to: to as '/dashboard' | '/legal-acceptance', replace: true })
-      } catch {
+      } catch (error) {
+        console.error('Error completing auth callback', error)
         await navigate({
           to: DASHBOARD_ROUTES.login(),
           search: { error: 'google_failed' },
