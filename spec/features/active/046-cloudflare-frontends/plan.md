@@ -33,40 +33,40 @@ push to staging -> CI succeeds -> Deploy Frontends workflow
 
 The workflow uses separate jobs or a matrix so a failed app can be re-run independently.
 Its `concurrency` group is staging-specific and does not cancel an active deploy. It
-receives `VITE_API_URL` from the native staging Cloud Run service URL stored in the
-GitHub `staging` Environment; `web` additionally receives
-`VITE_DASHBOARD_URL=https://dash-staging.lumina-events.com`. `VITE_SUPPORT_EMAIL` is
+receives `VITE_API_URL=https://api-staging.lumina-events.com` from the GitHub `staging`
+Environment after the Cloud Run domain mapping is active; `web` additionally receives
+`VITE_DASHBOARD_URL=https://staging-dash.lumina-events.com`. `VITE_SUPPORT_EMAIL` is
 required by `web` and `dashboard`.
 
-Before enabling the workflow, update the Cloud Run staging runtime configuration from
-`DASHBOARD_URL=https://dashboard-staging.lumina-events.com` to
-`DASHBOARD_URL=https://dash-staging.lumina-events.com`. The API derives its required
-CORS allowlist from `WEB_URL`, `DASHBOARD_URL`, and `ADMIN_URL`; its URL validation must
-allow those Cloudflare origins alongside the native Cloud Run API origin. Use the same native
-service URL for `API_PUBLIC_URL`, OAuth/webhook
-configuration, Scheduler OIDC audience, and `VITE_API_URL`; confirm it is healthy
-before the frontend release.
+Before enabling the workflow, move the staging regional resources to `us-east1`: recreate the
+Artifact Registry repository, Cloud Run service, migrator Job, and Cloud Scheduler job, then set
+the GitHub `staging` Environment's `GCP_REGION` and `AR_REPO` for those resources. Activate the
+`api-staging.lumina-events.com` domain mapping and its DNS/TLS before switching traffic. Use that
+same origin for `API_PUBLIC_URL`, Google OAuth callback, Mercado Pago webhook, and `VITE_API_URL`.
+Keep the native `run.app` URL for the Cloud Scheduler target and OIDC audience. Staging uses
+`DASHBOARD_URL=https://staging-dash.lumina-events.com`.
 
 ## File Changes
 
-| File                                                       | Action | Description                                                                                      |
-| ---------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------ |
-| `apps/{web,dashboard,admin}/package.json`                  | Modify | Add pinned Cloudflare build/deploy dependencies and deploy scripts.                              |
-| `apps/{web,dashboard,admin}/vite.config.ts`                | Modify | Add the Cloudflare SSR Vite plugin.                                                              |
-| `apps/{web,dashboard,admin}/wrangler.jsonc`                | Create | Name each staging Worker and configure compatibility, Node support, and Start entry.             |
-| `pnpm-lock.yaml`                                           | Modify | Lock the new dependencies.                                                                       |
-| `.github/workflows/deploy-frontends-cloudflare.yml`        | Create | Deploy the verified staging SHA with Environment-scoped configuration.                           |
-| `deploy/CLOUDFLARE.md`                                     | Create | One-time account, DNS/TLS, secrets, deployment, and verification runbook.                        |
-| `deploy/env/staging.build.env.example`                     | Modify | Record the staging public build origins.                                                         |
-| `deploy/env/staging.runtime.env.example`                   | Modify | Record the native API and three Cloudflare frontend origins.                                     |
-| `deploy/CLOUD_RUN_BOOTSTRAP.md` / `deploy/CLOUD_RUN.md`    | Modify | Align the dashboard origin and native Cloud Run API/OIDC, OAuth, and webhook URLs.               |
-| `apps/api/src/config/env.schema.ts` / `env.schema.test.ts` | Modify | Permit Cloudflare frontend origins with the native Cloud Run API origin and cover that contract. |
-| `apps/api/package.json`                                    | Modify | Remove the no-longer-used `tldts` dependency.                                                    |
+| File                                                       | Action | Description                                                                          |
+| ---------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------ |
+| `apps/{web,dashboard,admin}/package.json`                  | Modify | Add pinned Cloudflare build/deploy dependencies and deploy scripts.                  |
+| `apps/{web,dashboard,admin}/vite.config.ts`                | Modify | Add the Cloudflare SSR Vite plugin.                                                  |
+| `apps/{web,dashboard,admin}/wrangler.jsonc`                | Create | Name each staging Worker and configure compatibility, Node support, and Start entry. |
+| `pnpm-lock.yaml`                                           | Modify | Lock the new dependencies.                                                           |
+| `.github/workflows/deploy-frontends-cloudflare.yml`        | Create | Deploy the verified staging SHA with Environment-scoped configuration.               |
+| `deploy/CLOUDFLARE.md`                                     | Create | One-time account, DNS/TLS, secrets, deployment, and verification runbook.            |
+| `deploy/env/staging.build.env.example`                     | Modify | Record the staging public build origins.                                             |
+| `deploy/env/staging.runtime.env.example`                   | Modify | Record the custom same-site API and three Cloudflare frontend origins.               |
+| `deploy/CLOUD_RUN_BOOTSTRAP.md` / `deploy/CLOUD_RUN.md`    | Modify | Document the `us-east1` migration, public API, native OIDC, OAuth, and webhook URLs. |
+| `apps/api/src/config/env.schema.ts` / `env.schema.test.ts` | Modify | Reject a cross-site `run.app` API origin for Lumina cookie-authenticated frontends.  |
+| `apps/api/package.json`                                    | Modify | Remove the no-longer-used `tldts` dependency.                                        |
 
 ## Verification Strategy
 
 - Run each Worker build with its required staging `VITE_*` variables.
 - Run type-check, lint, format check, and `git diff --check`.
+- In Cloud Run, verify the `us-east1` resources and API domain mapping have active DNS/TLS.
 - In Cloudflare, verify each Worker has its custom hostname and active TLS.
 - Load each public hostname; confirm SSR responses, static assets, and a browser API
   request succeeds without a CORS failure.
@@ -75,11 +75,11 @@ before the frontend release.
 ## Rollout
 
 No database migration or feature flag is required. Configure the Cloudflare account,
-Workers, hostnames, API CORS origin, and GitHub staging Environment first. The workflow
+Workers, hostnames, API domain mapping, CORS origin, and GitHub staging Environment first. The workflow
 is enabled only after those prerequisites are present. Production remains out of scope.
 
 ## Open Questions
 
-- [ ] Record the native staging Cloud Run service URL as GitHub `staging` Environment
-      variable `VITE_API_URL` and confirm `${VITE_API_URL}/api/health/ready` returns HTTP
-      200 before T6 enables automated deployment.
+- [ ] Complete the `us-east1` API migration, set `VITE_API_URL` to
+      `https://api-staging.lumina-events.com`, and confirm
+      `${VITE_API_URL}/api/health/ready` returns HTTP 200 before T9 enables frontend deployment.

@@ -27,8 +27,10 @@ plane or deploy production.
 - RF-2: THE SYSTEM SHALL build the staging frontends with the public API and
   cross-application URLs that correspond to the staging environment.
 - RF-3: THE SYSTEM SHALL map the staging Workers to `staging.lumina-events.com`,
-  `dash-staging.lumina-events.com`, and `admin-staging.lumina-events.com` with
+  `staging-dash.lumina-events.com`, and `admin-staging.lumina-events.com` with
   Cloudflare-managed TLS.
+- RF-4: WHEN staging frontends use cookie authentication, THE SYSTEM SHALL use
+  `https://api-staging.lumina-events.com` as their API origin so refresh requests remain same-site.
 
 ## Non-Functional Requirements
 
@@ -57,15 +59,15 @@ plane or deploy production.
 
 ## Open Questions
 
-- [NEEDS CLARIFICATION] Record the native staging Cloud Run service URL in the GitHub
-  `staging` Environment before the Worker deployment is enabled.
+- [ ] Complete the `us-east1` Cloud Run migration and activate
+      `https://api-staging.lumina-events.com` before enabling the Worker deployment.
 
 ### Resolved decisions
 
 - Target host for staging/production frontends: **Cloudflare** (confirmed 2026-09-11
   with 042 Phase 2 decisions). API remains on Cloud Run.
 - This iteration deploys staging only: `web` at `https://staging.lumina-events.com`,
-  `dashboard` at `https://dash-staging.lumina-events.com`, and `admin` at
+  `dashboard` at `https://staging-dash.lumina-events.com`, and `admin` at
   `https://admin-staging.lumina-events.com` (confirmed 2026-09-17).
 - Cloudflare Workers is the hosting product because all three TanStack Start apps use
   SSR; static-only Cloudflare Pages is not suitable.
@@ -73,5 +75,5 @@ plane or deploy production.
   a separate follow-up.
 - Publish after successful CI for a push to the `staging` branch. Include all three
   frontends in this iteration.
-- The API uses its native Cloud Run service URL, not a custom API domain (confirmed
-  2026-09-17).
+- Staging uses `https://api-staging.lumina-events.com` after moving the API resources to
+  `us-east1`, which supports the required Cloud Run domain mapping (confirmed 2026-09-22).

@@ -65,6 +65,8 @@ export const MODE = {
   TEST: 'test',
 } as const
 
+const LUMINA_EVENTS_DOMAIN = 'lumina-events.com'
+
 const positiveInt = (defaultValue: number) =>
   z.coerce.number().int().positive().default(defaultValue)
 
@@ -131,6 +133,12 @@ function hasNonEmptyServiceAccount(value: string): boolean {
     .some((entry) => entry.length > 0)
 }
 
+function isLuminaEventsOrigin(origin: string): boolean {
+  const hostname = new URL(origin).hostname
+
+  return hostname === LUMINA_EVENTS_DOMAIN || hostname.endsWith(`.${LUMINA_EVENTS_DOMAIN}`)
+}
+
 export const apiConfigSchema = z
   .object({
     PORT: z.coerce.number().default(3000),
@@ -154,6 +162,22 @@ export const apiConfigSchema = z
     DATABASE_POOL_MAX: positiveInt(10),
   })
   .superRefine((config, context) => {
+    const applicationOrigins = [config.WEB_URL, config.DASHBOARD_URL, config.ADMIN_URL]
+    const hasLuminaEventsFrontend = applicationOrigins.some(isLuminaEventsOrigin)
+
+    if (
+      config.NODE_ENV === MODE.PRODUCTION &&
+      hasLuminaEventsFrontend &&
+      !isLuminaEventsOrigin(config.API_PUBLIC_URL)
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['API_PUBLIC_URL'],
+        message:
+          'API_PUBLIC_URL must use a lumina-events.com origin when a Lumina frontend uses that domain so refresh cookies remain same-site.',
+      })
+    }
+
     if (config.NODE_ENV === MODE.PRODUCTION && config.TRUST_PROXY_HOPS === 0) {
       context.addIssue({
         code: 'custom',
