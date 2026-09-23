@@ -123,10 +123,10 @@ Configure these on **both** `staging` and `production` Environments (values diff
 5. Set the Environment **secrets** and **variables** in the tables above
    (`GCP_SERVICE_ACCOUNT` = that env’s deploy SA).
 6. Bootstrap each environment once with the manual sections below (including `--set-secrets` and
-   Scheduler). Set `API_PUBLIC_URL` and `INTERNAL_JOBS_OIDC_AUDIENCE` to the native Cloud Run
-   service URL in both GitHub Environment variables and the runtime Secret Manager value. After
-   that, CI mainly updates images and re-runs the migrator while verifying the Scheduler URI,
-   audience, and SA.
+   Scheduler). Set `API_PUBLIC_URL` to the public API origin and keep
+   `INTERNAL_JOBS_OIDC_AUDIENCE` as the native Cloud Run service URL in both GitHub Environment
+   variables and the runtime Secret Manager value. After that, CI mainly updates images and
+   re-runs the migrator while verifying the Scheduler URI, audience, and SA.
 
 ### Secrets on subsequent deploys
 
@@ -145,7 +145,7 @@ Export either staging or production names, then run the sections below.
 
 ```bash
 export PROJECT_ID=your-gcp-project
-export REGION=southamerica-east1
+export REGION=us-east1
 export AR_REPO=lumina
 export SERVICE_NAME=lumina-api-staging
 export MIGRATOR_JOB_NAME=lumina-api-migrator-staging
@@ -155,6 +155,36 @@ export SCHEDULER_SA=lumina-scheduler-staging@${PROJECT_ID}.iam.gserviceaccount.c
 export API_IMAGE=${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}/api:$(git rev-parse --short HEAD)
 export MIGRATOR_IMAGE=${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}/migrator:$(git rev-parse --short HEAD)
 ```
+
+## Staging region and public API domain migration
+
+Cloud Run domain mapping is not available in `southamerica-east1`. The staging API uses
+`us-east1`, which supports the mapping, with `https://api-staging.lumina-events.com` as its
+public origin. Moving a Cloud Run service to another region creates new regional resources; it is
+not an in-place service update.
+
+1. Create the Artifact Registry repository, migrator Job, API service, and Scheduler job in
+   `us-east1`, reusing the existing staging runtime, scheduler, and deploy service accounts and
+   their Secret Manager access.
+2. Set the staging GitHub Environment `GCP_REGION` to `us-east1`. Keep the resource names, update
+   `INTERNAL_JOBS_OIDC_AUDIENCE` to the new service's native `run.app` URL, and update the runtime
+   Secret Manager value to the same URL.
+3. Set API runtime `API_PUBLIC_URL=https://api-staging.lumina-events.com` and the frontend
+   `VITE_API_URL=https://api-staging.lumina-events.com`. Set
+   `DASHBOARD_URL=https://staging-dash.lumina-events.com`.
+4. Map `api-staging.lumina-events.com` to the new API service, add the DNS records returned by
+   Cloud Run, and wait for its managed TLS certificate to become active. The base
+   `lumina-events.com` domain must be verified first.
+5. In the Google OAuth staging client, replace the callback URI with
+   `https://api-staging.lumina-events.com/api/auth/google/callback`; update payment webhooks to
+   the same API origin where applicable. Redeploy the frontend after the mapping is healthy.
+6. Verify `https://api-staging.lumina-events.com/api/health/ready`, Google sign-in, and the
+   Scheduler job. Delete the old regional service, job, repository images, and Scheduler job only
+   after those checks pass.
+
+Use `gcloud beta run domain-mappings create --service="$SERVICE_NAME" --domain="api-staging.lumina-events.com" --region="$REGION" --project="$PROJECT_ID"`
+after the new service is healthy, then retrieve the DNS values with
+`gcloud beta run domain-mappings describe --domain="api-staging.lumina-events.com" --region="$REGION" --project="$PROJECT_ID"`.
 
 **Production example**
 

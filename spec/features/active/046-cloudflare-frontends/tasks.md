@@ -20,3 +20,6 @@
       under `deploy/`.
 - [ ] T9: Verify the three Worker builds and staging deployment behavior without
       exposing credentials or bundling non-public values.
+- [ ] T10: Migrate staging Cloud Run regional resources to `us-east1`, activate
+      `api-staging.lumina-events.com`, update API/OAuth/webhook/OIDC configuration, and verify
+      same-site Google session refresh from `staging-dash.lumina-events.com`.
