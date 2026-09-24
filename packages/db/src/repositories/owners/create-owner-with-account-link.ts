@@ -2,6 +2,7 @@ import type { Transaction } from '../../client.ts'
 import { ownerAccountsLnk } from '../../schema/owner-account-lnk.ts'
 import { owners } from '../../schema/owner.ts'
 import type { OwnerProfileSeed } from '@repo/types'
+import { provisionOwnerOrganization } from '../organizations/provision-owner-organization.ts'
 
 export async function createOwnerWithAccountLink(
   tx: Transaction,
@@ -26,6 +27,8 @@ export async function createOwnerWithAccountLink(
     ownerId: owner.id,
     accountId,
   })
+
+  await provisionOwnerOrganization(tx, accountId, { ...profile, documentId: owner.documentId })
 
   return owner.documentId
 }
