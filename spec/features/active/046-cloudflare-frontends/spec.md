@@ -34,6 +34,9 @@ plane or deploy production.
 
 ## Non-Functional Requirements
 
+- WHEN the three frontends start concurrently in local development, THE SYSTEM SHALL
+  use distinct Worker inspector ports while preserving debugging and HTTP ports 3001–3003.
+
 - No secrets in frontend bundles beyond intentional public `VITE_*` values.
 - Use GitHub Actions after successful CI for a push to `staging`, aligned with the Cloud Run staging
   branch model.

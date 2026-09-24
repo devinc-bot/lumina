@@ -20,7 +20,8 @@
     "db:studio": "drizzle-kit studio --config=drizzle.config.ts",
     "db:seed:development": "tsx src/seed/development/index.ts",
     "db:seed:production": "tsx src/seed/production/index.ts",
-    "db:audit:legacy-orders": "tsx src/scripts/audit-legacy-orders.ts"
+    "db:audit:legacy-orders": "tsx src/scripts/audit-legacy-orders.ts",
+    "db:repair:owner-organizations": "tsx src/scripts/repair-owner-organizations.ts"
   },
   "dependencies": {
     "@repo/types": "workspace:*",

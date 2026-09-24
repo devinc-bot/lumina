@@ -64,6 +64,14 @@ Keep the native `run.app` URL for the Cloud Scheduler target and OIDC audience. 
 
 ## Verification Strategy
 
+- Local development assigns explicit Cloudflare `inspectorPort` values through each
+  app's existing development-server constants: web 9231, dashboard 9232, admin 9233.
+  This prevents concurrent default-port selection races and leaves Node's default
+  inspector port 9229 available. HTTP ports remain unchanged.
+- Smoke-start all three frontends concurrently and verify their HTTP and inspector
+  listeners. This configuration-only correction has low test importance; no new
+  automated tests are required.
+
 - Run each Worker build with its required staging `VITE_*` variables.
 - Run type-check, lint, format check, and `git diff --check`.
 - In Cloud Run, verify the `us-east1` resources and API domain mapping have active DNS/TLS.
