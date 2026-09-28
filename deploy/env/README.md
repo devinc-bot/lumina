@@ -44,8 +44,9 @@ The following runtime values are secrets and must not be supplied as Docker buil
 - `GOOGLE_CLIENT_SECRET`
 - `AWS_ACCESS_KEY_ID` (when set; must be paired with `AWS_SECRET_ACCESS_KEY`)
 - `AWS_SECRET_ACCESS_KEY` (when set; must be paired with `AWS_ACCESS_KEY_ID`)
-- `MERCADOPAGO_ACCESS_TOKEN`
 - `MERCADOPAGO_WEBHOOK_SECRET`
+- `MERCADOPAGO_MARKETPLACE_CLIENT_SECRET`
+- `MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY`
 - `R2_ACCESS_KEY_ID`
 - `R2_SECRET_ACCESS_KEY`
 
@@ -66,15 +67,26 @@ exists; keep edge rate limiting on Caddy, the CDN, or a WAF for cluster-wide pro
 
 ## Internal jobs / Cloud Run (feature 042)
 
+## Mercado Pago marketplace
+
+`MERCADOPAGO_MARKETPLACE_ENABLED` is a rollout flag. Keep it `false` until the marketplace
+application, OAuth callback, webhook signature, and separate seller/buyer sandbox flow have been
+validated. `MERCADOPAGO_MARKETPLACE_CLIENT_ID`, `MERCADOPAGO_OAUTH_REDIRECT_URI`,
+`MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION` are runtime configuration. The client secret and
+encryption key are secrets. Seller access/refresh tokens are persisted encrypted and must never be
+configured as environment variables. Each owner records their Mercado Pago settlement option in
+Lumina so quotes can estimate the provider fee. See
+[`docs/mercado-pago-marketplace-runbook.md`](../../docs/mercado-pago-marketplace-runbook.md).
+
 These runtime variables configure Nest in-process schedulers and the Cloud Scheduler OIDC surface.
 They belong in API runtime files (and Secret Manager on Cloud Run), not in frontend build env.
 
-| Variable                                      | Notes                                                                                                                                                                                         |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `INTERNAL_JOBS_OIDC_AUDIENCE`                 | Expected Google OIDC JWT audience. On Cloud Run, use the stable API public origin and use the exact same value in Cloud Scheduler. Empty only for local DX; required non-empty in production. |
-| `INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS` | Comma-separated Scheduler SA emails allowed to call `POST /api/internal/jobs/run`. Empty only for local DX; required in production.                                                           |
-| `ENABLE_IN_PROCESS_SCHEDULERS`                | `true`/`false` (default `false`). Use `true` only for local Nest cron DX — keep `false` on Cloud Run.                                                                                         |
-| `DATABASE_POOL_MAX`                           | Per-process `pg` pool max (default `10`). Keep low under Cloud Run scale-out with Neon.                                                                                                       |
+| Variable                                      | Notes                                                                                                                                                                                                       |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `INTERNAL_JOBS_OIDC_AUDIENCE`                 | Expected Google OIDC JWT audience. When Cloud Scheduler targets the native Cloud Run URL, use that exact native URL here and in Cloud Scheduler. Empty only for local DX; required non-empty in production. |
+| `INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS` | Comma-separated Scheduler SA emails allowed to call `POST /api/internal/jobs/run`. Empty only for local DX; required in production.                                                                         |
+| `ENABLE_IN_PROCESS_SCHEDULERS`                | `true`/`false` (default `false`). Use `true` only for local Nest cron DX — keep `false` on Cloud Run.                                                                                                       |
+| `DATABASE_POOL_MAX`                           | Per-process `pg` pool max (default `10`). Keep low under Cloud Run scale-out with Neon.                                                                                                                     |
 
 Canonical API staging/production runbook: [`../CLOUD_RUN.md`](../CLOUD_RUN.md) (Cloud Run + Actions).
 Deploy index and frontend target (Cloudflare): [`../OPERATIONS.md`](../OPERATIONS.md),

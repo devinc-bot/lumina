@@ -15,6 +15,7 @@ const DASHBOARD_DEVELOPMENT_SERVER = {
   host: '0.0.0.0',
   hostname: 'dashboard.localhost',
   port: 3002,
+  inspectorPort: 9232,
   apiPath: '/api',
   apiTarget: 'http://localhost:3000',
 } as const
@@ -55,7 +56,10 @@ export default defineConfig(({ mode }) => {
   return {
     ...NODE_SSR_BUILD_CONFIG,
     plugins: [
-      cloudflare({ viteEnvironment: { name: 'ssr' } }),
+      cloudflare({
+        inspectorPort: DASHBOARD_DEVELOPMENT_SERVER.inspectorPort,
+        viteEnvironment: { name: 'ssr' },
+      }),
       tailwindcss(),
       tanstackStart({
         srcDirectory: 'app',

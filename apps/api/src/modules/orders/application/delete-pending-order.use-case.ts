@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common'
 import {
   deletePendingOrderByDocumentIdAndUserId,
+  findMercadoPagoConnectionById,
   findOrderByDocumentIdAndUserId,
   findPendingPurchaseCancellation,
   findUserIdByDocumentId,
@@ -15,6 +16,7 @@ import {
 import { ORDER_ERROR_CODE } from '@repo/i18n/constants'
 import { TranslationService } from '@repo/i18n/server'
 import { INVENTORY_RESERVATION_STATUS, PAYMENT_STATUS, PURCHASE_STATUS } from '@repo/types'
+import { decryptMercadoPagoCredential } from '../../mercado-pago/mercado-pago-credential-crypto'
 import type { MercadoPagoCheckoutProPort } from '../../mercado-pago/mercado-pago-checkout-pro.port'
 import { MERCADO_PAGO_CHECKOUT_PRO_PORT } from '../../mercado-pago/mercado-pago.tokens'
 
@@ -36,7 +38,14 @@ export class DeletePendingOrderUseCase {
     if (purchase) {
       try {
         if (purchase.payment.providerPreferenceId) {
-          await this.mercadoPagoCheckoutPro.expirePreference(purchase.payment.providerPreferenceId)
+          const accessToken = await this.getPaymentAccessToken(
+            purchase.payment.credentialAccessTokenEncrypted,
+            purchase.payment.organizationPaymentConnectionId
+          )
+          await this.mercadoPagoCheckoutPro.expirePreference(
+            purchase.payment.providerPreferenceId,
+            accessToken
+          )
         }
       } catch {
         throw new InternalServerErrorException(
@@ -83,5 +92,26 @@ export class DeletePendingOrderUseCase {
     }
 
     throw new InternalServerErrorException(this.ts.translateError(ORDER_ERROR_CODE.DELETE_FAILED))
+  }
+
+  private async getPaymentAccessToken(
+    credentialAccessTokenEncrypted: string | null | undefined,
+    organizationPaymentConnectionId: number | null
+  ): Promise<string> {
+    // A payment-attempt snapshot remains valid even when its organization reconnects later.
+    if (credentialAccessTokenEncrypted) {
+      return decryptMercadoPagoCredential(credentialAccessTokenEncrypted)
+    }
+
+    if (!organizationPaymentConnectionId) {
+      throw new Error('Marketplace payment credential snapshot is unavailable')
+    }
+
+    const connection = await findMercadoPagoConnectionById(organizationPaymentConnectionId)
+    if (!connection?.accessTokenEncrypted) {
+      throw new Error('Marketplace payment credential snapshot is unavailable')
+    }
+
+    return decryptMercadoPagoCredential(connection.accessTokenEncrypted)
   }
 }

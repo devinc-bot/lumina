@@ -25,7 +25,7 @@ function AuthCallbackPage() {
         saveAuthSession(await refreshAuthSession())
         await useSessionStore.getState().loadSession()
         const to = await resolvePostAuthPath(DASHBOARD_ROUTES.home())
-        await navigate({ to: to as '/dashboard' | '/legal-acceptance', replace: true })
+        await navigate({ to, replace: true })
       } catch {
         await navigate({
           to: DASHBOARD_ROUTES.login(),

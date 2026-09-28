@@ -47,6 +47,11 @@ complete, and never runs a seed. The deployment migrator container runs the same
 
 ## Isolated database tests
 
+Preview owner accounts missing an organization with `pnpm db:repair:owner-organizations`.
+Use `pnpm db:repair:owner-organizations --apply` to provision those organizations and memberships.
+The command uses `DATABASE_MIGRATION_URL`, reports counts only, preserves all existing memberships,
+and can be repeated safely. Owners without an account link are excluded.
+
 `DATABASE_TEST_URL` is reserved for an isolated, migrated PostgreSQL database used by database
 integration tests. Its database name must end in `_test` and it must differ from the runtime and
 migration URLs. It must never point to runtime, staging, or production data. Tests skip their

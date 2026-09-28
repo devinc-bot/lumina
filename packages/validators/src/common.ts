@@ -2,6 +2,8 @@ import { z } from 'zod'
 
 export const uuidSchema = z.uuid()
 
+export const booleanStringSchema = z.enum(['true', 'false']).transform((value) => value === 'true')
+
 /** URL-safe public identifier. UUIDs stay reserved for internal contracts. */
 export const slugSchema = z
   .string()

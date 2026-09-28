@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import { envSchema } from './env'
-import { apiConfigSchema, mailEnvSchema, uploadEnvSchema } from './env.schema'
+import { apiConfigSchema, mailEnvSchema, mercadoPagoEnvSchema, uploadEnvSchema } from './env.schema'
 import {
   RATE_LIMIT_POLICY_DEFAULTS,
   RATE_LIMIT_PROFILE,
@@ -26,6 +26,27 @@ test('mail env accepts AWS_REGION with empty paired AWS keys', () => {
     MAIL_SMOKE_TO: 'smoke@example.test',
   })
   expect(env).not.toHaveProperty('RESEND_API_KEY')
+})
+
+test('marketplace checkout does not require a legacy platform access token', () => {
+  const result = mercadoPagoEnvSchema.safeParse({
+    MERCADOPAGO_WEBHOOK_SECRET: 'marketplace-webhook-secret',
+    MERCADOPAGO_TEST_MODE: 'false',
+    MERCADOPAGO_MARKETPLACE_ENABLED: 'true',
+    MERCADOPAGO_MARKETPLACE_CLIENT_ID: 'marketplace-client-id',
+    MERCADOPAGO_MARKETPLACE_CLIENT_SECRET: 'marketplace-client-secret',
+    MERCADOPAGO_OAUTH_REDIRECT_URI: 'https://dashboard.lumina.test/callback',
+    MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY: 'a'.repeat(44),
+  })
+
+  expect(result.success).toBe(true)
+  if (result.success) {
+    expect(result.data.MERCADOPAGO_ACCESS_TOKEN).toBe('')
+  }
+})
+
+test('marketplace checkout does not configure an estimated provider fee globally', () => {
+  expect(mercadoPagoEnvSchema.shape).not.toHaveProperty('MERCADOPAGO_ESTIMATED_FEE_BPS')
 })
 
 test('mail env accepts both AWS access key and secret set together', () => {
@@ -224,16 +245,55 @@ test('defaults CORS origins to the three application URLs and accepts extra orig
   ])
 })
 
-test('accepts a Cloud Run API origin with Cloudflare frontend origins', () => {
+test('accepts the same-site custom API origin with Cloudflare frontend origins', () => {
   const result = apiConfigSchema.safeParse({
     ...validConfig,
-    API_PUBLIC_URL: 'https://lumina-api-staging-123.run.app',
+    API_PUBLIC_URL: 'https://api-staging.lumina-events.com',
     WEB_URL: 'https://staging.lumina-events.com',
-    DASHBOARD_URL: 'https://dash-staging.lumina-events.com',
+    DASHBOARD_URL: 'https://staging-dash.lumina-events.com',
     ADMIN_URL: 'https://admin-staging.lumina-events.com',
   })
 
   expect(result.success).toBe(true)
+})
+
+test('allows a cross-site Cloud Run API origin for Lumina frontends outside production', () => {
+  const result = apiConfigSchema.safeParse({
+    ...validConfig,
+    API_PUBLIC_URL: 'https://lumina-api-staging-w6oqqom2mq-rj.a.run.app',
+    WEB_URL: 'https://staging.lumina-events.com',
+    DASHBOARD_URL: 'https://staging-dash.lumina-events.com',
+    ADMIN_URL: 'https://admin-staging.lumina-events.com',
+    NODE_ENV: 'development',
+    TRUST_PROXY_HOPS: '0',
+  })
+
+  expect(result.success).toBe(true)
+})
+
+test('allows a cross-site API origin for Lumina frontends in test mode', () => {
+  const result = apiConfigSchema.safeParse({
+    ...validConfig,
+    API_PUBLIC_URL: 'https://lumina-api-staging-w6oqqom2mq-rj.a.run.app',
+    WEB_URL: 'https://staging.lumina-events.com',
+    DASHBOARD_URL: 'https://staging-dash.lumina-events.com',
+    ADMIN_URL: 'https://admin-staging.lumina-events.com',
+    NODE_ENV: 'test',
+  })
+
+  expect(result.success).toBe(true)
+})
+
+test('rejects a cross-site Cloud Run API origin for cookie-authenticated Lumina frontends in production', () => {
+  const result = apiConfigSchema.safeParse({
+    ...validConfig,
+    API_PUBLIC_URL: 'https://lumina-api-staging-w6oqqom2mq-rj.a.run.app',
+    WEB_URL: 'https://staging.lumina-events.com',
+    DASHBOARD_URL: 'https://staging-dash.lumina-events.com',
+    ADMIN_URL: 'https://admin-staging.lumina-events.com',
+  })
+
+  expect(result.success).toBe(false)
 })
 
 test('accepts public-suffix and IP-address origin combinations', () => {

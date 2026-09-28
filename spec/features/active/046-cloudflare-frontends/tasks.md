@@ -1,5 +1,11 @@
 # Tasks 046 - Cloudflare Frontends
 
+- [x] T11: Assign distinct local Worker inspector ports to web (9231), dashboard
+      (9232), and admin (9233); verify concurrent startup and configuration checks.
+      Verified concurrent Vite startup and all six HTTP/inspector listeners; type-check,
+      focused formatting, and diff checks passed. Lint reported an existing dashboard
+      `no-console` warning. No automated tests added (low-importance configuration change).
+
 - [x] T1: Resolve staging scope and product decisions in `spec.md` (Cloudflare
       Workers, one account, successful CI after a staging push, and all three frontends).
 - [x] T2: Complete `plan.md` with the Cloudflare Workers technical approach,
@@ -20,3 +26,6 @@
       under `deploy/`.
 - [ ] T9: Verify the three Worker builds and staging deployment behavior without
       exposing credentials or bundling non-public values.
+- [ ] T10: Migrate staging Cloud Run regional resources to `us-east1`, activate
+      `api-staging.lumina-events.com`, update API/OAuth/webhook/OIDC configuration, and verify
+      same-site Google session refresh from `staging-dash.lumina-events.com`.

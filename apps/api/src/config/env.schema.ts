@@ -1,4 +1,4 @@
-import { IMAGE_OPTIMIZATION, IMAGE_UPLOAD_MAX_BYTES } from '@repo/validators'
+import { booleanStringSchema, IMAGE_OPTIMIZATION, IMAGE_UPLOAD_MAX_BYTES } from '@repo/validators'
 import { z } from 'zod'
 import { RATE_LIMIT_POLICY_DEFAULTS, RATE_LIMIT_PROFILE } from './rate-limit.policy'
 
@@ -43,9 +43,17 @@ export const mailEnvSchema = z
   })
 
 export const mercadoPagoEnvSchema = z.object({
-  MERCADOPAGO_ACCESS_TOKEN: z.string(),
+  // Marketplace checkouts always use the connected organization's OAuth token.
+  // Keep this optional only while non-payment modules still load the shared config.
+  MERCADOPAGO_ACCESS_TOKEN: z.string().default(''),
   MERCADOPAGO_WEBHOOK_SECRET: z.string(),
-  MERCADOPAGO_TEST_MODE: z.string().transform((value) => value === 'true' || value === '1'),
+  MERCADOPAGO_TEST_MODE: booleanStringSchema.default(true),
+  MERCADOPAGO_MARKETPLACE_ENABLED: booleanStringSchema.default(false),
+  MERCADOPAGO_MARKETPLACE_CLIENT_ID: z.string().default(''),
+  MERCADOPAGO_MARKETPLACE_CLIENT_SECRET: z.string().default(''),
+  MERCADOPAGO_OAUTH_REDIRECT_URI: z.string().default(''),
+  MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY: z.string().default(''),
+  MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION: z.string().default('v1'),
 })
 
 export const uploadEnvSchema = z.object({
@@ -64,6 +72,8 @@ export const MODE = {
   PRODUCTION: 'production',
   TEST: 'test',
 } as const
+
+const LUMINA_EVENTS_DOMAIN = 'lumina-events.com'
 
 const positiveInt = (defaultValue: number) =>
   z.coerce.number().int().positive().default(defaultValue)
@@ -131,6 +141,12 @@ function hasNonEmptyServiceAccount(value: string): boolean {
     .some((entry) => entry.length > 0)
 }
 
+function isLuminaEventsOrigin(origin: string): boolean {
+  const hostname = new URL(origin).hostname
+
+  return hostname === LUMINA_EVENTS_DOMAIN || hostname.endsWith(`.${LUMINA_EVENTS_DOMAIN}`)
+}
+
 export const apiConfigSchema = z
   .object({
     PORT: z.coerce.number().default(3000),
@@ -147,13 +163,26 @@ export const apiConfigSchema = z
     NODE_ENV: z.enum([MODE.DEVELOPMENT, MODE.PRODUCTION, MODE.TEST]).default(MODE.DEVELOPMENT),
     INTERNAL_JOBS_OIDC_AUDIENCE: z.string().default(''),
     INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS: z.string().default(''),
-    ENABLE_IN_PROCESS_SCHEDULERS: z
-      .enum(['true', 'false'])
-      .default('false')
-      .transform((value) => value === 'true'),
+    ENABLE_IN_PROCESS_SCHEDULERS: booleanStringSchema.default(false),
     DATABASE_POOL_MAX: positiveInt(10),
   })
   .superRefine((config, context) => {
+    const applicationOrigins = [config.WEB_URL, config.DASHBOARD_URL, config.ADMIN_URL]
+    const hasLuminaEventsFrontend = applicationOrigins.some(isLuminaEventsOrigin)
+
+    if (
+      config.NODE_ENV === MODE.PRODUCTION &&
+      hasLuminaEventsFrontend &&
+      !isLuminaEventsOrigin(config.API_PUBLIC_URL)
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['API_PUBLIC_URL'],
+        message:
+          'API_PUBLIC_URL must use a lumina-events.com origin when a Lumina frontend uses that domain so refresh cookies remain same-site.',
+      })
+    }
+
     if (config.NODE_ENV === MODE.PRODUCTION && config.TRUST_PROXY_HOPS === 0) {
       context.addIssue({
         code: 'custom',

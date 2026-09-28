@@ -6,10 +6,26 @@ type Order = {
   externalOrderId: string | null
 }
 
+const repositorySpies = vi.hoisted(() => ({
+  findMercadoPagoConnectionById: vi.fn(),
+  releaseReservationOnce: vi.fn(),
+}))
+
 const state = vi.hoisted(() => ({
+  connection: null as { accessTokenEncrypted: string | null } | null,
   currentOrder: null as Order | null,
   deleteResult: false,
   initialOrder: null as Order | null,
+  pendingPurchase: null as {
+    reservation: { documentId: string }
+    payment: {
+      providerPreferenceId: string | null
+      credentialSource: string
+      organizationPaymentConnectionId: number | null
+      credentialAccessTokenEncrypted?: string | null
+    }
+  } | null,
+  releaseTransitioned: false,
   userId: null as number | null,
 }))
 let findOrderCallCount = 0
@@ -20,35 +36,53 @@ vi.mock('@repo/db', () => ({
     findOrderCallCount += 1
     return findOrderCallCount === 1 ? state.initialOrder : state.currentOrder
   },
-  findPendingPurchaseCancellation: async () => null,
+  findPendingPurchaseCancellation: async () => state.pendingPurchase,
+  findMercadoPagoConnectionById: (...args: unknown[]) =>
+    repositorySpies.findMercadoPagoConnectionById(...args),
   deletePendingOrderByDocumentIdAndUserId: async () => state.deleteResult,
-  releaseReservationOnce: async () => ({ transitioned: false }),
+  releaseReservationOnce: (...args: unknown[]) => repositorySpies.releaseReservationOnce(...args),
+}))
+
+vi.mock('../../mercado-pago/mercado-pago-credential-crypto', () => ({
+  decryptMercadoPagoCredential: (value: string) => `decrypted:${value}`,
 }))
 
 import { DeletePendingOrderUseCase } from './delete-pending-order.use-case.ts'
 
 function resetState({
+  connection = null,
   currentOrder,
   deleteResult,
   initialOrder,
+  pendingPurchase = null,
+  releaseTransitioned = false,
   userId = 1,
 }: {
+  connection?: { accessTokenEncrypted: string | null } | null
   currentOrder?: Order | null
   deleteResult: boolean
   initialOrder: Order | null
+  pendingPurchase?: typeof state.pendingPurchase
+  releaseTransitioned?: boolean
   userId?: number | null
 }) {
+  vi.clearAllMocks()
+  state.connection = connection
   state.currentOrder = currentOrder ?? initialOrder
   state.deleteResult = deleteResult
   state.initialOrder = initialOrder
+  state.pendingPurchase = pendingPurchase
+  state.releaseTransitioned = releaseTransitioned
   state.userId = userId
   findOrderCallCount = 0
+  repositorySpies.findMercadoPagoConnectionById.mockResolvedValue(connection)
+  repositorySpies.releaseReservationOnce.mockResolvedValue({ transitioned: releaseTransitioned })
 }
 
 function createUseCase({
   expirePreference,
 }: {
-  expirePreference: (preferenceId: string) => Promise<void>
+  expirePreference: (preferenceId: string, accessToken?: string) => Promise<void>
 }) {
   return new DeletePendingOrderUseCase(
     { translateError: (code: string) => code } as never,
@@ -125,4 +159,88 @@ test('rejects deletion when reconciliation completes the order concurrently', as
     name: 'ConflictException',
     message: 'order.DELETE_NOT_PENDING',
   })
+})
+
+test('uses the payment attempt credential snapshot after its organization reconnects or disconnects', async () => {
+  resetState({
+    initialOrder: null,
+    deleteResult: false,
+    connection: { accessTokenEncrypted: 'replacement-connection-token' },
+    pendingPurchase: {
+      reservation: { documentId: 'reservation-1' },
+      payment: {
+        providerPreferenceId: 'historical-preference',
+        credentialSource: 'organization_connection',
+        organizationPaymentConnectionId: 91,
+        credentialAccessTokenEncrypted: 'historical-attempt-token',
+      },
+    },
+    releaseTransitioned: true,
+  })
+  const expirePreference = vi.fn().mockResolvedValue(undefined)
+  const useCase = await createUseCase({ expirePreference })
+
+  await useCase.execute('buyer-1', 'purchase-1')
+
+  expect(expirePreference).toHaveBeenCalledWith(
+    'historical-preference',
+    'decrypted:historical-attempt-token'
+  )
+  expect(repositorySpies.findMercadoPagoConnectionById).not.toHaveBeenCalled()
+})
+
+test('uses the current organization connection only when a historical payment has no credential snapshot', async () => {
+  resetState({
+    initialOrder: null,
+    deleteResult: false,
+    connection: { accessTokenEncrypted: 'current-connection-token' },
+    pendingPurchase: {
+      reservation: { documentId: 'reservation-connection-fallback' },
+      payment: {
+        providerPreferenceId: 'connection-fallback-preference',
+        credentialSource: 'organization_connection',
+        organizationPaymentConnectionId: 91,
+        credentialAccessTokenEncrypted: null,
+      },
+    },
+    releaseTransitioned: true,
+  })
+  const expirePreference = vi.fn().mockResolvedValue(undefined)
+  const useCase = await createUseCase({ expirePreference })
+
+  await useCase.execute('buyer-1', 'purchase-connection-fallback')
+
+  expect(repositorySpies.findMercadoPagoConnectionById).toHaveBeenCalledWith(91)
+  expect(expirePreference).toHaveBeenCalledWith(
+    'connection-fallback-preference',
+    'decrypted:current-connection-token'
+  )
+})
+
+test('fails closed without releasing inventory when neither snapshot nor connection provides a credential', async () => {
+  resetState({
+    initialOrder: null,
+    deleteResult: false,
+    connection: null,
+    pendingPurchase: {
+      reservation: { documentId: 'reservation-no-credential' },
+      payment: {
+        providerPreferenceId: 'no-credential-preference',
+        credentialSource: 'organization_connection',
+        organizationPaymentConnectionId: 91,
+        credentialAccessTokenEncrypted: null,
+      },
+    },
+    releaseTransitioned: true,
+  })
+  const expirePreference = vi.fn()
+  const useCase = await createUseCase({ expirePreference })
+
+  await expect(useCase.execute('buyer-1', 'purchase-no-credential')).rejects.toMatchObject({
+    name: 'InternalServerErrorException',
+    message: 'order.DELETE_FAILED',
+  })
+
+  expect(expirePreference).not.toHaveBeenCalled()
+  expect(repositorySpies.releaseReservationOnce).not.toHaveBeenCalled()
 })
