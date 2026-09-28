@@ -31,6 +31,7 @@ import { useOwnerEventsForSelect } from '~/modules/tickets/queries/use-owner-eve
 import { TicketTypeCreateDialog } from '~/modules/ticket-types/components/ticket-type-create-dialog'
 import { useTicketTypes } from '~/modules/ticket-types/queries/use-ticket-type-queries'
 import { EMPTY_TICKET_FORM_VALUES } from '~/modules/tickets/utils/ticket-form.formatter'
+import { TicketCommercialBreakdown } from '~/modules/tickets/components/ticket-commercial-breakdown'
 
 export const TICKET_FORM_MODE = {
   CREATE: 'create',
@@ -531,6 +532,9 @@ export function TicketForm({
                   </div>
                 )
               }}
+            </form.Subscribe>
+            <form.Subscribe selector={(state) => state.values.price}>
+              {(price) => <TicketCommercialBreakdown price={price} />}
             </form.Subscribe>
           </FormSection>
         </form>

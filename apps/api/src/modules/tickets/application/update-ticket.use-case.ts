@@ -1,13 +1,23 @@
-import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common'
 import {
   findEventOwnedByOwnerDocumentId,
   findAvailableTicketTypeByDocumentId,
   findTicketWithRelationsOwnedByOwner,
   updateTicketByDocumentId,
+  findConnectedMercadoPagoConnectionByOrganizationId,
 } from '@repo/db'
 import { TranslationService } from '@repo/i18n/server'
 import type { TicketResponse } from '@repo/types'
 import type { UpdateTicketInput } from '@repo/validators'
+import { TICKET_ERROR_CODE } from '@repo/i18n'
+import { TICKET_STATUS } from '@repo/types'
+import { ENV } from '../../../config/env'
 import { toTicketResponse, toTicketUpsertInput } from '../mappers/tickets.mapper'
 
 @Injectable()
@@ -26,6 +36,17 @@ export class UpdateTicketUseCase {
     }
 
     const eventId = await this.resolveEventId(ownerDocumentId, input.eventId)
+    if (input.status === TICKET_STATUS.ACTIVE && ENV.MERCADOPAGO_MARKETPLACE_ENABLED) {
+      const event = await findEventOwnedByOwnerDocumentId(input.eventId, ownerDocumentId)
+      if (
+        !event ||
+        !(await findConnectedMercadoPagoConnectionByOrganizationId(event.organizationId))
+      ) {
+        throw new BadRequestException(
+          this.ts.translateError(TICKET_ERROR_CODE.MERCADO_PAGO_CONNECTION_REQUIRED)
+        )
+      }
+    }
     const ticketType = await findAvailableTicketTypeByDocumentId(
       input.ticketTypeId,
       ownerDocumentId

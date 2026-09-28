@@ -14,6 +14,7 @@ import { sql } from 'drizzle-orm'
 import { PAYMENT_ATTEMPT_STATUS, PAYMENT_PROVIDER } from '@repo/types/enums'
 import { createBaseColumns } from './base.ts'
 import { purchases } from './purchase.ts'
+import { organizationPaymentConnections } from './organization-payment-connection.ts'
 
 export const payments = pgTable(
   'payments',
@@ -35,12 +36,43 @@ export const payments = pgTable(
       .default(PAYMENT_ATTEMPT_STATUS.PENDING),
     amount: numeric('amount', { precision: 12, scale: 2, mode: 'number' }).notNull(),
     currency: varchar('currency', { length: 3 }).notNull(),
+    credentialSource: text('credential_source').notNull().default('organization_connection'),
+    organizationPaymentConnectionId: integer('organization_payment_connection_id').references(
+      () => organizationPaymentConnections.id
+    ),
+    providerSellerId: text('provider_seller_id'),
+    credentialAccessTokenEncrypted: text('credential_access_token_encrypted'),
+    credentialRefreshTokenEncrypted: text('credential_refresh_token_encrypted'),
+    credentialAccessTokenExpiresAt: timestamp('credential_access_token_expires_at', {
+      withTimezone: true,
+    }),
     providerPreferenceId: text('provider_preference_id'),
     providerPaymentId: text('provider_payment_id'),
     metadata: jsonb('metadata').$type<Record<string, unknown>>(),
     paidAt: timestamp('paid_at', { withTimezone: true }),
     reconciledAt: timestamp('reconciled_at', { withTimezone: true }),
     reconciliationError: text('reconciliation_error'),
+    providerFeeActualAmount: numeric('provider_fee_actual_amount', {
+      precision: 12,
+      scale: 2,
+      mode: 'number',
+    }),
+    providerFinancingFeeAmount: numeric('provider_financing_fee_amount', {
+      precision: 12,
+      scale: 2,
+      mode: 'number',
+    }),
+    providerTaxesAmount: numeric('provider_taxes_amount', {
+      precision: 12,
+      scale: 2,
+      mode: 'number',
+    }),
+    marketplaceFeeActualAmount: numeric('marketplace_fee_actual_amount', {
+      precision: 12,
+      scale: 2,
+      mode: 'number',
+    }),
+    ownerNetAmount: numeric('owner_net_amount', { precision: 12, scale: 2, mode: 'number' }),
   },
   (table) => [
     check('payments_amount_non_negative', sql`${table.amount} >= 0`),

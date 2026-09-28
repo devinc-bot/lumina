@@ -5,6 +5,7 @@ import {
   PAYMENT_PROVIDER,
   PURCHASE_STATUS,
 } from '@repo/types'
+import type { PaymentCredentialSource, PriceBreakdown } from '@repo/types'
 import { db } from '../../client.ts'
 import {
   inventoryReservations,
@@ -22,6 +23,13 @@ export type ReserveSingleTicketCheckoutInput = {
   currency: string
   expiresAt: Date
   now: Date
+  priceBreakdown: PriceBreakdown
+  credentialSource: PaymentCredentialSource
+  organizationPaymentConnectionId: number | null
+  providerSellerId: string | null
+  credentialAccessTokenEncrypted: string | null
+  credentialRefreshTokenEncrypted: string | null
+  credentialAccessTokenExpiresAt: Date | null
 }
 
 export type ReservedSingleTicketCheckout = {
@@ -85,12 +93,18 @@ export async function reserveSingleTicketCheckout(
     if (ticket.quantity - allocatedQuantity < input.quantity) return null
 
     const lineTotal = ticket.price * input.quantity
+    const toMajorAmount = (amount: number) => amount / 100
     const [purchase] = await tx
       .insert(purchases)
       .values({
         userId: input.userId,
         status: PURCHASE_STATUS.PENDING,
-        totalAmount: lineTotal,
+        totalAmount: toMajorAmount(input.priceBreakdown.totalAmount),
+        subtotalAmount: toMajorAmount(input.priceBreakdown.subtotalAmount),
+        platformFeeAmount: toMajorAmount(input.priceBreakdown.platformFeeAmount),
+        providerFeeQuotedAmount: toMajorAmount(input.priceBreakdown.providerFeeQuotedAmount),
+        pricingPolicyVersion: input.priceBreakdown.pricingPolicyVersion,
+        isProviderFeeEstimated: input.priceBreakdown.isProviderFeeEstimated ? 1 : 0,
         currency: input.currency,
         expiresAt: input.expiresAt,
         stateVersion: 0,
@@ -130,8 +144,14 @@ export async function reserveSingleTicketCheckout(
         purchaseId: purchase.id,
         provider: PAYMENT_PROVIDER.MERCADO_PAGO,
         status: PAYMENT_ATTEMPT_STATUS.PENDING,
-        amount: lineTotal,
+        amount: toMajorAmount(input.priceBreakdown.totalAmount),
         currency: input.currency,
+        credentialSource: input.credentialSource,
+        organizationPaymentConnectionId: input.organizationPaymentConnectionId,
+        providerSellerId: input.providerSellerId,
+        credentialAccessTokenEncrypted: input.credentialAccessTokenEncrypted,
+        credentialRefreshTokenEncrypted: input.credentialRefreshTokenEncrypted,
+        credentialAccessTokenExpiresAt: input.credentialAccessTokenExpiresAt,
         updatedAt: input.now,
       })
       .returning()

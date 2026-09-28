@@ -52,8 +52,8 @@ Suggested naming (one `PROJECT_ID`):
 GitHub Environments `staging` / `production` hold env-specific vars (service names,
 Scheduler name/SA, stable API OIDC audience, and runtime SA) and WIF provider config.
 **Production** Environment requires manual reviewers before deploy; staging does not. Trigger:
-successful `CI` workflow completion on the matching branch; the deploy workflow checks out the
-verified workflow-run SHA.
+successful `CI` workflow completion after a push to the matching branch; the deploy workflow
+checks out the verified workflow-run SHA. CI also validates pull requests without deploying.
 
 ## Internal Job Catalog
 

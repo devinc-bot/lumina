@@ -50,6 +50,45 @@
     }
   },
   "owner": {
+    "mercadoPago": {
+      "title": "Cobros con Mercado Pago",
+      "description": "Vinculá la cuenta que recibirá directamente el dinero de tus ventas.",
+      "loading": "Consultando conexión…",
+      "connected": "Cuenta de Mercado Pago vinculada",
+      "disconnected": "Cuenta de Mercado Pago sin vincular",
+      "connectedHint": "Las nuevas ventas se acreditarán en tu cuenta conectada.",
+      "disconnectedHint": "Conectá tu cuenta antes de activar o vender entradas.",
+      "connect": "Conectar Mercado Pago",
+      "reconnect": "Volver a conectar Mercado Pago",
+      "disconnect": "Desconectar",
+      "error": "No pudimos actualizar la conexión de Mercado Pago.",
+      "settlementTerm": {
+        "label": "Cuándo se acredita el dinero",
+        "hint": "Elegí el mismo plazo que configuraste en Mercado Pago. Este porcentaje se usa solo para estimar el cargo; el importe final puede variar.",
+        "options": {
+          "instant": "Al instante ({rate}%)",
+          "10_days": "En 10 días ({rate}%)",
+          "18_days": "En 18 días ({rate}%)",
+          "35_days": "En 35 días ({rate}%)"
+        }
+      },
+      "status": {
+        "connected": "Cuenta de Mercado Pago vinculada",
+        "connecting": "Estamos vinculando tu cuenta de Mercado Pago",
+        "refreshFailed": "No pudimos actualizar la conexión de Mercado Pago",
+        "reconnectRequired": "Tenés que volver a vincular Mercado Pago",
+        "disconnectPending": "La desconexión de Mercado Pago está pendiente",
+        "disconnected": "Cuenta de Mercado Pago sin vincular"
+      },
+      "hint": {
+        "connected": "Las nuevas ventas se acreditarán en tu cuenta conectada.",
+        "connecting": "Terminá la autorización en Mercado Pago para habilitar ventas.",
+        "refreshFailed": "Volvé a conectar tu cuenta antes de activar o vender entradas.",
+        "reconnectRequired": "Volvé a conectar tu cuenta antes de activar o vender entradas.",
+        "disconnectPending": "Las ventas nuevas permanecen bloqueadas mientras se completa la desconexión.",
+        "disconnected": "Conectá tu cuenta antes de activar o vender entradas."
+      }
+    },
     "page": {
       "title": "Configuración",
       "description": "Tu perfil, en un solo lugar."

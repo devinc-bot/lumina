@@ -50,6 +50,45 @@
     }
   },
   "owner": {
+    "mercadoPago": {
+      "title": "Mercado Pago payments",
+      "description": "Connect the account that will receive proceeds directly from your sales.",
+      "loading": "Checking connection…",
+      "connected": "Mercado Pago account connected",
+      "disconnected": "Mercado Pago account not connected",
+      "connectedHint": "New sales will be credited to your connected account.",
+      "disconnectedHint": "Connect your account before activating or selling tickets.",
+      "connect": "Connect Mercado Pago",
+      "reconnect": "Reconnect Mercado Pago",
+      "disconnect": "Disconnect",
+      "error": "We could not update the Mercado Pago connection.",
+      "settlementTerm": {
+        "label": "When funds are released",
+        "hint": "Choose the same term configured in Mercado Pago. This percentage is only used to estimate the fee; the final amount may vary.",
+        "options": {
+          "instant": "Instant ({rate}%)",
+          "10_days": "In 10 days ({rate}%)",
+          "18_days": "In 18 days ({rate}%)",
+          "35_days": "In 35 days ({rate}%)"
+        }
+      },
+      "status": {
+        "connected": "Mercado Pago account connected",
+        "connecting": "Connecting your Mercado Pago account",
+        "refreshFailed": "We could not refresh the Mercado Pago connection",
+        "reconnectRequired": "You need to reconnect Mercado Pago",
+        "disconnectPending": "Mercado Pago disconnection is pending",
+        "disconnected": "Mercado Pago account not connected"
+      },
+      "hint": {
+        "connected": "New sales will be credited to your connected account.",
+        "connecting": "Finish authorization in Mercado Pago to enable sales.",
+        "refreshFailed": "Reconnect your account before activating or selling tickets.",
+        "reconnectRequired": "Reconnect your account before activating or selling tickets.",
+        "disconnectPending": "New sales remain blocked while the disconnection completes.",
+        "disconnected": "Connect your account before activating or selling tickets."
+      }
+    },
     "page": {
       "title": "Settings",
       "description": "Your profile, in one place."

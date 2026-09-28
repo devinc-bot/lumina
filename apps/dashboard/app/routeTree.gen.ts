@@ -9,48 +9,34 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppRouteImport } from './routes/_app'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as NameTokenRouteImport } from './routes/$name.$token'
-import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
-import { Route as AppLegalAcceptanceRouteImport } from './routes/_app/legal-acceptance'
-import { Route as AppQrTicketRouteImport } from './routes/_app/qr-ticket'
-import { Route as AppSalesRouteImport } from './routes/_app/sales'
-import { Route as AppSettingsRouteImport } from './routes/_app/settings'
-import { Route as AppStaffRouteImport } from './routes/_app/staff'
-import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegisterConfirmRouteImport } from './routes/register_.confirm'
-import { Route as AppEventsIndexRouteImport } from './routes/_app/events/index'
-import { Route as AppEventsNewRouteImport } from './routes/_app/events/new'
-import { Route as AppLocationsIndexRouteImport } from './routes/_app/locations/index'
-import { Route as AppLocationsNewRouteImport } from './routes/_app/locations/new'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as AppStaffRouteImport } from './routes/_app/staff'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppSalesRouteImport } from './routes/_app/sales'
+import { Route as AppQrTicketRouteImport } from './routes/_app/qr-ticket'
+import { Route as AppLegalAcceptanceRouteImport } from './routes/_app/legal-acceptance'
+import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as NameTokenRouteImport } from './routes/$name.$token'
 import { Route as AppTicketsIndexRouteImport } from './routes/_app/tickets/index'
+import { Route as AppLocationsIndexRouteImport } from './routes/_app/locations/index'
+import { Route as AppEventsIndexRouteImport } from './routes/_app/events/index'
 import { Route as AppTicketsNewRouteImport } from './routes/_app/tickets/new'
-import { Route as AppEventsDocumentIdEditRouteImport } from './routes/_app/events/$documentId/edit'
-import { Route as AppLocationsDocumentIdEditRouteImport } from './routes/_app/locations/$documentId/edit'
+import { Route as AppLocationsNewRouteImport } from './routes/_app/locations/new'
+import { Route as AppEventsNewRouteImport } from './routes/_app/events/new'
 import { Route as AppTicketsDocumentIdEditRouteImport } from './routes/_app/tickets/$documentId/edit'
+import { Route as AppLocationsDocumentIdEditRouteImport } from './routes/_app/locations/$documentId/edit'
+import { Route as AppEventsDocumentIdEditRouteImport } from './routes/_app/events/$documentId/edit'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppRoute = AppRouteImport.update({
-  id: '/_app',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -58,49 +44,23 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NameTokenRoute = NameTokenRouteImport.update({
-  id: '/$name/$token',
-  path: '/$name/$token',
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppDashboardRoute = AppDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AppRoute,
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AppLegalAcceptanceRoute = AppLegalAcceptanceRouteImport.update({
-  id: '/legal-acceptance',
-  path: '/legal-acceptance',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppQrTicketRoute = AppQrTicketRouteImport.update({
-  id: '/qr-ticket',
-  path: '/qr-ticket',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppSalesRoute = AppSalesRouteImport.update({
-  id: '/sales',
-  path: '/sales',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppSettingsRoute = AppSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppStaffRoute = AppStaffRouteImport.update({
-  id: '/staff',
-  path: '/staff',
-  getParentRoute: () => AppRoute,
-} as any)
-const AuthCallbackRoute = AuthCallbackRouteImport.update({
-  id: '/auth/callback',
-  path: '/auth/callback',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterConfirmRoute = RegisterConfirmRouteImport.update({
@@ -108,14 +68,49 @@ const RegisterConfirmRoute = RegisterConfirmRouteImport.update({
   path: '/register/confirm',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppEventsIndexRoute = AppEventsIndexRouteImport.update({
-  id: '/events/',
-  path: '/events/',
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppStaffRoute = AppStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
   getParentRoute: () => AppRoute,
 } as any)
-const AppEventsNewRoute = AppEventsNewRouteImport.update({
-  id: '/events/new',
-  path: '/events/new',
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSalesRoute = AppSalesRouteImport.update({
+  id: '/sales',
+  path: '/sales',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppQrTicketRoute = AppQrTicketRouteImport.update({
+  id: '/qr-ticket',
+  path: '/qr-ticket',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLegalAcceptanceRoute = AppLegalAcceptanceRouteImport.update({
+  id: '/legal-acceptance',
+  path: '/legal-acceptance',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const NameTokenRoute = NameTokenRouteImport.update({
+  id: '/$name/$token',
+  path: '/$name/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppTicketsIndexRoute = AppTicketsIndexRouteImport.update({
+  id: '/tickets/',
+  path: '/tickets/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppLocationsIndexRoute = AppLocationsIndexRouteImport.update({
@@ -123,14 +118,9 @@ const AppLocationsIndexRoute = AppLocationsIndexRouteImport.update({
   path: '/locations/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppLocationsNewRoute = AppLocationsNewRouteImport.update({
-  id: '/locations/new',
-  path: '/locations/new',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppTicketsIndexRoute = AppTicketsIndexRouteImport.update({
-  id: '/tickets/',
-  path: '/tickets/',
+const AppEventsIndexRoute = AppEventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppTicketsNewRoute = AppTicketsNewRouteImport.update({
@@ -138,23 +128,33 @@ const AppTicketsNewRoute = AppTicketsNewRouteImport.update({
   path: '/tickets/new',
   getParentRoute: () => AppRoute,
 } as any)
-const AppEventsDocumentIdEditRoute = AppEventsDocumentIdEditRouteImport.update({
-  id: '/events/$documentId/edit',
-  path: '/events/$documentId/edit',
+const AppLocationsNewRoute = AppLocationsNewRouteImport.update({
+  id: '/locations/new',
+  path: '/locations/new',
   getParentRoute: () => AppRoute,
 } as any)
-const AppLocationsDocumentIdEditRoute =
-  AppLocationsDocumentIdEditRouteImport.update({
-    id: '/locations/$documentId/edit',
-    path: '/locations/$documentId/edit',
-    getParentRoute: () => AppRoute,
-  } as any)
+const AppEventsNewRoute = AppEventsNewRouteImport.update({
+  id: '/events/new',
+  path: '/events/new',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppTicketsDocumentIdEditRoute =
   AppTicketsDocumentIdEditRouteImport.update({
     id: '/tickets/$documentId/edit',
     path: '/tickets/$documentId/edit',
     getParentRoute: () => AppRoute,
   } as any)
+const AppLocationsDocumentIdEditRoute =
+  AppLocationsDocumentIdEditRouteImport.update({
+    id: '/locations/$documentId/edit',
+    path: '/locations/$documentId/edit',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppEventsDocumentIdEditRoute = AppEventsDocumentIdEditRouteImport.update({
+  id: '/events/$documentId/edit',
+  path: '/events/$documentId/edit',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -326,32 +326,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app': {
-      id: '/_app'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -361,67 +340,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/$name/$token': {
-      id: '/$name/$token'
-      path: '/$name/$token'
-      fullPath: '/$name/$token'
-      preLoaderRoute: typeof NameTokenRouteImport
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/dashboard': {
-      id: '/_app/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AppDashboardRouteImport
-      parentRoute: typeof AppRoute
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_app/legal-acceptance': {
-      id: '/_app/legal-acceptance'
-      path: '/legal-acceptance'
-      fullPath: '/legal-acceptance'
-      preLoaderRoute: typeof AppLegalAcceptanceRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/qr-ticket': {
-      id: '/_app/qr-ticket'
-      path: '/qr-ticket'
-      fullPath: '/qr-ticket'
-      preLoaderRoute: typeof AppQrTicketRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/sales': {
-      id: '/_app/sales'
-      path: '/sales'
-      fullPath: '/sales'
-      preLoaderRoute: typeof AppSalesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/settings': {
-      id: '/_app/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AppSettingsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/staff': {
-      id: '/_app/staff'
-      path: '/staff'
-      fullPath: '/staff'
-      preLoaderRoute: typeof AppStaffRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/auth/callback': {
-      id: '/auth/callback'
-      path: '/auth/callback'
-      fullPath: '/auth/callback'
-      preLoaderRoute: typeof AuthCallbackRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register_/confirm': {
@@ -431,18 +375,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterConfirmRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/events/': {
-      id: '/_app/events/'
-      path: '/events'
-      fullPath: '/events/'
-      preLoaderRoute: typeof AppEventsIndexRouteImport
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/staff': {
+      id: '/_app/staff'
+      path: '/staff'
+      fullPath: '/staff'
+      preLoaderRoute: typeof AppStaffRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/events/new': {
-      id: '/_app/events/new'
-      path: '/events/new'
-      fullPath: '/events/new'
-      preLoaderRoute: typeof AppEventsNewRouteImport
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/sales': {
+      id: '/_app/sales'
+      path: '/sales'
+      fullPath: '/sales'
+      preLoaderRoute: typeof AppSalesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/qr-ticket': {
+      id: '/_app/qr-ticket'
+      path: '/qr-ticket'
+      fullPath: '/qr-ticket'
+      preLoaderRoute: typeof AppQrTicketRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/legal-acceptance': {
+      id: '/_app/legal-acceptance'
+      path: '/legal-acceptance'
+      fullPath: '/legal-acceptance'
+      preLoaderRoute: typeof AppLegalAcceptanceRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/$name/$token': {
+      id: '/$name/$token'
+      path: '/$name/$token'
+      fullPath: '/$name/$token'
+      preLoaderRoute: typeof NameTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/tickets/': {
+      id: '/_app/tickets/'
+      path: '/tickets'
+      fullPath: '/tickets/'
+      preLoaderRoute: typeof AppTicketsIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/locations/': {
@@ -452,18 +445,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppLocationsIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/locations/new': {
-      id: '/_app/locations/new'
-      path: '/locations/new'
-      fullPath: '/locations/new'
-      preLoaderRoute: typeof AppLocationsNewRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/tickets/': {
-      id: '/_app/tickets/'
-      path: '/tickets'
-      fullPath: '/tickets/'
-      preLoaderRoute: typeof AppTicketsIndexRouteImport
+    '/_app/events/': {
+      id: '/_app/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof AppEventsIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/tickets/new': {
@@ -473,11 +459,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTicketsNewRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/events/$documentId/edit': {
-      id: '/_app/events/$documentId/edit'
-      path: '/events/$documentId/edit'
-      fullPath: '/events/$documentId/edit'
-      preLoaderRoute: typeof AppEventsDocumentIdEditRouteImport
+    '/_app/locations/new': {
+      id: '/_app/locations/new'
+      path: '/locations/new'
+      fullPath: '/locations/new'
+      preLoaderRoute: typeof AppLocationsNewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/events/new': {
+      id: '/_app/events/new'
+      path: '/events/new'
+      fullPath: '/events/new'
+      preLoaderRoute: typeof AppEventsNewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/tickets/$documentId/edit': {
+      id: '/_app/tickets/$documentId/edit'
+      path: '/tickets/$documentId/edit'
+      fullPath: '/tickets/$documentId/edit'
+      preLoaderRoute: typeof AppTicketsDocumentIdEditRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/locations/$documentId/edit': {
@@ -487,11 +487,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppLocationsDocumentIdEditRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/tickets/$documentId/edit': {
-      id: '/_app/tickets/$documentId/edit'
-      path: '/tickets/$documentId/edit'
-      fullPath: '/tickets/$documentId/edit'
-      preLoaderRoute: typeof AppTicketsDocumentIdEditRouteImport
+    '/_app/events/$documentId/edit': {
+      id: '/_app/events/$documentId/edit'
+      path: '/events/$documentId/edit'
+      fullPath: '/events/$documentId/edit'
+      preLoaderRoute: typeof AppEventsDocumentIdEditRouteImport
       parentRoute: typeof AppRoute
     }
   }

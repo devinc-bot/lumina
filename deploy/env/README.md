@@ -44,8 +44,9 @@ The following runtime values are secrets and must not be supplied as Docker buil
 - `GOOGLE_CLIENT_SECRET`
 - `AWS_ACCESS_KEY_ID` (when set; must be paired with `AWS_SECRET_ACCESS_KEY`)
 - `AWS_SECRET_ACCESS_KEY` (when set; must be paired with `AWS_ACCESS_KEY_ID`)
-- `MERCADOPAGO_ACCESS_TOKEN`
 - `MERCADOPAGO_WEBHOOK_SECRET`
+- `MERCADOPAGO_MARKETPLACE_CLIENT_SECRET`
+- `MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY`
 - `R2_ACCESS_KEY_ID`
 - `R2_SECRET_ACCESS_KEY`
 
@@ -65,6 +66,17 @@ Each omitted pair uses the API schema default. Counters are per API process unti
 exists; keep edge rate limiting on Caddy, the CDN, or a WAF for cluster-wide protection.
 
 ## Internal jobs / Cloud Run (feature 042)
+
+## Mercado Pago marketplace
+
+`MERCADOPAGO_MARKETPLACE_ENABLED` is a rollout flag. Keep it `false` until the marketplace
+application, OAuth callback, webhook signature, and separate seller/buyer sandbox flow have been
+validated. `MERCADOPAGO_MARKETPLACE_CLIENT_ID`, `MERCADOPAGO_OAUTH_REDIRECT_URI`,
+`MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION` are runtime configuration. The client secret and
+encryption key are secrets. Seller access/refresh tokens are persisted encrypted and must never be
+configured as environment variables. Each owner records their Mercado Pago settlement option in
+Lumina so quotes can estimate the provider fee. See
+[`docs/mercado-pago-marketplace-runbook.md`](../../docs/mercado-pago-marketplace-runbook.md).
 
 These runtime variables configure Nest in-process schedulers and the Cloud Scheduler OIDC surface.
 They belong in API runtime files (and Secret Manager on Cloud Run), not in frontend build env.

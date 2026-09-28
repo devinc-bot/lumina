@@ -9,48 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppRouteImport } from './routes/_app'
-import { Route as PublicRouteImport } from './routes/_public'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as AppLegalAcceptanceRouteImport } from './routes/_app/legal-acceptance'
-import { Route as AppOrdersRouteImport } from './routes/_app/orders'
-import { Route as AppSettingsRouteImport } from './routes/_app/settings'
-import { Route as AppTicketsRouteImport } from './routes/_app/tickets'
-import { Route as PublicEventsRouteImport } from './routes/_public/events'
-import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as PublicRouteImport } from './routes/_public'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegisterConfirmRouteImport } from './routes/register_.confirm'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as PublicEventsRouteImport } from './routes/_public/events'
+import { Route as AppTicketsRouteImport } from './routes/_app/tickets'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppOrdersRouteImport } from './routes/_app/orders'
+import { Route as AppLegalAcceptanceRouteImport } from './routes/_app/legal-acceptance'
 import { Route as PublicEventsIndexRouteImport } from './routes/_public/events.index'
-import { Route as PublicEventsSlugRouteImport } from './routes/_public/events.$slug'
-import { Route as PublicOrganizationsSlugRouteImport } from './routes/_public/organizations.$slug'
-import { Route as CheckoutOrderIdErrorRouteImport } from './routes/checkout.$orderId.error'
-import { Route as CheckoutOrderIdPendingRouteImport } from './routes/checkout.$orderId.pending'
 import { Route as CheckoutOrderIdSuccessRouteImport } from './routes/checkout.$orderId.success'
+import { Route as CheckoutOrderIdPendingRouteImport } from './routes/checkout.$orderId.pending'
+import { Route as CheckoutOrderIdErrorRouteImport } from './routes/checkout.$orderId.error'
+import { Route as PublicOrganizationsSlugRouteImport } from './routes/_public/organizations.$slug'
+import { Route as PublicEventsSlugRouteImport } from './routes/_public/events.$slug'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppRoute = AppRouteImport.update({
-  id: '/_app',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PublicRoute = PublicRouteImport.update({
-  id: '/_public',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -58,39 +40,27 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppLegalAcceptanceRoute = AppLegalAcceptanceRouteImport.update({
-  id: '/legal-acceptance',
-  path: '/legal-acceptance',
-  getParentRoute: () => AppRoute,
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AppOrdersRoute = AppOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => AppRoute,
+const PublicRoute = PublicRouteImport.update({
+  id: '/_public',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AppSettingsRoute = AppSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AppRoute,
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AppTicketsRoute = AppTicketsRouteImport.update({
-  id: '/tickets',
-  path: '/tickets',
-  getParentRoute: () => AppRoute,
-} as any)
-const PublicEventsRoute = PublicEventsRouteImport.update({
-  id: '/events',
-  path: '/events',
-  getParentRoute: () => PublicRoute,
-} as any)
-const AuthCallbackRoute = AuthCallbackRouteImport.update({
-  id: '/auth/callback',
-  path: '/auth/callback',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterConfirmRoute = RegisterConfirmRouteImport.update({
@@ -98,24 +68,44 @@ const RegisterConfirmRoute = RegisterConfirmRouteImport.update({
   path: '/register/confirm',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicEventsRoute = PublicEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => PublicRoute,
+} as any)
+const AppTicketsRoute = AppTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOrdersRoute = AppOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLegalAcceptanceRoute = AppLegalAcceptanceRouteImport.update({
+  id: '/legal-acceptance',
+  path: '/legal-acceptance',
+  getParentRoute: () => AppRoute,
+} as any)
 const PublicEventsIndexRoute = PublicEventsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PublicEventsRoute,
 } as any)
-const PublicEventsSlugRoute = PublicEventsSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => PublicEventsRoute,
-} as any)
-const PublicOrganizationsSlugRoute = PublicOrganizationsSlugRouteImport.update({
-  id: '/organizations/$slug',
-  path: '/organizations/$slug',
-  getParentRoute: () => PublicRoute,
-} as any)
-const CheckoutOrderIdErrorRoute = CheckoutOrderIdErrorRouteImport.update({
-  id: '/checkout/$orderId/error',
-  path: '/checkout/$orderId/error',
+const CheckoutOrderIdSuccessRoute = CheckoutOrderIdSuccessRouteImport.update({
+  id: '/checkout/$orderId/success',
+  path: '/checkout/$orderId/success',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutOrderIdPendingRoute = CheckoutOrderIdPendingRouteImport.update({
@@ -123,10 +113,20 @@ const CheckoutOrderIdPendingRoute = CheckoutOrderIdPendingRouteImport.update({
   path: '/checkout/$orderId/pending',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CheckoutOrderIdSuccessRoute = CheckoutOrderIdSuccessRouteImport.update({
-  id: '/checkout/$orderId/success',
-  path: '/checkout/$orderId/success',
+const CheckoutOrderIdErrorRoute = CheckoutOrderIdErrorRouteImport.update({
+  id: '/checkout/$orderId/error',
+  path: '/checkout/$orderId/error',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PublicOrganizationsSlugRoute = PublicOrganizationsSlugRouteImport.update({
+  id: '/organizations/$slug',
+  path: '/organizations/$slug',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicEventsSlugRoute = PublicEventsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => PublicEventsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -272,39 +272,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app': {
-      id: '/_app'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_public': {
-      id: '/_public'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof PublicRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -314,53 +286,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/legal-acceptance': {
-      id: '/_app/legal-acceptance'
-      path: '/legal-acceptance'
-      fullPath: '/legal-acceptance'
-      preLoaderRoute: typeof AppLegalAcceptanceRouteImport
-      parentRoute: typeof AppRoute
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_app/orders': {
-      id: '/_app/orders'
-      path: '/orders'
-      fullPath: '/orders'
-      preLoaderRoute: typeof AppOrdersRouteImport
-      parentRoute: typeof AppRoute
+    '/_public': {
+      id: '/_public'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof PublicRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_app/settings': {
-      id: '/_app/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AppSettingsRouteImport
-      parentRoute: typeof AppRoute
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_app/tickets': {
-      id: '/_app/tickets'
-      path: '/tickets'
-      fullPath: '/tickets'
-      preLoaderRoute: typeof AppTicketsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_public/events': {
-      id: '/_public/events'
-      path: '/events'
-      fullPath: '/events'
-      preLoaderRoute: typeof PublicEventsRouteImport
-      parentRoute: typeof PublicRoute
-    }
-    '/auth/callback': {
-      id: '/auth/callback'
-      path: '/auth/callback'
-      fullPath: '/auth/callback'
-      preLoaderRoute: typeof AuthCallbackRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register_/confirm': {
@@ -370,6 +328,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterConfirmRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public/events': {
+      id: '/_public/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof PublicEventsRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_app/tickets': {
+      id: '/_app/tickets'
+      path: '/tickets'
+      fullPath: '/tickets'
+      preLoaderRoute: typeof AppTicketsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/orders': {
+      id: '/_app/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof AppOrdersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/legal-acceptance': {
+      id: '/_app/legal-acceptance'
+      path: '/legal-acceptance'
+      fullPath: '/legal-acceptance'
+      preLoaderRoute: typeof AppLegalAcceptanceRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_public/events/': {
       id: '/_public/events/'
       path: '/'
@@ -377,25 +377,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicEventsIndexRouteImport
       parentRoute: typeof PublicEventsRoute
     }
-    '/_public/events/$slug': {
-      id: '/_public/events/$slug'
-      path: '/$slug'
-      fullPath: '/events/$slug'
-      preLoaderRoute: typeof PublicEventsSlugRouteImport
-      parentRoute: typeof PublicEventsRoute
-    }
-    '/_public/organizations/$slug': {
-      id: '/_public/organizations/$slug'
-      path: '/organizations/$slug'
-      fullPath: '/organizations/$slug'
-      preLoaderRoute: typeof PublicOrganizationsSlugRouteImport
-      parentRoute: typeof PublicRoute
-    }
-    '/checkout/$orderId/error': {
-      id: '/checkout/$orderId/error'
-      path: '/checkout/$orderId/error'
-      fullPath: '/checkout/$orderId/error'
-      preLoaderRoute: typeof CheckoutOrderIdErrorRouteImport
+    '/checkout/$orderId/success': {
+      id: '/checkout/$orderId/success'
+      path: '/checkout/$orderId/success'
+      fullPath: '/checkout/$orderId/success'
+      preLoaderRoute: typeof CheckoutOrderIdSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout/$orderId/pending': {
@@ -405,12 +391,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutOrderIdPendingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/checkout/$orderId/success': {
-      id: '/checkout/$orderId/success'
-      path: '/checkout/$orderId/success'
-      fullPath: '/checkout/$orderId/success'
-      preLoaderRoute: typeof CheckoutOrderIdSuccessRouteImport
+    '/checkout/$orderId/error': {
+      id: '/checkout/$orderId/error'
+      path: '/checkout/$orderId/error'
+      fullPath: '/checkout/$orderId/error'
+      preLoaderRoute: typeof CheckoutOrderIdErrorRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_public/organizations/$slug': {
+      id: '/_public/organizations/$slug'
+      path: '/organizations/$slug'
+      fullPath: '/organizations/$slug'
+      preLoaderRoute: typeof PublicOrganizationsSlugRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/events/$slug': {
+      id: '/_public/events/$slug'
+      path: '/$slug'
+      fullPath: '/events/$slug'
+      preLoaderRoute: typeof PublicEventsSlugRouteImport
+      parentRoute: typeof PublicEventsRoute
     }
   }
 }

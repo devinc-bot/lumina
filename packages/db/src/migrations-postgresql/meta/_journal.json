@@ -85,6 +85,34 @@
       "when": 1789149600000,
       "tag": "20260911180000_drop_domain_outbox_events",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1790251200000,
+      "tag": "20260924120000_mercado_pago_marketplace",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790341200000,
+      "tag": "20260925130000_mercado_pago_oauth_pkce",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1790424000000,
+      "tag": "20260926120000_remove_legacy_payment_credential_default",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1790427600000,
+      "tag": "20260926130000_mercado_pago_settlement_term",
+      "breakpoints": true
     }
   ]
 }

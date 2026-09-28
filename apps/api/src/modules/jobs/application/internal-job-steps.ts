@@ -7,6 +7,7 @@ export const INTERNAL_JOB_STEP = {
   CLEANUP_PASSWORD_RESET_TOKENS: 'cleanup-password-reset-tokens',
   CLEANUP_ACCOUNT_SESSIONS: 'cleanup-account-sessions',
   CLEANUP_STAFF_INVITATIONS: 'cleanup-staff-invitations',
+  CLEANUP_MERCADO_PAGO_OAUTH_STATES: 'cleanup-mercado-pago-oauth-states',
 } as const
 
 export type InternalJobStepName = (typeof INTERNAL_JOB_STEP)[keyof typeof INTERNAL_JOB_STEP]
@@ -20,4 +21,5 @@ export const INTERNAL_JOB_STEP_ORDER = [
   INTERNAL_JOB_STEP.CLEANUP_PASSWORD_RESET_TOKENS,
   INTERNAL_JOB_STEP.CLEANUP_ACCOUNT_SESSIONS,
   INTERNAL_JOB_STEP.CLEANUP_STAFF_INVITATIONS,
+  INTERNAL_JOB_STEP.CLEANUP_MERCADO_PAGO_OAUTH_STATES,
 ] as const satisfies readonly InternalJobStepName[]

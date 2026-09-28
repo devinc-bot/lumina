@@ -31,6 +31,15 @@ export const purchases = pgTable(
       .notNull()
       .default(PURCHASE_STATUS.PENDING),
     totalAmount: numeric('total_amount', { precision: 12, scale: 2, mode: 'number' }).notNull(),
+    subtotalAmount: numeric('subtotal_amount', { precision: 12, scale: 2, mode: 'number' }),
+    platformFeeAmount: numeric('platform_fee_amount', { precision: 12, scale: 2, mode: 'number' }),
+    providerFeeQuotedAmount: numeric('provider_fee_quoted_amount', {
+      precision: 12,
+      scale: 2,
+      mode: 'number',
+    }),
+    pricingPolicyVersion: varchar('pricing_policy_version', { length: 64 }),
+    isProviderFeeEstimated: integer('is_provider_fee_estimated'),
     currency: varchar('currency', { length: 3 }).notNull(),
     expiresAt: timestamp('expires_at', { withTimezone: true }),
     confirmedAt: timestamp('confirmed_at', { withTimezone: true }),

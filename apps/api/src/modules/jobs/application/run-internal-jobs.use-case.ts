@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import {
   deleteApiErrorRecordsBefore,
   deleteExpiredAndCancelledInvitations,
+  deleteExpiredMercadoPagoOAuthStatesBefore,
   deleteExpiredOrRevokedAccountSessionsBefore,
   deleteExpiredOwnerRegistrationTokens,
   deleteExpiredPasswordResetTokens,
@@ -21,6 +22,7 @@ import { runInternalJobPipeline, type InternalJobPipelineResult } from './run-in
 const EXPIRY_BATCH_SIZE = 100
 const API_ERROR_RETENTION_DAYS = 30
 const ACCOUNT_SESSION_RETENTION_DAYS = 7
+const MERCADO_PAGO_OAUTH_STATE_RETENTION_DAYS = 1
 const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000
 const JOB_NAME = 'run'
 
@@ -47,6 +49,10 @@ export class RunInternalJobsUseCase {
         await deleteExpiredAndCancelledInvitations()
         return 0
       },
+      [INTERNAL_JOB_STEP.CLEANUP_MERCADO_PAGO_OAUTH_STATES]: () =>
+        deleteExpiredMercadoPagoOAuthStatesBefore(
+          this.getMercadoPagoOAuthStateRetentionCutoff(now)
+        ),
     }
 
     return runInternalJobPipeline(
@@ -95,5 +101,9 @@ export class RunInternalJobsUseCase {
 
   private getAccountSessionRetentionCutoff(now: Date): Date {
     return new Date(now.getTime() - ACCOUNT_SESSION_RETENTION_DAYS * DAY_IN_MILLISECONDS)
+  }
+
+  private getMercadoPagoOAuthStateRetentionCutoff(now: Date): Date {
+    return new Date(now.getTime() - MERCADO_PAGO_OAUTH_STATE_RETENTION_DAYS * DAY_IN_MILLISECONDS)
   }
 }

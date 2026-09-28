@@ -1,8 +1,10 @@
 export type CreateMercadoPagoPreferenceInput = {
   externalReference: string
   title: string
-  quantity: number
-  unitPrice: number
+  amount: number
+  marketplaceFeeAmount: number
+  accessToken: string
+  idempotencyKey: string
   notificationUrl: string
   expiresAt: Date
   backUrls: {
@@ -23,10 +25,15 @@ export type MercadoPagoPaymentResult = {
   externalReference: string | null
   amount: number
   currency: string
+  sellerId?: string | null
+  preferenceId?: string | null
+  marketplaceFeeAmount?: number | null
+  providerFeeAmount?: number | null
+  netReceivedAmount?: number | null
 }
 
 export interface MercadoPagoCheckoutProPort {
   createPreference(input: CreateMercadoPagoPreferenceInput): Promise<MercadoPagoPreferenceResult>
-  expirePreference(preferenceId: string): Promise<void>
-  getPayment(paymentId: string): Promise<MercadoPagoPaymentResult>
+  expirePreference(preferenceId: string, accessToken?: string): Promise<void>
+  getPayment(paymentId: string, accessToken?: string): Promise<MercadoPagoPaymentResult>
 }

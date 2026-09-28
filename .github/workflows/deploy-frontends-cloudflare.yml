@@ -1,13 +1,23 @@
 name: Deploy Frontends
 
 on:
-  workflow_run:
-    workflows:
-      - CI
-    types:
-      - completed
+  push:
     branches:
       - staging
+    paths:
+      - apps/web/**
+      - apps/dashboard/**
+      - apps/admin/**
+      - packages/common/**
+      - packages/i18n/**
+      - packages/types/**
+      - packages/ui/**
+      - packages/validators/**
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - .github/workflows/deploy-frontends-cloudflare.yml
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,7 +28,6 @@ concurrency:
 
 jobs:
   deploy-web:
-    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment: staging
     permissions:
@@ -32,7 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.sha }}
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -40,10 +49,9 @@ jobs:
           cache: pnpm
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @repo/web deploy
+      - run: pnpm --filter @repo/web run deploy
 
   deploy-dashboard:
-    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment: staging
     permissions:
@@ -56,7 +64,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.sha }}
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -64,10 +72,9 @@ jobs:
           cache: pnpm
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @repo/dashboard deploy
+      - run: pnpm --filter @repo/dashboard run deploy
 
   deploy-admin:
-    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment: staging
     permissions:
@@ -79,7 +86,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.sha }}
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -87,4 +94,4 @@ jobs:
           cache: pnpm
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @repo/admin deploy
+      - run: pnpm --filter @repo/admin run deploy

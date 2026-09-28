@@ -9,21 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AppRouteImport } from './routes/_app'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
-import { Route as AppErrorsRouteImport } from './routes/_app/errors'
-import { Route as AppLegalDocumentsRouteImport } from './routes/_app/legal-documents'
-import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppLegalDocumentsRouteImport } from './routes/_app/legal-documents'
+import { Route as AppErrorsRouteImport } from './routes/_app/errors'
 
-const AppRoute = AppRouteImport.update({
-  id: '/_app',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -31,14 +31,9 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppErrorsRoute = AppErrorsRouteImport.update({
-  id: '/errors',
-  path: '/errors',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppLegalDocumentsRoute = AppLegalDocumentsRouteImport.update({
-  id: '/legal-documents',
-  path: '/legal-documents',
+const AppUsersRoute = AppUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
@@ -46,9 +41,14 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
-const AppUsersRoute = AppUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
+const AppLegalDocumentsRoute = AppLegalDocumentsRouteImport.update({
+  id: '/legal-documents',
+  path: '/legal-documents',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppErrorsRoute = AppErrorsRouteImport.update({
+  id: '/errors',
+  path: '/errors',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -81,7 +81,12 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/login' | '/errors' | '/legal-documents' | '/settings' | '/users'
+    | '/'
+    | '/login'
+    | '/errors'
+    | '/legal-documents'
+    | '/settings'
+    | '/users'
   fileRoutesByTo: FileRoutesByTo
   to: '/login' | '/errors' | '/legal-documents' | '/settings' | '/users' | '/'
   id:
@@ -102,18 +107,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_app': {
-      id: '/_app'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/': {
@@ -123,18 +128,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/errors': {
-      id: '/_app/errors'
-      path: '/errors'
-      fullPath: '/errors'
-      preLoaderRoute: typeof AppErrorsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/legal-documents': {
-      id: '/_app/legal-documents'
-      path: '/legal-documents'
-      fullPath: '/legal-documents'
-      preLoaderRoute: typeof AppLegalDocumentsRouteImport
+    '/_app/users': {
+      id: '/_app/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AppUsersRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/settings': {
@@ -144,11 +142,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/users': {
-      id: '/_app/users'
-      path: '/users'
-      fullPath: '/users'
-      preLoaderRoute: typeof AppUsersRouteImport
+    '/_app/legal-documents': {
+      id: '/_app/legal-documents'
+      path: '/legal-documents'
+      fullPath: '/legal-documents'
+      preLoaderRoute: typeof AppLegalDocumentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/errors': {
+      id: '/_app/errors'
+      path: '/errors'
+      fullPath: '/errors'
+      preLoaderRoute: typeof AppErrorsRouteImport
       parentRoute: typeof AppRoute
     }
   }

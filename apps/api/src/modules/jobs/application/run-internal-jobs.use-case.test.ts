@@ -12,6 +12,7 @@ const db = vi.hoisted(() => ({
   deleteExpiredPasswordResetTokens: vi.fn(),
   deleteExpiredOrRevokedAccountSessionsBefore: vi.fn(),
   deleteExpiredAndCancelledInvitations: vi.fn(),
+  deleteExpiredMercadoPagoOAuthStatesBefore: vi.fn(),
 }))
 
 vi.mock('@repo/db', () => db)
@@ -28,6 +29,7 @@ const EXPECTED_STEP_ORDER = [
   INTERNAL_JOB_STEP.CLEANUP_PASSWORD_RESET_TOKENS,
   INTERNAL_JOB_STEP.CLEANUP_ACCOUNT_SESSIONS,
   INTERNAL_JOB_STEP.CLEANUP_STAFF_INVITATIONS,
+  INTERNAL_JOB_STEP.CLEANUP_MERCADO_PAGO_OAUTH_STATES,
 ] as const
 
 beforeEach(() => {
@@ -41,6 +43,7 @@ beforeEach(() => {
   db.deleteExpiredPasswordResetTokens.mockResolvedValue(0)
   db.deleteExpiredOrRevokedAccountSessionsBefore.mockResolvedValue(0)
   db.deleteExpiredAndCancelledInvitations.mockResolvedValue(0)
+  db.deleteExpiredMercadoPagoOAuthStatesBefore.mockResolvedValue(0)
 })
 
 test('exposes the fixed eight-step Scheduler pipeline order', () => {
@@ -57,12 +60,13 @@ test('runs all hygiene steps after expiry and returns per-step results in catalo
   db.deleteExpiredPasswordResetTokens.mockResolvedValue(5)
   db.deleteExpiredOrRevokedAccountSessionsBefore.mockResolvedValue(6)
   db.deleteExpiredAndCancelledInvitations.mockResolvedValue(undefined)
+  db.deleteExpiredMercadoPagoOAuthStatesBefore.mockResolvedValue(7)
 
   const result = await new RunInternalJobsUseCase().execute()
 
   expect(result.steps.map((step) => step.name)).toEqual([...EXPECTED_STEP_ORDER])
   expect(result.steps.every((step) => step.status === 'success')).toBe(true)
-  expect(result.steps.map((step) => step.affected)).toEqual([1, 1, 2, 3, 4, 5, 6, 0])
+  expect(result.steps.map((step) => step.affected)).toEqual([1, 1, 2, 3, 4, 5, 6, 0, 7])
 })
 
 test('expiry step requests a bounded batch of 100 expired active reservations', async () => {
@@ -165,6 +169,7 @@ test('propagates the first step failure without running later repository cleanup
   expect(db.deleteExpiredPasswordResetTokens).not.toHaveBeenCalled()
   expect(db.deleteExpiredOrRevokedAccountSessionsBefore).not.toHaveBeenCalled()
   expect(db.deleteExpiredAndCancelledInvitations).not.toHaveBeenCalled()
+  expect(db.deleteExpiredMercadoPagoOAuthStatesBefore).not.toHaveBeenCalled()
 })
 
 test('propagates a mid-pipeline failure after earlier steps succeeded', async () => {
