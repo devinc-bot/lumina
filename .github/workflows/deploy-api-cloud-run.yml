@@ -4,18 +4,6 @@ on:
   push:
     branches:
       - staging
-    paths:
-      - apps/api/**
-      - packages/common/**
-      - packages/db/**
-      - packages/i18n/**
-      - packages/types/**
-      - packages/validators/**
-      - deploy/**
-      - package.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - .github/workflows/deploy-api-cloud-run.yml
   workflow_dispatch:
 
 permissions:

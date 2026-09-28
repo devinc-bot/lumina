@@ -4,19 +4,6 @@ on:
   push:
     branches:
       - staging
-    paths:
-      - apps/web/**
-      - apps/dashboard/**
-      - apps/admin/**
-      - packages/common/**
-      - packages/i18n/**
-      - packages/types/**
-      - packages/ui/**
-      - packages/validators/**
-      - package.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - .github/workflows/deploy-frontends-cloudflare.yml
   workflow_dispatch:
 
 permissions:
