@@ -1,6 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import {
   findEventImageAssetsByEventIds,
+  findConnectedMercadoPagoConnectionByOrganizationId,
   findLocationImageAssetsByLocationIds,
   findPublishedEventBySlug,
   findTicketsWithCompletedSalesByEventId,
@@ -29,12 +30,6 @@ function isTicketOnSale(ticket: {
   )
 }
 
-function arePlatformPaymentsConfigured(): boolean {
-  return Boolean(
-    ENV.MERCADOPAGO_ACCESS_TOKEN && ENV.MERCADOPAGO_WEBHOOK_SECRET && ENV.API_PUBLIC_URL
-  )
-}
-
 @Injectable()
 export class GetPublicEventByDocumentIdUseCase {
   constructor(@Inject(TranslationService) private readonly ts: TranslationService) {}
@@ -46,10 +41,13 @@ export class GetPublicEventByDocumentIdUseCase {
       throw new NotFoundException(this.ts.translateError('event.NOT_FOUND'))
     }
 
-    const [eventImageRows, locationImageRows, ticketRows] = await Promise.all([
+    const [eventImageRows, locationImageRows, ticketRows, connection] = await Promise.all([
       findEventImageAssetsByEventIds([row.event.id]),
       findLocationImageAssetsByLocationIds([row.location.id]),
       findTicketsWithCompletedSalesByEventId(row.event.id),
+      ENV.MERCADOPAGO_MARKETPLACE_ENABLED
+        ? findConnectedMercadoPagoConnectionByOrganizationId(row.event.organizationId)
+        : Promise.resolve(null),
     ])
 
     const imagesByEventId = groupEventImagesByEventId(eventImageRows)
@@ -73,7 +71,7 @@ export class GetPublicEventByDocumentIdUseCase {
             reservedQuantity
           )
         ),
-      arePlatformPaymentsConfigured()
+      Boolean(ENV.MERCADOPAGO_MARKETPLACE_ENABLED && connection)
     )
   }
 }

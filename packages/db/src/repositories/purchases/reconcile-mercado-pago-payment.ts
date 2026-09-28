@@ -24,10 +24,23 @@ export type ReconcileMercadoPagoPaymentInput = {
   providerPaymentId: string
   providerStatus: string
   externalReference: string
+  providerPreferenceId: string | null
   amount: number
   currency: string
+  sellerId: string | null
+  marketplaceFeeAmount: number | null
+  providerFeeAmount: number | null
+  netReceivedAmount: number | null
   payload: Record<string, unknown>
   now: Date
+}
+
+type StoredMercadoPagoPaymentFacts = {
+  amount: number
+  currency: string
+  providerPreferenceId: string | null
+  sellerId: string | null
+  marketplaceFeeAmount: number | null
 }
 
 export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPaymentInput) {
@@ -54,8 +67,11 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
       ticketId: number
       purchaseDocumentId: string
       paymentAmount: number | string
+      platformFeeAmount: number | string | null
       paymentCurrency: string
+      providerSellerId: string | null
       paymentStatus: string
+      providerPreferenceId: string | null
       purchaseStatus: string
       reservationStatus: string
       reservationExpiresAt: Date
@@ -69,8 +85,11 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
         pi.id as "purchaseItemId",
         pi.ticket_id as "ticketId",
         pay.amount as "paymentAmount",
+        p.platform_fee_amount as "platformFeeAmount",
         pay.currency as "paymentCurrency",
+        pay.provider_seller_id as "providerSellerId",
         pay.status as "paymentStatus",
+        pay.provider_preference_id as "providerPreferenceId",
         p.status as "purchaseStatus",
         r.status as "reservationStatus",
         r.expires_at as "reservationExpiresAt"
@@ -97,9 +116,14 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
       })
       .where(eq(paymentWebhookEvents.id, row.receiptId))
 
-    const paymentAmount =
-      typeof row.paymentAmount === 'number' ? row.paymentAmount : Number(row.paymentAmount)
-    const factsMatch = paymentAmount === input.amount && row.paymentCurrency === input.currency
+    const storedPaymentFacts: StoredMercadoPagoPaymentFacts = {
+      amount: typeof row.paymentAmount === 'number' ? row.paymentAmount : Number(row.paymentAmount),
+      currency: row.paymentCurrency,
+      providerPreferenceId: row.providerPreferenceId,
+      sellerId: row.providerSellerId,
+      marketplaceFeeAmount: row.platformFeeAmount === null ? null : Number(row.platformFeeAmount),
+    }
+    const factsMatch = matchesMercadoPagoPaymentFacts(storedPaymentFacts, input)
     const [webhookEvent] = await tx
       .select()
       .from(paymentWebhookEvents)
@@ -142,6 +166,9 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
           status: terminalPaymentStatus,
           providerPaymentId: input.providerPaymentId,
           reconciledAt: input.now,
+          providerFeeActualAmount: input.providerFeeAmount,
+          marketplaceFeeActualAmount: input.marketplaceFeeAmount,
+          ownerNetAmount: input.netReceivedAmount,
           updatedAt: input.now,
         })
         .where(eq(payments.id, row.paymentId))
@@ -187,6 +214,9 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
           providerPaymentId: input.providerPaymentId,
           paidAt: input.now,
           reconciledAt: input.now,
+          providerFeeActualAmount: input.providerFeeAmount,
+          marketplaceFeeActualAmount: input.marketplaceFeeAmount,
+          ownerNetAmount: input.netReceivedAmount,
           reconciliationError: PAYMENT_RECONCILIATION_ERROR.LATE_APPROVED_REQUIRES_MANUAL_REVIEW,
           updatedAt: input.now,
         })
@@ -216,6 +246,9 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
         providerPaymentId: input.providerPaymentId,
         paidAt: input.now,
         reconciledAt: input.now,
+        providerFeeActualAmount: input.providerFeeAmount,
+        marketplaceFeeActualAmount: input.marketplaceFeeAmount,
+        ownerNetAmount: input.netReceivedAmount,
         updatedAt: input.now,
       })
       .where(
@@ -261,4 +294,26 @@ function getTerminalPaymentStatus(providerStatus: string) {
     return PAYMENT_ATTEMPT_STATUS.CANCELLED
   }
   return null
+}
+
+function matchesMercadoPagoPaymentFacts(
+  stored: StoredMercadoPagoPaymentFacts,
+  reported: ReconcileMercadoPagoPaymentInput
+): boolean {
+  const hasMatchingPaymentDetails =
+    stored.amount === reported.amount && stored.currency === reported.currency
+  const hasMatchingPreference =
+    reported.providerPreferenceId !== null &&
+    stored.providerPreferenceId === reported.providerPreferenceId
+  const hasMatchingSeller = stored.sellerId === null || stored.sellerId === reported.sellerId
+  const hasMatchingMarketplaceFee =
+    stored.marketplaceFeeAmount === null ||
+    stored.marketplaceFeeAmount === reported.marketplaceFeeAmount
+
+  return (
+    hasMatchingPaymentDetails &&
+    hasMatchingPreference &&
+    hasMatchingSeller &&
+    hasMatchingMarketplaceFee
+  )
 }

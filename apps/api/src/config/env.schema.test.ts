@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import { envSchema } from './env'
-import { apiConfigSchema, mailEnvSchema, uploadEnvSchema } from './env.schema'
+import { apiConfigSchema, mailEnvSchema, mercadoPagoEnvSchema, uploadEnvSchema } from './env.schema'
 import {
   RATE_LIMIT_POLICY_DEFAULTS,
   RATE_LIMIT_PROFILE,
@@ -26,6 +26,27 @@ test('mail env accepts AWS_REGION with empty paired AWS keys', () => {
     MAIL_SMOKE_TO: 'smoke@example.test',
   })
   expect(env).not.toHaveProperty('RESEND_API_KEY')
+})
+
+test('marketplace checkout does not require a legacy platform access token', () => {
+  const result = mercadoPagoEnvSchema.safeParse({
+    MERCADOPAGO_WEBHOOK_SECRET: 'marketplace-webhook-secret',
+    MERCADOPAGO_TEST_MODE: 'false',
+    MERCADOPAGO_MARKETPLACE_ENABLED: 'true',
+    MERCADOPAGO_MARKETPLACE_CLIENT_ID: 'marketplace-client-id',
+    MERCADOPAGO_MARKETPLACE_CLIENT_SECRET: 'marketplace-client-secret',
+    MERCADOPAGO_OAUTH_REDIRECT_URI: 'https://dashboard.lumina.test/callback',
+    MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY: 'a'.repeat(44),
+  })
+
+  expect(result.success).toBe(true)
+  if (result.success) {
+    expect(result.data.MERCADOPAGO_ACCESS_TOKEN).toBe('')
+  }
+})
+
+test('marketplace checkout does not configure an estimated provider fee globally', () => {
+  expect(mercadoPagoEnvSchema.shape).not.toHaveProperty('MERCADOPAGO_ESTIMATED_FEE_BPS')
 })
 
 test('mail env accepts both AWS access key and secret set together', () => {

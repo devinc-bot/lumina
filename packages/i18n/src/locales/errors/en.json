@@ -84,7 +84,8 @@
     "HAS_PAYMENTS": "Cannot delete a ticket with recorded sales.",
     "CHECK_IN_INVALID": "The ticket is invalid or does not belong to Event Flow.",
     "CHECK_IN_EXPIRED": "The ticket QR code has expired.",
-    "CHECK_IN_USED": "This ticket has already been used."
+    "CHECK_IN_USED": "This ticket has already been used.",
+    "MERCADO_PAGO_CONNECTION_REQUIRED": "Connect Mercado Pago before activating this ticket."
   },
   "ticketType": {
     "NOT_FOUND": "The selected ticket type is not available.",
@@ -137,7 +138,8 @@
     "LIST_FAILED": "We could not load your orders. Try again in a few minutes.",
     "DELETE_NOT_PENDING": "Only pending orders can be deleted.",
     "DELETE_FAILED": "We could not delete the order. Try again.",
-    "WEBHOOK_INVALID": "The payment notification is invalid."
+    "WEBHOOK_INVALID": "The payment notification is invalid.",
+    "QUOTE_CHANGED": "The total changed. Review it and confirm again."
   },
   "dashboard": {
     "KPI_FAILED": "We could not load dashboard metrics. Try again in a few minutes.",

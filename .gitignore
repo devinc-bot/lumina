@@ -5,9 +5,6 @@ node_modules/
 dist/
 .vinxi/
 .output/
-apps/web/.wrangler/
-apps/dashboard/.wrangler/
-apps/admin/.wrangler/
 *.tsbuildinfo
 pnpm-debug.log
 local.db*
@@ -34,3 +31,10 @@ test-results/
 # !spec/features/active/031-password-reset-token-retention/*.md
 # spec/features/archive/*
 # !spec/features/archive/.gitkeep
+
+# Cloudflare
+apps/web/.wrangler/
+apps/dashboard/.wrangler/
+apps/admin/.wrangler/
+
+.cloudflared/

@@ -1,9 +1,14 @@
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common'
 import { WebhookSignatureValidator } from 'mercadopago'
-import { reconcileMercadoPagoPayment } from '@repo/db'
+import {
+  findConnectedMercadoPagoConnectionBySellerId,
+  findMercadoPagoPaymentCredentialSnapshotBySellerId,
+  reconcileMercadoPagoPayment,
+} from '@repo/db'
 import { TranslationService } from '@repo/i18n/server'
 import { MERCADO_PAGO_NOTIFICATION_TYPE, type MercadoPagoNotificationType } from '@repo/types'
 import { ENV } from '../../../config/env'
+import { decryptMercadoPagoCredential } from '../mercado-pago-credential-crypto'
 import type { MercadoPagoCheckoutProPort } from '../mercado-pago-checkout-pro.port'
 import { MERCADO_PAGO_CHECKOUT_PRO_PORT } from '../mercado-pago.tokens'
 
@@ -14,6 +19,7 @@ type MercadoPagoWebhookPayload = {
   resource?: string
   topic?: string
   type?: MercadoPagoNotificationType | string
+  user_id?: string | number
 }
 
 function isPaymentWebhook(body: unknown): boolean {
@@ -32,6 +38,16 @@ function getPaymentId(body: unknown, queryPaymentId: string | undefined): string
   if (paymentId === undefined) return undefined
 
   return String(paymentId).split('/').at(-1)
+}
+
+function getSellerId(body: unknown): string | null {
+  if (!body || typeof body !== 'object') return null
+
+  const userId = (body as MercadoPagoWebhookPayload).user_id
+  if (typeof userId === 'string') return userId.trim() ? userId : null
+  if (typeof userId === 'number' && Number.isFinite(userId)) return String(userId)
+
+  return null
 }
 
 @Injectable()
@@ -57,18 +73,49 @@ export class ReconcileMercadoPagoWebhookUseCase {
       throw new ForbiddenException(this.ts.translateError('order.WEBHOOK_INVALID'))
     }
 
-    const providerPayment = await this.mercadoPagoCheckoutPro.getPayment(paymentId)
-    if (!providerPayment.externalReference) return
+    const sellerId = getSellerId(body)
+    if (!sellerId) {
+      throw new ForbiddenException(this.ts.translateError('order.WEBHOOK_INVALID'))
+    }
+
+    const providerPayment = await this.mercadoPagoCheckoutPro.getPayment(
+      paymentId,
+      await this.getSellerAccessToken(sellerId)
+    )
+    if (!providerPayment.externalReference || !providerPayment.preferenceId) {
+      throw new ForbiddenException(this.ts.translateError('order.WEBHOOK_INVALID'))
+    }
 
     await reconcileMercadoPagoPayment({
       providerPaymentId: providerPayment.id,
       providerStatus: providerPayment.status,
       externalReference: providerPayment.externalReference,
+      providerPreferenceId: providerPayment.preferenceId,
       amount: providerPayment.amount,
       currency: providerPayment.currency,
+      sellerId: providerPayment.sellerId ?? null,
+      marketplaceFeeAmount: providerPayment.marketplaceFeeAmount ?? null,
+      providerFeeAmount: providerPayment.providerFeeAmount ?? null,
+      netReceivedAmount: providerPayment.netReceivedAmount ?? null,
       payload: body as Record<string, unknown>,
       now: new Date(),
     })
+  }
+
+  private async getSellerAccessToken(sellerId: string): Promise<string> {
+    const snapshot = await findMercadoPagoPaymentCredentialSnapshotBySellerId(sellerId)
+    if (snapshot?.accessTokenEncrypted) {
+      return decryptMercadoPagoCredential(snapshot.accessTokenEncrypted)
+    }
+
+    const connection = await findConnectedMercadoPagoConnectionBySellerId(sellerId)
+
+    // The immutable payment snapshot takes precedence over the seller's current connection.
+    if (!connection?.accessTokenEncrypted) {
+      throw new ForbiddenException(this.ts.translateError('order.WEBHOOK_INVALID'))
+    }
+
+    return decryptMercadoPagoCredential(connection.accessTokenEncrypted)
   }
 
   private isSignatureValid(

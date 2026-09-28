@@ -102,13 +102,12 @@ Tras validar la firma, la API consulta `Payment.get` mediante el adapter y solo 
 
 ## Variables necesarias
 
-| Variable                     | Uso                                                               |
-| ---------------------------- | ----------------------------------------------------------------- |
-| `MERCADOPAGO_ACCESS_TOKEN`   | Credencial de servidor para crear preferencias y consultar pagos. |
-| `MERCADOPAGO_WEBHOOK_SECRET` | Valida la firma de notificaciones.                                |
-| `MERCADOPAGO_TEST_MODE`      | Selecciona el init point de sandbox.                              |
-| `API_PUBLIC_URL`             | Construye la URL pública del webhook.                             |
-| `WEB_URL`                    | Construye los retornos del checkout.                              |
+| Variable                     | Uso                                   |
+| ---------------------------- | ------------------------------------- |
+| `MERCADOPAGO_WEBHOOK_SECRET` | Valida la firma de notificaciones.    |
+| `MERCADOPAGO_TEST_MODE`      | Selecciona el init point de sandbox.  |
+| `API_PUBLIC_URL`             | Construye la URL pública del webhook. |
+| `WEB_URL`                    | Construye los retornos del checkout.  |
 
 No expongas estas variables al cliente ni las registres en logs.
 

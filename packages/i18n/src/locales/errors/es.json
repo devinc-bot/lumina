@@ -84,7 +84,8 @@
     "HAS_PAYMENTS": "No se puede eliminar un ticket con ventas registradas.",
     "CHECK_IN_INVALID": "El ticket no es válido o no pertenece a Event Flow.",
     "CHECK_IN_EXPIRED": "El código QR del ticket venció.",
-    "CHECK_IN_USED": "Este ticket ya fue usado."
+    "CHECK_IN_USED": "Este ticket ya fue usado.",
+    "MERCADO_PAGO_CONNECTION_REQUIRED": "Conectá Mercado Pago antes de activar este ticket."
   },
   "ticketType": {
     "NOT_FOUND": "El tipo de ticket seleccionado no está disponible.",
@@ -137,7 +138,8 @@
     "LIST_FAILED": "No pudimos cargar tus órdenes. Intentá de nuevo en unos minutos.",
     "DELETE_NOT_PENDING": "Solo podés eliminar órdenes pendientes.",
     "DELETE_FAILED": "No pudimos eliminar la orden. Intentá de nuevo.",
-    "WEBHOOK_INVALID": "La notificación de pago no es válida."
+    "WEBHOOK_INVALID": "La notificación de pago no es válida.",
+    "QUOTE_CHANGED": "El total cambió. Revisalo y confirmá nuevamente."
   },
   "dashboard": {
     "KPI_FAILED": "No pudimos cargar los indicadores del dashboard. Intentá de nuevo en unos minutos.",

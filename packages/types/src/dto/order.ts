@@ -1,5 +1,6 @@
 import type { PaymentProvider, PaymentStatus } from '../enums/payment.ts'
 import type { TicketTypeResponse } from './ticket-type.ts'
+import type { PriceBreakdown } from '../marketplace-payment.ts'
 
 /** Buyer-facing order. */
 export interface OrderResponse {
@@ -17,6 +18,7 @@ export interface OrderResponse {
 /** Response after creating a pending order and Checkout Pro preference. */
 export interface CreateOrderResponse extends OrderResponse {
   checkoutUrl: string
+  breakdown: PriceBreakdown
 }
 
 /** Buyer-facing order summary for paginated order history. */

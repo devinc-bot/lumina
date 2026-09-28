@@ -7,7 +7,7 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: 'border border-hairline bg-surface-card',
+        default: 'border border-hairline/40 bg-surface-card',
         gradient: 'cn-gradient-border-from-primary-to-background cn-gradient-border--card',
       },
     },

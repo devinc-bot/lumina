@@ -151,6 +151,13 @@ export const API_ROUTES = {
     path: {
       /** Public — Mercado Pago webhook notifications (POST). */
       webhook: () => '/webhook' as const,
+      connection: () => '/connection' as const,
+      connect: () => '/connection/connect' as const,
+      connectionQuote: () => '/connection/quote' as const,
+      connectionSettlement: () => '/connection/settlement' as const,
+      callback: () => '/connection/callback' as const,
+      disconnect: () => '/connection/disconnect' as const,
+      quote: () => '/quote' as const,
     },
   },
   health: {
