@@ -1,5 +1,6 @@
 import * as MapLibreGL from 'maplibre-gl'
 import type { PopupOptions, MarkerOptions } from 'maplibre-gl'
+import mapLibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type * as GeoJSON from 'geojson'
 import {
@@ -19,6 +20,11 @@ import { createPortal } from 'react-dom'
 import { X, Minus, Plus, Locate, Maximize, Loader2, MapPin } from 'lucide-react'
 import type { ComponentProps } from 'react'
 import { cn } from '../../lib/utils'
+
+// Make Vite emit MapLibre's module worker as a hashed client asset. Without this
+// explicit import, MapLibre requests `/assets/maplibre-gl-worker.mjs` at runtime,
+// which SSR hosts may handle as an application route rather than JavaScript.
+MapLibreGL.setWorkerUrl(mapLibreWorkerUrl)
 
 const defaultStyles = {
   dark: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
