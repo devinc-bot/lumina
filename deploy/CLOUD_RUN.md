@@ -95,16 +95,25 @@ Configure these on **both** `staging` and `production` Environments (values diff
 
 ### Required GitHub Environment variables
 
-| Variable                      | Purpose                                                                                 |
-| ----------------------------- | --------------------------------------------------------------------------------------- |
-| `GCP_REGION`                  | e.g. `southamerica-east1`                                                               |
-| `AR_REPO`                     | Artifact Registry Docker repository id (e.g. `lumina`)                                  |
-| `SERVICE_NAME`                | Cloud Run service (`lumina-api-staging` / `lumina-api`)                                 |
-| `MIGRATOR_JOB_NAME`           | Migrator Job name                                                                       |
-| `RUNTIME_SERVICE_ACCOUNT`     | Required Cloud Run service / Job runtime SA email                                       |
-| `SCHEDULER_JOB_NAME`          | Required Cloud Scheduler job name                                                       |
-| `SCHEDULER_SERVICE_ACCOUNT`   | Required Scheduler OIDC service-account email                                           |
-| `INTERNAL_JOBS_OIDC_AUDIENCE` | Required HTTPS audience; exactly matches Scheduler and the runtime Secret Manager value |
+| Variable                                          | Purpose                                                                                 |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `GCP_REGION`                                      | e.g. `southamerica-east1`                                                               |
+| `AR_REPO`                                         | Artifact Registry Docker repository id (e.g. `lumina`)                                  |
+| `SERVICE_NAME`                                    | Cloud Run service (`lumina-api-staging` / `lumina-api`)                                 |
+| `MIGRATOR_JOB_NAME`                               | Migrator Job name                                                                       |
+| `RUNTIME_SERVICE_ACCOUNT`                         | Required Cloud Run service / Job runtime SA email                                       |
+| `SCHEDULER_JOB_NAME`                              | Required Cloud Scheduler job name                                                       |
+| `SCHEDULER_SERVICE_ACCOUNT`                       | Required Scheduler OIDC service-account email                                           |
+| `INTERNAL_JOBS_OIDC_AUDIENCE`                     | Required HTTPS audience; exactly matches Scheduler and the runtime Secret Manager value |
+| `MERCADOPAGO_ACCESS_TOKEN_SECRET_ID`              | Secret Manager id for the temporary legacy Mercado Pago access token                    |
+| `MERCADOPAGO_WEBHOOK_SECRET_ID`                   | Secret Manager id for the Mercado Pago webhook secret                                   |
+| `MERCADOPAGO_TEST_MODE_SECRET_ID`                 | Secret Manager id whose value is the `true` / `false` Mercado Pago test-mode flag       |
+| `MERCADOPAGO_MARKETPLACE_ENABLED`                 | Marketplace rollout flag (`true` / `false`) passed directly to Cloud Run                |
+| `MERCADOPAGO_MARKETPLACE_CLIENT_ID`               | Mercado Pago marketplace application id passed directly to Cloud Run                    |
+| `MERCADOPAGO_MARKETPLACE_CLIENT_SECRET_SECRET_ID` | Secret Manager id for the marketplace client secret                                     |
+| `MERCADOPAGO_OAUTH_REDIRECT_URI`                  | Mercado Pago OAuth redirect URI passed directly to Cloud Run                            |
+| `MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_SECRET_ID` | Secret Manager id for the seller-credential encryption key                              |
+| `MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION`   | Seller-credential encryption-key version passed directly to Cloud Run                   |
 
 ### One-time GCP + GitHub setup (operator)
 
@@ -136,6 +145,11 @@ and non-secret env updates **without** `--set-secrets` / `--clear-secrets`. Omit
 keeps existing secret env bindings on the service or Job. Prefer `--update-env-vars` in CI so
 other plain env vars are not wiped. If you pass `--set-secrets` or `--set-env-vars`, you replace
 the whole secrets or plain-env set respectively—avoid that in CI unless intentional.
+
+The API deployment is the intentional exception: it invokes `--update-secrets` on every release
+for the Mercado Pago runtime contract. The GitHub Environment entries are only Secret Manager IDs,
+so credential values never enter GitHub Actions or the container image. This additive update keeps
+all other existing bindings intact.
 
 ## Manual fallback: parameterized env vars
 
