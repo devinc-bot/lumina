@@ -25,4 +25,5 @@
 - [x] T11d: Provide separate interactive generic Secret Manager helpers that upsert any named secret from a masked value or permanently delete a confirmed secret, without logging the value or passing it as a command-line argument.
 - [x] T11e: Provide an interactive Cloud Run helper that additively binds an existing Secret Manager secret version to a named service environment variable.
 - [x] T11f: Pass the Mercado Pago marketplace rollout flag, client ID, OAuth redirect URI, and credential-key version from GitHub Environment variables into Cloud Run as non-secret runtime configuration.
+- [x] T11g: Preserve the Cloud Run deployment's single comma-separated `--update-env-vars` argument while formatting the Mercado Pago runtime configuration readably.
 - [ ] T12: Run focused and integration tests, the Mercado Pago sandbox seller/buyer flow, migration/backfill verification, `pnpm check:i18n`, `pnpm type-check`, `pnpm lint`, `pnpm format:check`, affected builds, and `git diff --check`; complete delegated security, UI craftsmanship, and acceptance review and fix all findings.
