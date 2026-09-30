@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Roll out the Cloud Run API service to the new API_IMAGE (scale-to-zero,
-# public ingress). Omit --set-secrets / --clear-secrets so existing Secret
-# Manager bindings remain. Requires: SERVICE_NAME, PROJECT_ID, REGION, API_IMAGE;
+# public ingress). Update Mercado Pago config and Secret Manager bindings on each deploy
+# while preserving every other existing binding. Requires: SERVICE_NAME, PROJECT_ID,
+# REGION, API_IMAGE, Mercado Pago runtime config, and Mercado Pago *_SECRET_ID values;
 # optional: RUNTIME_SERVICE_ACCOUNT.
 set -euo pipefail
 
@@ -19,7 +20,13 @@ ARGS=(
   --memory=512Mi
   --concurrency=40
   --timeout=180s
-  --update-env-vars=NODE_ENV=production,ENABLE_IN_PROCESS_SCHEDULERS=false,DATABASE_POOL_MAX=3
+  --update-env-vars="NODE_ENV=production,"\
+  "ENABLE_IN_PROCESS_SCHEDULERS=false,"\
+  "DATABASE_POOL_MAX=3,"\
+  "MERCADOPAGO_MARKETPLACE_ENABLED=${MERCADOPAGO_MARKETPLACE_ENABLED},"\
+  "MERCADOPAGO_TEST_MODE=${MERCADOPAGO_TEST_MODE},"\
+  "MERCADOPAGO_OAUTH_REDIRECT_URI=${MERCADOPAGO_OAUTH_REDIRECT_URI},"\
+  "MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION=${MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION}"
 )
 if [ -n "${RUNTIME_SERVICE_ACCOUNT:-}" ]; then
   ARGS+=(--service-account="${RUNTIME_SERVICE_ACCOUNT}")
