@@ -21,6 +21,9 @@ Routine API releases: GitHub Actions workflow
 (WIF; no SA JSON in the repo). Bootstrap secrets, Scheduler, and first Cloud Run bindings once via
 [`CLOUD_RUN.md`](./CLOUD_RUN.md).
 
+For PowerShell `gcloud` commands grouped by GCP service, see the
+[GCP command reference](./docs/gcp/README.md).
+
 ## Neon
 
 Staging and production use **separate** Neon databases. Prefer the Cloud Run migrator Job for schema

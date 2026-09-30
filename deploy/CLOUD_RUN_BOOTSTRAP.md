@@ -246,6 +246,9 @@ lumina-staging-aws-access-key-id
 lumina-staging-aws-secret-access-key
 lumina-staging-mercadopago-access-token
 lumina-staging-mercadopago-webhook-secret
+lumina-staging-mercadopago-test-mode
+lumina-staging-mercadopago-marketplace-client-secret
+lumina-staging-mercadopago-credential-encryption-key
 lumina-staging-r2-access-key-id
 lumina-staging-r2-secret-access-key
 lumina-staging-internal-jobs-oidc-audience
@@ -275,6 +278,9 @@ $RUNTIME_SECRETS = @(
   "lumina-staging-aws-secret-access-key",
   "lumina-staging-mercadopago-access-token",
   "lumina-staging-mercadopago-webhook-secret",
+  "lumina-staging-mercadopago-test-mode",
+  "lumina-staging-mercadopago-marketplace-client-secret",
+  "lumina-staging-mercadopago-credential-encryption-key",
   "lumina-staging-r2-access-key-id",
   "lumina-staging-r2-secret-access-key",
   "lumina-staging-internal-jobs-oidc-audience",
@@ -291,6 +297,11 @@ foreach ($SECRET_NAME in $RUNTIME_SECRETS) {
 
 The deploy identity must not receive `roles/secretmanager.secretAccessor`.
 
+For Secret Manager creation, rotation, deletion, and Cloud Run bindings, follow the
+[Secret Manager command reference](./docs/gcp/secret-manager.md). For Mercado Pago, use the
+canonical secret IDs in the list above, then set the matching `<VARIABLE>_SECRET_ID` in the GitHub
+Environment.
+
 ## 8. Configure external staging providers
 
 Use distinct staging credentials; do not reuse production credentials.
@@ -302,8 +313,10 @@ Use distinct staging credentials; do not reuse production credentials.
 - **AWS SES:** create a dedicated staging IAM user with `ses:SendEmail`; verify the `MAIL_FROM`
   identity in `sa-east-1`. Store its access key pair in Secret Manager.
 - **Mercado Pago:** use test credentials and configure the test webhook URL only after section 11
-  as `https://api-staging.lumina-events.com/api/mercado-pago/webhook`. Store the access token and webhook secret in Secret
-  Manager; set `MERCADOPAGO_TEST_MODE=true`.
+  as `https://api-staging.lumina-events.com/api/mercado-pago/webhook`. Store credentials in Secret
+  Manager. Keep `MERCADOPAGO_TEST_MODE=true` and `MERCADOPAGO_MARKETPLACE_ENABLED=false` until the
+  marketplace sandbox flow is ready; the marketplace flag, client id, OAuth redirect URI, and
+  encryption-key version are ordinary Cloud Run environment variables.
 - **Cloudflare R2:** create private bucket `lumina-staging`; create an `Object Read & Write` API
   token limited to that bucket. Attach public custom domain
   `assets-staging.lumina-events.com` only for public event/media objects. Store the R2 access key
@@ -368,6 +381,10 @@ $SERVICE_NAME = "lumina-api-staging"
 $MAIL_FROM = Read-Host "MAIL_FROM (verified in SES)"
 $MAIL_SMOKE_TO = Read-Host "MAIL_SMOKE_TO"
 $R2_ACCOUNT_ID = Read-Host "R2_ACCOUNT_ID"
+$MERCADOPAGO_MARKETPLACE_ENABLED = "false"
+$MERCADOPAGO_MARKETPLACE_CLIENT_ID = Read-Host "MERCADOPAGO_MARKETPLACE_CLIENT_ID"
+$MERCADOPAGO_OAUTH_REDIRECT_URI = "https://api-staging.lumina-events.com/api/mercado-pago/connection/callback"
+$MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION = "v1"
 # This is the final browser-facing API origin. The API starts before its Cloud Run mapping and
 # managed certificate are active, then section 11 creates the mapping.
 $API_PUBLIC_URL = "https://api-staging.lumina-events.com"
@@ -385,8 +402,8 @@ gcloud run deploy $SERVICE_NAME `
   --memory=512Mi `
   --concurrency=40 `
   --timeout=180s `
-  --set-env-vars="NODE_ENV=production,ENABLE_IN_PROCESS_SCHEDULERS=false,DATABASE_POOL_MAX=3,API_PUBLIC_URL=$API_PUBLIC_URL,WEB_URL=https://staging.lumina-events.com,DASHBOARD_URL=https://staging-dash.lumina-events.com,ADMIN_URL=https://admin-staging.lumina-events.com,TRUST_PROXY_HOPS=1,AWS_REGION=sa-east-1,MAIL_FROM=$MAIL_FROM,MAIL_SMOKE_TO=$MAIL_SMOKE_TO,MERCADOPAGO_TEST_MODE=true,R2_ACCOUNT_ID=$R2_ACCOUNT_ID,R2_BUCKET=lumina-staging,R2_PUBLIC_BASE_URL=https://assets-staging.lumina-events.com" `
-  --set-secrets="DATABASE_URL=lumina-staging-database-url:latest,JWT_SECRET=lumina-staging-jwt-secret:latest,REFRESH_TOKEN_SECRET=lumina-staging-refresh-token-secret:latest,GOOGLE_CLIENT_ID=lumina-staging-google-client-id:latest,GOOGLE_CLIENT_SECRET=lumina-staging-google-client-secret:latest,AWS_ACCESS_KEY_ID=lumina-staging-aws-access-key-id:latest,AWS_SECRET_ACCESS_KEY=lumina-staging-aws-secret-access-key:latest,MERCADOPAGO_WEBHOOK_SECRET=lumina-staging-mercadopago-webhook-secret:latest,R2_ACCESS_KEY_ID=lumina-staging-r2-access-key-id:latest,R2_SECRET_ACCESS_KEY=lumina-staging-r2-secret-access-key:latest,INTERNAL_JOBS_OIDC_AUDIENCE=lumina-staging-internal-jobs-oidc-audience:latest,INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS=lumina-staging-internal-jobs-oidc-allowed-service-accounts:latest"
+  --set-env-vars="NODE_ENV=production,ENABLE_IN_PROCESS_SCHEDULERS=false,DATABASE_POOL_MAX=3,API_PUBLIC_URL=$API_PUBLIC_URL,WEB_URL=https://staging.lumina-events.com,DASHBOARD_URL=https://staging-dash.lumina-events.com,ADMIN_URL=https://admin-staging.lumina-events.com,TRUST_PROXY_HOPS=1,AWS_REGION=sa-east-1,MAIL_FROM=$MAIL_FROM,MAIL_SMOKE_TO=$MAIL_SMOKE_TO,R2_ACCOUNT_ID=$R2_ACCOUNT_ID,R2_BUCKET=lumina-staging,R2_PUBLIC_BASE_URL=https://assets-staging.lumina-events.com,MERCADOPAGO_MARKETPLACE_ENABLED=$MERCADOPAGO_MARKETPLACE_ENABLED,MERCADOPAGO_MARKETPLACE_CLIENT_ID=$MERCADOPAGO_MARKETPLACE_CLIENT_ID,MERCADOPAGO_OAUTH_REDIRECT_URI=$MERCADOPAGO_OAUTH_REDIRECT_URI,MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION=$MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION" `
+  --set-secrets="DATABASE_URL=lumina-staging-database-url:latest,JWT_SECRET=lumina-staging-jwt-secret:latest,REFRESH_TOKEN_SECRET=lumina-staging-refresh-token-secret:latest,GOOGLE_CLIENT_ID=lumina-staging-google-client-id:latest,GOOGLE_CLIENT_SECRET=lumina-staging-google-client-secret:latest,AWS_ACCESS_KEY_ID=lumina-staging-aws-access-key-id:latest,AWS_SECRET_ACCESS_KEY=lumina-staging-aws-secret-access-key:latest,MERCADOPAGO_ACCESS_TOKEN=lumina-staging-mercadopago-access-token:latest,MERCADOPAGO_WEBHOOK_SECRET=lumina-staging-mercadopago-webhook-secret:latest,MERCADOPAGO_TEST_MODE=lumina-staging-mercadopago-test-mode:latest,MERCADOPAGO_MARKETPLACE_CLIENT_SECRET=lumina-staging-mercadopago-marketplace-client-secret:latest,MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY=lumina-staging-mercadopago-credential-encryption-key:latest,R2_ACCESS_KEY_ID=lumina-staging-r2-access-key-id:latest,R2_SECRET_ACCESS_KEY=lumina-staging-r2-secret-access-key:latest,INTERNAL_JOBS_OIDC_AUDIENCE=lumina-staging-internal-jobs-oidc-audience:latest,INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS=lumina-staging-internal-jobs-oidc-allowed-service-accounts:latest"
 ```
 
 `--max-instances=2` intentionally matches `deploy/scripts/cloud-run/deploy-service.sh`. Change

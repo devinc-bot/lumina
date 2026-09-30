@@ -71,11 +71,13 @@ exists; keep edge rate limiting on Caddy, the CDN, or a WAF for cluster-wide pro
 
 `MERCADOPAGO_MARKETPLACE_ENABLED` is a rollout flag. Keep it `false` until the marketplace
 application, OAuth callback, webhook signature, and separate seller/buyer sandbox flow have been
-validated. `MERCADOPAGO_MARKETPLACE_CLIENT_ID`, `MERCADOPAGO_OAUTH_REDIRECT_URI`,
-`MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION` are runtime configuration. The client secret and
-encryption key are secrets. Seller access/refresh tokens are persisted encrypted and must never be
-configured as environment variables. Each owner records their Mercado Pago settlement option in
-Lumina so quotes can estimate the provider fee. See
+validated. For Cloud Run, `MERCADOPAGO_MARKETPLACE_ENABLED`,
+`MERCADOPAGO_MARKETPLACE_CLIENT_ID`, `MERCADOPAGO_OAUTH_REDIRECT_URI`, and
+`MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION` are GitHub Environment variables passed directly
+to Cloud Run. The client secret and encryption key are bound from Secret Manager. Seller
+access/refresh tokens are persisted encrypted and must never be configured as environment
+variables. Each owner records their Mercado Pago settlement option in Lumina so quotes can estimate
+the provider fee. See
 [`docs/mercado-pago-marketplace-runbook.md`](../../docs/mercado-pago-marketplace-runbook.md).
 
 These runtime variables configure Nest in-process schedulers and the Cloud Scheduler OIDC surface.
