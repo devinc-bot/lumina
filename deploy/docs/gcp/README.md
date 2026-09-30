@@ -34,15 +34,15 @@ protected GitHub Environment approval process.
 
 ## Services
 
-| Service | Use in Lumina | Guide |
-| --- | --- | --- |
-| Secret Manager | Runtime API and migrator secrets | [secret-manager.md](./secret-manager.md) |
-| Cloud Run | API service and migrator Job | [cloud-run.md](./cloud-run.md) |
-| Artifact Registry | API and migrator container images | [artifact-registry.md](./artifact-registry.md) |
-| Cloud Scheduler | OIDC-triggered internal maintenance job | [cloud-scheduler.md](./cloud-scheduler.md) |
+| Service                              | Use in Lumina                             | Guide                                                  |
+| ------------------------------------ | ----------------------------------------- | ------------------------------------------------------ |
+| Secret Manager                       | Runtime API and migrator secrets          | [secret-manager.md](./secret-manager.md)               |
+| Cloud Run                            | API service and migrator Job              | [cloud-run.md](./cloud-run.md)                         |
+| Artifact Registry                    | API and migrator container images         | [artifact-registry.md](./artifact-registry.md)         |
+| Cloud Scheduler                      | OIDC-triggered internal maintenance job   | [cloud-scheduler.md](./cloud-scheduler.md)             |
 | IAM and Workload Identity Federation | Runtime, Scheduler, and deploy identities | [iam-workload-identity.md](./iam-workload-identity.md) |
-| Cloud Logging | Service and Job diagnostics | [cloud-logging.md](./cloud-logging.md) |
-| Service Usage | Required Google APIs | [service-usage.md](./service-usage.md) |
+| Cloud Logging                        | Service and Job diagnostics               | [cloud-logging.md](./cloud-logging.md)                 |
+| Service Usage                        | Required Google APIs                      | [service-usage.md](./service-usage.md)                 |
 
 ## Safety rules
 
