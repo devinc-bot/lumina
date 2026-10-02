@@ -352,15 +352,18 @@ test('rejects a seller whose connection and immutable snapshot have no credentia
       requestId,
       paymentId
     )
-  ).rejects.toMatchObject({ name: 'ForbiddenException', message: 'order.WEBHOOK_INVALID' })
+  ).rejects.toMatchObject({
+    name: 'ServiceUnavailableException',
+    message: 'order.WEBHOOK_PROCESSING_FAILED',
+  })
   expect(getPayment).not.toHaveBeenCalled()
 })
 
-test('accepts a legacy payment notification with its resource as the payment ID', async () => {
+test('accepts a payment notification with its resource as the payment ID', async () => {
   const requestId = 'request-123'
   const timestamp = String(Math.floor(Date.now() / 1000))
   const paymentId = 'payment-123'
-  const manifest = `request-id:${requestId};ts:${timestamp};`
+  const manifest = `id:${paymentId};request-id:${requestId};ts:${timestamp};`
   const signature = createHmac('sha256', process.env.MERCADOPAGO_WEBHOOK_SECRET ?? '')
     .update(manifest)
     .digest('hex')
@@ -507,7 +510,7 @@ test('omits a missing request ID from the webhook signature manifest', async () 
   const timestamp = String(Math.floor(Date.now() / 1000))
   const paymentId = 'payment-789'
   const signature = createHmac('sha256', process.env.MERCADOPAGO_WEBHOOK_SECRET ?? '')
-    .update(`ts:${timestamp};`)
+    .update(`id:${paymentId};ts:${timestamp};`)
     .digest('hex')
   let receivedPaymentId: string | undefined
   const useCase = new ReconcileMercadoPagoWebhookUseCase(
