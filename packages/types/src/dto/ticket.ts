@@ -17,7 +17,7 @@ export interface TicketResponse {
   eventImageUrl: string | null
   locationId: string | null
   locationName: string | null
-  /** Completed unit sales (`tickets_sold` via completed orders). */
+  /** Completed unit sales issued from confirmed purchases. */
   totalSold: number
   /** Sum of completed order amounts for this ticket. */
   revenue: number

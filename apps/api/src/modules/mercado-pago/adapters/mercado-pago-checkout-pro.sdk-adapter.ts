@@ -99,8 +99,11 @@ export class MercadoPagoCheckoutProSdkAdapter implements MercadoPagoCheckoutProP
 
   async getPayment(paymentId: string, accessToken?: string): Promise<MercadoPagoPaymentResult> {
     if (!accessToken) throw new Error('Mercado Pago organization credential is required')
+
     const payment = new Payment(this.createClient(accessToken))
+
     const response = await payment.get({ id: paymentId })
+
     if (
       response.id === undefined ||
       !response.status ||

@@ -1,11 +1,4 @@
 import { expect, test, vi } from 'vitest'
-import { PAYMENT_STATUS, type PaymentStatus } from '@repo/types'
-
-type Order = {
-  status: PaymentStatus | null
-  externalOrderId: string | null
-}
-
 const repositorySpies = vi.hoisted(() => ({
   findMercadoPagoConnectionById: vi.fn(),
   releaseReservationOnce: vi.fn(),
@@ -13,9 +6,7 @@ const repositorySpies = vi.hoisted(() => ({
 
 const state = vi.hoisted(() => ({
   connection: null as { accessTokenEncrypted: string | null } | null,
-  currentOrder: null as Order | null,
-  deleteResult: false,
-  initialOrder: null as Order | null,
+  normalizedPurchase: null as { purchase: { status: string } } | null,
   pendingPurchase: null as {
     reservation: { documentId: string }
     payment: {
@@ -28,18 +19,12 @@ const state = vi.hoisted(() => ({
   releaseTransitioned: false,
   userId: null as number | null,
 }))
-let findOrderCallCount = 0
-
 vi.mock('@repo/db', () => ({
   findUserIdByDocumentId: async () => state.userId,
-  findOrderByDocumentIdAndUserId: async () => {
-    findOrderCallCount += 1
-    return findOrderCallCount === 1 ? state.initialOrder : state.currentOrder
-  },
   findPendingPurchaseCancellation: async () => state.pendingPurchase,
+  findPurchaseByDocumentIdAndUserId: async () => state.normalizedPurchase,
   findMercadoPagoConnectionById: (...args: unknown[]) =>
     repositorySpies.findMercadoPagoConnectionById(...args),
-  deletePendingOrderByDocumentIdAndUserId: async () => state.deleteResult,
   releaseReservationOnce: (...args: unknown[]) => repositorySpies.releaseReservationOnce(...args),
 }))
 
@@ -51,30 +36,23 @@ import { DeletePendingOrderUseCase } from './delete-pending-order.use-case.ts'
 
 function resetState({
   connection = null,
-  currentOrder,
-  deleteResult,
-  initialOrder,
+  normalizedPurchase = null,
   pendingPurchase = null,
   releaseTransitioned = false,
   userId = 1,
 }: {
   connection?: { accessTokenEncrypted: string | null } | null
-  currentOrder?: Order | null
-  deleteResult: boolean
-  initialOrder: Order | null
+  normalizedPurchase?: typeof state.normalizedPurchase
   pendingPurchase?: typeof state.pendingPurchase
   releaseTransitioned?: boolean
   userId?: number | null
 }) {
   vi.clearAllMocks()
   state.connection = connection
-  state.currentOrder = currentOrder ?? initialOrder
-  state.deleteResult = deleteResult
-  state.initialOrder = initialOrder
+  state.normalizedPurchase = normalizedPurchase
   state.pendingPurchase = pendingPurchase
   state.releaseTransitioned = releaseTransitioned
   state.userId = userId
-  findOrderCallCount = 0
   repositorySpies.findMercadoPagoConnectionById.mockResolvedValue(connection)
   repositorySpies.releaseReservationOnce.mockResolvedValue({ transitioned: releaseTransitioned })
 }
@@ -90,10 +68,18 @@ function createUseCase({
   )
 }
 
-test('expires the provider preference before deleting an owned pending order', async () => {
+test('expires the provider preference before releasing an owned pending purchase', async () => {
   resetState({
-    initialOrder: { status: PAYMENT_STATUS.PENDING, externalOrderId: 'preference-1' },
-    deleteResult: true,
+    pendingPurchase: {
+      reservation: { documentId: 'reservation-1' },
+      payment: {
+        providerPreferenceId: 'preference-1',
+        credentialSource: 'organization_connection',
+        organizationPaymentConnectionId: 91,
+        credentialAccessTokenEncrypted: 'payment-token',
+      },
+    },
+    releaseTransitioned: true,
   })
   const expiredPreferences: string[] = []
   const useCase = await createUseCase({
@@ -107,11 +93,8 @@ test('expires the provider preference before deleting an owned pending order', a
   expect(expiredPreferences).toEqual(['preference-1'])
 })
 
-test('rejects deletion of an owned non-pending order', async () => {
-  resetState({
-    initialOrder: { status: PAYMENT_STATUS.COMPLETED, externalOrderId: 'preference-1' },
-    deleteResult: false,
-  })
+test('rejects deletion when an owned normalized purchase is not pending', async () => {
+  resetState({ normalizedPurchase: { purchase: { status: 'confirmed' } } })
   const useCase = await createUseCase({ expirePreference: async () => undefined })
 
   await expect(useCase.execute('buyer-1', 'order-1')).rejects.toMatchObject({
@@ -122,8 +105,16 @@ test('rejects deletion of an owned non-pending order', async () => {
 
 test('retains the local order when preference expiration fails', async () => {
   resetState({
-    initialOrder: { status: PAYMENT_STATUS.PENDING, externalOrderId: 'preference-1' },
-    deleteResult: true,
+    pendingPurchase: {
+      reservation: { documentId: 'reservation-1' },
+      payment: {
+        providerPreferenceId: 'preference-1',
+        credentialSource: 'organization_connection',
+        organizationPaymentConnectionId: 91,
+        credentialAccessTokenEncrypted: 'payment-token',
+      },
+    },
+    releaseTransitioned: true,
   })
   const useCase = await createUseCase({
     expirePreference: async () => {
@@ -137,8 +128,8 @@ test('retains the local order when preference expiration fails', async () => {
   })
 })
 
-test('returns not found when the buyer does not own an order', async () => {
-  resetState({ initialOrder: null, deleteResult: false })
+test('returns not found when the buyer does not own a pending purchase', async () => {
+  resetState({})
   const useCase = await createUseCase({ expirePreference: async () => undefined })
 
   await expect(useCase.execute('buyer-1', 'order-1')).rejects.toMatchObject({
@@ -147,11 +138,17 @@ test('returns not found when the buyer does not own an order', async () => {
   })
 })
 
-test('rejects deletion when reconciliation completes the order concurrently', async () => {
+test('rejects deletion when reconciliation completes the purchase concurrently', async () => {
   resetState({
-    initialOrder: { status: PAYMENT_STATUS.PENDING, externalOrderId: null },
-    currentOrder: { status: PAYMENT_STATUS.COMPLETED, externalOrderId: null },
-    deleteResult: false,
+    pendingPurchase: {
+      reservation: { documentId: 'reservation-1' },
+      payment: {
+        providerPreferenceId: null,
+        credentialSource: 'organization_connection',
+        organizationPaymentConnectionId: 91,
+      },
+    },
+    releaseTransitioned: false,
   })
   const useCase = await createUseCase({ expirePreference: async () => undefined })
 
@@ -163,8 +160,6 @@ test('rejects deletion when reconciliation completes the order concurrently', as
 
 test('uses the payment attempt credential snapshot after its organization reconnects or disconnects', async () => {
   resetState({
-    initialOrder: null,
-    deleteResult: false,
     connection: { accessTokenEncrypted: 'replacement-connection-token' },
     pendingPurchase: {
       reservation: { documentId: 'reservation-1' },
@@ -191,8 +186,6 @@ test('uses the payment attempt credential snapshot after its organization reconn
 
 test('uses the current organization connection only when a historical payment has no credential snapshot', async () => {
   resetState({
-    initialOrder: null,
-    deleteResult: false,
     connection: { accessTokenEncrypted: 'current-connection-token' },
     pendingPurchase: {
       reservation: { documentId: 'reservation-connection-fallback' },
@@ -219,8 +212,6 @@ test('uses the current organization connection only when a historical payment ha
 
 test('fails closed without releasing inventory when neither snapshot nor connection provides a credential', async () => {
   resetState({
-    initialOrder: null,
-    deleteResult: false,
     connection: null,
     pendingPurchase: {
       reservation: { documentId: 'reservation-no-credential' },

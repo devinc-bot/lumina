@@ -89,6 +89,7 @@ The test suite must retain fixtures for provider-fee plus VAT gross-up at zero p
 - Require explicit confirmation before creating the reservation/preference. If the server response returns a newer quote than the one displayed, update the summary and require confirmation again instead of redirecting silently.
 - Render organization-specific payment readiness and localized unavailable/reconnect messaging. Do not imply the platform account is the recipient.
 - Include the immutable breakdown in order/purchase details where this feature already exposes the paid total; broader receipt/email work remains separately scoped unless approved.
+- Poll the checkout-result purchase read only while its payment status is pending, without internal retries, and stop once reconciliation returns a terminal status or five total purchase-read attempts have completed.
 
 ## Security, Privacy, and Operations
 

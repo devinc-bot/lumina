@@ -57,9 +57,4 @@ integration tests. Its database name must end in `_test` and it must differ from
 migration URLs. It must never point to runtime, staging, or production data. Tests skip their
 database integration coverage when this variable is absent.
 
-Run the legacy checkout audit with `pnpm db:audit:legacy-orders`. It connects through
-`DATABASE_MIGRATION_URL`, opens a read-only transaction, prints JSON, and exits non-zero when it
-finds blocking historical inconsistencies. Price snapshot differences are reported but are not
-treated as blocking because legacy orders do not retain an immutable unit price.
-
 Use `@repo/validators` before persistence and keep API DTOs and enums in `@repo/types`.

@@ -104,7 +104,9 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
         and pay.provider_preference_id is not null
       for update of receipt, p, pay, pi, r
     `)
+
     const row = receipt.rows[0]
+
     if (!row || row.receiptStatus === PAYMENT_WEBHOOK_EVENT_STATUS.PROCESSED) return
 
     await tx
@@ -123,7 +125,9 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
       sellerId: row.providerSellerId,
       marketplaceFeeAmount: row.platformFeeAmount === null ? null : Number(row.platformFeeAmount),
     }
+
     const factsMatch = matchesMercadoPagoPaymentFacts(storedPaymentFacts, input)
+
     const [webhookEvent] = await tx
       .select()
       .from(paymentWebhookEvents)
@@ -159,6 +163,7 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
     }
 
     const terminalPaymentStatus = getTerminalPaymentStatus(input.providerStatus)
+
     if (terminalPaymentStatus) {
       await tx
         .update(payments)
@@ -172,12 +177,18 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
           updatedAt: input.now,
         })
         .where(eq(payments.id, row.paymentId))
+
       const [purchase] = await tx
         .update(purchases)
-        .set({ updatedAt: input.now, stateVersion: sql`${purchases.stateVersion} + 1` })
+        .set({
+          updatedAt: input.now,
+          stateVersion: sql`${purchases.stateVersion} + 1`,
+        })
         .where(eq(purchases.id, row.purchaseId))
         .returning()
+
       if (!purchase) throw new Error('Payment transition did not return its purchase')
+
       await tx
         .update(paymentWebhookEvents)
         .set({
@@ -202,10 +213,15 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
       return
     }
 
+    // if the reservation has expired
+    const reservationExpiresAt = new Date(row.reservationExpiresAt).getTime()
+
     const canConfirm =
       row.purchaseStatus === PURCHASE_STATUS.PENDING &&
       row.reservationStatus === INVENTORY_RESERVATION_STATUS.ACTIVE &&
-      row.reservationExpiresAt > input.now
+      Number.isFinite(reservationExpiresAt) &&
+      reservationExpiresAt > input.now.getTime()
+
     if (!canConfirm) {
       await tx
         .update(payments)
@@ -221,12 +237,18 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
           updatedAt: input.now,
         })
         .where(eq(payments.id, row.paymentId))
+
       const [purchase] = await tx
         .update(purchases)
-        .set({ updatedAt: input.now, stateVersion: sql`${purchases.stateVersion} + 1` })
+        .set({
+          updatedAt: input.now,
+          stateVersion: sql`${purchases.stateVersion} + 1`,
+        })
         .where(eq(purchases.id, row.purchaseId))
         .returning()
+
       if (!purchase) throw new Error('Late payment transition did not return its purchase')
+
       await tx
         .update(paymentWebhookEvents)
         .set({
@@ -254,6 +276,7 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
       .where(
         and(eq(payments.id, row.paymentId), eq(payments.status, PAYMENT_ATTEMPT_STATUS.PENDING))
       )
+
     await tx
       .update(inventoryReservations)
       .set({
@@ -262,6 +285,7 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
         updatedAt: input.now,
       })
       .where(eq(inventoryReservations.purchaseItemId, row.purchaseItemId))
+
     const [purchase] = await tx
       .update(purchases)
       .set({
@@ -272,8 +296,11 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
       })
       .where(eq(purchases.id, row.purchaseId))
       .returning()
+
     if (!purchase) throw new Error('Confirmed payment transition did not return its purchase')
+
     await issueTicketsSoldForPurchaseItem(row.purchaseItemId, tx)
+
     await tx
       .update(paymentWebhookEvents)
       .set({
@@ -303,10 +330,11 @@ function matchesMercadoPagoPaymentFacts(
   const hasMatchingPaymentDetails =
     stored.amount === reported.amount && stored.currency === reported.currency
   const hasMatchingPreference =
-    reported.providerPreferenceId !== null &&
+    reported.providerPreferenceId === null ||
     stored.providerPreferenceId === reported.providerPreferenceId
   const hasMatchingSeller = stored.sellerId === null || stored.sellerId === reported.sellerId
   const hasMatchingMarketplaceFee =
+    reported.marketplaceFeeAmount === null ||
     stored.marketplaceFeeAmount === null ||
     stored.marketplaceFeeAmount === reported.marketplaceFeeAmount
 

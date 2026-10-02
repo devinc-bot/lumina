@@ -91,6 +91,7 @@ export class CreatePendingOrderUseCase {
     const expiresAt = new Date(now.getTime() + CHECKOUT_RESERVATION_DURATION_MS)
     const marketplaceAccessToken = await this.resolveConnectionAccessToken(connection, now)
     const credentialSnapshot = await findMercadoPagoConnectionById(connection.id)
+
     const checkout = await reserveSingleTicketCheckout({
       userId,
       ticketId: ticket.id,
@@ -144,8 +145,8 @@ export class CreatePendingOrderUseCase {
         checkoutUrl: preference.initPoint,
         breakdown,
       }
-    } catch {
-      this.logger.error('Mercado Pago preference creation failed')
+    } catch (error) {
+      this.logger.error('Mercado Pago preference creation failed', { error })
       await releaseReservationOnce({
         reservationDocumentId: checkout.reservation.documentId,
         purchaseStatus: PURCHASE_STATUS.CANCELLED,
@@ -181,5 +182,10 @@ export class CreatePendingOrderUseCase {
       pending: new URL(CLIENT_ROUTES.checkoutPending(orderDocumentId), ENV.WEB_URL).toString(),
       failure: new URL(CLIENT_ROUTES.checkoutError(orderDocumentId), ENV.WEB_URL).toString(),
     }
+    // return {
+    //   success: new URL(CLIENT_ROUTES.checkoutSuccess(orderDocumentId), "https://staging.lumina-events.com").toString(),
+    //   pending: new URL(CLIENT_ROUTES.checkoutPending(orderDocumentId), "https://staging.lumina-events.com").toString(),
+    //   failure: new URL(CLIENT_ROUTES.checkoutError(orderDocumentId), "https://staging.lumina-events.com").toString(),
+    // }
   }
 }
