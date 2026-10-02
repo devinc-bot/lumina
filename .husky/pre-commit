@@ -1,3 +1,5 @@
+pnpm format:check
+
 pnpm lint-staged
 
 pnpm type-check
