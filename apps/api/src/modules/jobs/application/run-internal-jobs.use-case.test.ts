@@ -5,7 +5,6 @@ const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000
 const db = vi.hoisted(() => ({
   findExpiredActiveReservationDocumentIds: vi.fn(),
   releaseReservationOnce: vi.fn(),
-  deleteStalePendingOrders: vi.fn(),
   deleteApiErrorRecordsBefore: vi.fn(),
   deleteExpiredUserRegistrationTokens: vi.fn(),
   deleteExpiredOwnerRegistrationTokens: vi.fn(),
@@ -22,7 +21,6 @@ import { RunInternalJobsUseCase } from './run-internal-jobs.use-case.ts'
 
 const EXPECTED_STEP_ORDER = [
   INTERNAL_JOB_STEP.EXPIRE_PURCHASE_RESERVATIONS,
-  INTERNAL_JOB_STEP.CLEANUP_STALE_PENDING_ORDERS,
   INTERNAL_JOB_STEP.CLEANUP_API_ERROR_RECORDS,
   INTERNAL_JOB_STEP.CLEANUP_USER_REGISTRATION_TOKENS,
   INTERNAL_JOB_STEP.CLEANUP_OWNER_REGISTRATION_TOKENS,
@@ -36,7 +34,6 @@ beforeEach(() => {
   vi.clearAllMocks()
   db.findExpiredActiveReservationDocumentIds.mockResolvedValue([])
   db.releaseReservationOnce.mockResolvedValue({ transitioned: false })
-  db.deleteStalePendingOrders.mockResolvedValue(0)
   db.deleteApiErrorRecordsBefore.mockResolvedValue(0)
   db.deleteExpiredUserRegistrationTokens.mockResolvedValue(0)
   db.deleteExpiredOwnerRegistrationTokens.mockResolvedValue(0)
@@ -46,14 +43,13 @@ beforeEach(() => {
   db.deleteExpiredMercadoPagoOAuthStatesBefore.mockResolvedValue(0)
 })
 
-test('exposes the fixed eight-step Scheduler pipeline order', () => {
+test('exposes the normalized reservation maintenance pipeline order', () => {
   expect(INTERNAL_JOB_STEP_ORDER).toEqual(EXPECTED_STEP_ORDER)
 })
 
 test('runs all hygiene steps after expiry and returns per-step results in catalog order', async () => {
   db.findExpiredActiveReservationDocumentIds.mockResolvedValue(['res-1'])
   db.releaseReservationOnce.mockResolvedValue({ transitioned: true })
-  db.deleteStalePendingOrders.mockResolvedValue(1)
   db.deleteApiErrorRecordsBefore.mockResolvedValue(2)
   db.deleteExpiredUserRegistrationTokens.mockResolvedValue(3)
   db.deleteExpiredOwnerRegistrationTokens.mockResolvedValue(4)
@@ -66,7 +62,7 @@ test('runs all hygiene steps after expiry and returns per-step results in catalo
 
   expect(result.steps.map((step) => step.name)).toEqual([...EXPECTED_STEP_ORDER])
   expect(result.steps.every((step) => step.status === 'success')).toBe(true)
-  expect(result.steps.map((step) => step.affected)).toEqual([1, 1, 2, 3, 4, 5, 6, 0, 7])
+  expect(result.steps.map((step) => step.affected)).toEqual([1, 2, 3, 4, 5, 6, 0, 7])
 })
 
 test('expiry step requests a bounded batch of 100 expired active reservations', async () => {
@@ -162,7 +158,6 @@ test('propagates the first step failure without running later repository cleanup
 
   await expect(new RunInternalJobsUseCase().execute()).rejects.toBe(failure)
 
-  expect(db.deleteStalePendingOrders).not.toHaveBeenCalled()
   expect(db.deleteApiErrorRecordsBefore).not.toHaveBeenCalled()
   expect(db.deleteExpiredUserRegistrationTokens).not.toHaveBeenCalled()
   expect(db.deleteExpiredOwnerRegistrationTokens).not.toHaveBeenCalled()
@@ -179,6 +174,5 @@ test('propagates a mid-pipeline failure after earlier steps succeeded', async ()
   await expect(new RunInternalJobsUseCase().execute()).rejects.toBe(failure)
 
   expect(db.findExpiredActiveReservationDocumentIds).toHaveBeenCalledOnce()
-  expect(db.deleteStalePendingOrders).toHaveBeenCalledOnce()
   expect(db.deleteExpiredUserRegistrationTokens).not.toHaveBeenCalled()
 })

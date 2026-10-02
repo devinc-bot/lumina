@@ -258,7 +258,47 @@ if (integration) {
       ).resolves.toMatchObject({ rows: [{ count: 0 }] })
     })
 
-    test('accepts matching facts and rejects each missing or mismatched Mercado Pago fact', async () => {
+    test('confirms a payment when Mercado Pago omits optional preference and marketplace fee facts', async () => {
+      const { ticketId, userId } = await createTicket(1)
+      const checkout = await repositories.reserveSingleTicketCheckout(
+        marketplaceCheckoutInput({
+          userId,
+          ticketId,
+          quantity: 1,
+          expiresAt: new Date(now.getTime() + 15 * 60 * 1000),
+          now,
+          providerSellerId: 'seller-expected',
+        })
+      )
+      if (!checkout) throw new Error('Expected the integration checkout reservation')
+      await repositories.attachProviderPreference({
+        purchaseDocumentId: checkout.purchase.documentId,
+        provider: 'mercado_pago',
+        providerPreferenceId: 'optional-facts-preference',
+        now,
+      })
+
+      await repositories.reconcileMercadoPagoPayment({
+        providerPaymentId: 'optional-facts-payment',
+        providerStatus: 'approved',
+        externalReference: checkout.purchase.documentId,
+        amount: checkout.purchase.totalAmount,
+        currency: 'ARS',
+        sellerId: 'seller-expected',
+        providerPreferenceId: null,
+        marketplaceFeeAmount: null,
+        providerFeeAmount: null,
+        netReceivedAmount: null,
+        payload: { id: 'optional-facts-payment' },
+        now,
+      })
+
+      await expect(
+        pool.query('select count(*)::int as count from tickets_sold')
+      ).resolves.toMatchObject({ rows: [{ count: 1 }] })
+    })
+
+    test('accepts matching facts and rejects mismatched verified Mercado Pago facts', async () => {
       const { ticketId, userId } = await createTicket(1)
       const checkout = await repositories.reserveSingleTicketCheckout(
         marketplaceCheckoutInput({
@@ -293,9 +333,8 @@ if (integration) {
       const mismatches = [
         { name: 'amount', facts: { amount: checkout.purchase.totalAmount + 1 } },
         { name: 'currency', facts: { currency: 'USD' as const } },
-        { name: 'preference', facts: { providerPreferenceId: null } },
+        { name: 'preference', facts: { providerPreferenceId: 'different-preference' } },
         { name: 'seller', facts: { sellerId: 'seller-other' } },
-        { name: 'missing marketplace fee', facts: { marketplaceFeeAmount: null } },
       ]
 
       await repositories.reconcileMercadoPagoPayment({
@@ -323,7 +362,7 @@ if (integration) {
         pool.query(
           "select count(*)::int as count from payment_webhook_events where last_error = 'provider_fact_mismatch'"
         )
-      ).resolves.toMatchObject({ rows: [{ count: 5 }] })
+      ).resolves.toMatchObject({ rows: [{ count: 4 }] })
     })
   })
 } else {

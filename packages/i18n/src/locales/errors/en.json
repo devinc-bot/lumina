@@ -135,6 +135,7 @@
     "OUT_OF_STOCK": "There are not enough tickets available.",
     "CHECKOUT_UNAVAILABLE": "Checkout is not available right now.",
     "CHECKOUT_FAILED": "We could not start the Mercado Pago checkout. Try again.",
+    "WEBHOOK_PROCESSING_FAILED": "We could not process the payment notification. Try again shortly.",
     "LIST_FAILED": "We could not load your orders. Try again in a few minutes.",
     "DELETE_NOT_PENDING": "Only pending orders can be deleted.",
     "DELETE_FAILED": "We could not delete the order. Try again.",

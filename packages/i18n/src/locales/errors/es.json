@@ -135,6 +135,7 @@
     "OUT_OF_STOCK": "No hay suficientes entradas disponibles.",
     "CHECKOUT_UNAVAILABLE": "El checkout no está disponible por el momento.",
     "CHECKOUT_FAILED": "No pudimos iniciar el pago con Mercado Pago. Intentá de nuevo.",
+    "WEBHOOK_PROCESSING_FAILED": "No pudimos procesar la notificación de pago. Intentá de nuevo en unos instantes.",
     "LIST_FAILED": "No pudimos cargar tus órdenes. Intentá de nuevo en unos minutos.",
     "DELETE_NOT_PENDING": "Solo podés eliminar órdenes pendientes.",
     "DELETE_FAILED": "No pudimos eliminar la orden. Intentá de nuevo.",

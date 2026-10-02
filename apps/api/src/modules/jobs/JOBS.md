@@ -37,7 +37,6 @@ curl -X POST "https://api.example.com/api/internal/jobs/run" \
 | Name                                | Local schedule              | What it does                                                                                                |
 | ----------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `expire-purchase-reservations`      | Every minute                | Finds up to 100 expired active inventory reservations and releases each (purchase + reservation → expired). |
-| `cleanup-stale-pending-orders`      | 1st of month, midnight      | Deletes stale pending legacy orders older than the start of the previous month.                             |
 | `cleanup-api-error-records`         | Daily midnight              | Deletes API error records older than 30 days.                                                               |
 | `cleanup-user-registration-tokens`  | Daily midnight              | Deletes expired user registration tokens.                                                                   |
 | `cleanup-owner-registration-tokens` | Daily midnight              | Deletes expired owner registration tokens.                                                                  |

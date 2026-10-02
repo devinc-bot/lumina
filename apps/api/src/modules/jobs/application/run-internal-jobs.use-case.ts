@@ -7,7 +7,6 @@ import {
   deleteExpiredOwnerRegistrationTokens,
   deleteExpiredPasswordResetTokens,
   deleteExpiredUserRegistrationTokens,
-  deleteStalePendingOrders,
   findExpiredActiveReservationDocumentIds,
   releaseReservationOnce,
 } from '@repo/db'
@@ -34,8 +33,6 @@ export class RunInternalJobsUseCase {
     const now = new Date()
     const runners: Record<InternalJobStepName, () => Promise<number>> = {
       [INTERNAL_JOB_STEP.EXPIRE_PURCHASE_RESERVATIONS]: () => this.expirePurchaseReservations(now),
-      [INTERNAL_JOB_STEP.CLEANUP_STALE_PENDING_ORDERS]: () =>
-        deleteStalePendingOrders(this.getPreviousMonthStart(now)),
       [INTERNAL_JOB_STEP.CLEANUP_API_ERROR_RECORDS]: () =>
         deleteApiErrorRecordsBefore(this.getApiErrorRetentionCutoff(now)),
       [INTERNAL_JOB_STEP.CLEANUP_USER_REGISTRATION_TOKENS]: () =>
@@ -84,13 +81,6 @@ export class RunInternalJobsUseCase {
     }
 
     return transitionedCount
-  }
-
-  private getPreviousMonthStart(now: Date): Date {
-    const cutoff = new Date(now)
-    cutoff.setMonth(cutoff.getMonth() - 1, 1)
-    cutoff.setHours(0, 0, 0, 0)
-    return cutoff
   }
 
   private getApiErrorRetentionCutoff(now: Date): Date {
