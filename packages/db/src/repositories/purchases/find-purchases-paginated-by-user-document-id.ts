@@ -1,10 +1,5 @@
 import { and, count, desc, eq } from 'drizzle-orm'
-import type {
-  ListBuyerOrdersParams,
-  PaymentAttemptStatus,
-  PaymentProvider,
-  PurchaseStatus,
-} from '@repo/types'
+import type { PaymentAttemptStatus, PaymentProvider, PurchaseStatus } from '@repo/types'
 import { db } from '../../client.ts'
 import { events } from '../../schema/event.ts'
 import { payments } from '../../schema/payment.ts'
@@ -31,11 +26,17 @@ export type BuyerPurchaseSummaryRow = {
   eventStartsAt: Date | null
 }
 
+type ListBuyerPurchasesParams = {
+  userDocumentId: string
+  page: number
+  limit: number
+}
+
 export async function findPurchasesPaginatedByUserDocumentId({
   userDocumentId,
   page,
   limit,
-}: ListBuyerOrdersParams): Promise<{ rows: BuyerPurchaseSummaryRow[]; total: number }> {
+}: ListBuyerPurchasesParams): Promise<{ rows: BuyerPurchaseSummaryRow[]; total: number }> {
   const offset = (page - 1) * limit
   const where = and(eq(users.documentId, userDocumentId))
 

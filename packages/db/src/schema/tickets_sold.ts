@@ -2,15 +2,12 @@ import { boolean, integer, pgTable, text, timestamp, uniqueIndex } from 'drizzle
 import { USER_ROLE } from '@repo/types/enums'
 import { createBaseColumns } from './base.ts'
 import { accounts } from './account.ts'
-import { orders } from './orders.ts'
 import { purchaseItems } from './purchase-item.ts'
 
 export const ticketsSold = pgTable(
   'tickets_sold',
   {
     ...createBaseColumns('tickets_sold'),
-    // Retained to read historical rows; normalized issuance never writes this column.
-    orderId: integer('order_id').references(() => orders.id),
     purchaseItemId: integer('purchase_item_id')
       .notNull()
       .references(() => purchaseItems.id),

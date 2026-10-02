@@ -1,13 +1,9 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
-import {
-  findOrderByDocumentIdAndUserId,
-  findPurchaseByDocumentIdAndUserId,
-  findUserIdByDocumentId,
-} from '@repo/db'
+import { findPurchaseByDocumentIdAndUserId, findUserIdByDocumentId } from '@repo/db'
 import { ORDER_ERROR_CODE } from '@repo/i18n'
 import { TranslationService } from '@repo/i18n/server'
 import { type OrderResponse } from '@repo/types'
-import { toLegacyPaymentStatus, toOrderResponse } from '../mappers/orders.mapper'
+import { toLegacyPaymentStatus } from '../mappers/orders.mapper'
 
 @Injectable()
 export class GetOrderByDocumentIdUseCase {
@@ -32,10 +28,6 @@ export class GetOrderByDocumentIdUseCase {
       }
     }
 
-    const order = userId ? await findOrderByDocumentIdAndUserId(orderDocumentId, userId) : null
-
-    if (!order) throw new NotFoundException(this.ts.translateError(ORDER_ERROR_CODE.NOT_FOUND))
-
-    return toOrderResponse(order)
+    throw new NotFoundException(this.ts.translateError(ORDER_ERROR_CODE.NOT_FOUND))
   }
 }

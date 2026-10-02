@@ -1,11 +1,5 @@
-import type { BuyerPurchaseSummaryRow, OrderWithTicketDocumentId } from '@repo/db'
-import type {
-  BuyerOrderSummaryResponse,
-  BuyerOrderSummaryRow,
-  OrderResponse,
-  PaymentProvider,
-  PaymentStatus,
-} from '@repo/types'
+import type { BuyerPurchaseSummaryRow } from '@repo/db'
+import type { BuyerOrderSummaryResponse, PaymentProvider, PaymentStatus } from '@repo/types'
 import { PAYMENT_ATTEMPT_STATUS, PAYMENT_STATUS, PURCHASE_STATUS } from '@repo/types'
 
 export function toLegacyPaymentStatus(
@@ -17,40 +11,6 @@ export function toLegacyPaymentStatus(
   if (paymentStatus === PAYMENT_ATTEMPT_STATUS.CANCELLED) return PAYMENT_STATUS.CANCELLED
   if (purchaseStatus === PURCHASE_STATUS.PENDING) return PAYMENT_STATUS.PENDING
   return PAYMENT_STATUS.CANCELLED
-}
-
-export function toOrderResponse(order: OrderWithTicketDocumentId): OrderResponse {
-  return {
-    documentId: order.documentId,
-    ticketId: order.ticketDocumentId,
-    status: order.status as PaymentStatus,
-    amount: order.amount,
-    quantity: order.quantity,
-    provider: order.provider,
-    paidAt: order.paidAt,
-    createdAt: order.createdAt,
-    updatedAt: order.updatedAt,
-  }
-}
-
-export function toBuyerOrderSummaryResponse(
-  order: BuyerOrderSummaryRow
-): BuyerOrderSummaryResponse {
-  return {
-    documentId: order.documentId,
-    status: order.status as PaymentStatus,
-    amount: order.amount,
-    quantity: order.quantity,
-    provider: order.provider,
-    paidAt: order.paidAt,
-    createdAt: order.createdAt,
-    updatedAt: order.updatedAt,
-    ticketId: order.ticketId,
-    ticketType: order.ticketType,
-    eventId: order.eventId,
-    eventName: order.eventName,
-    eventStartsAt: order.eventStartsAt,
-  }
 }
 
 export function toBuyerPurchaseSummaryResponse(

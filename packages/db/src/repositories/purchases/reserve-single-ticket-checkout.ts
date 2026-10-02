@@ -40,8 +40,7 @@ export type ReservedSingleTicketCheckout = {
 }
 
 type TicketAllocation = {
-  legacyCompletedQuantity: number | string
-  normalizedConfirmedQuantity: number | string
+  confirmedQuantity: number | string
   activeReservedQuantity: number | string
 }
 
@@ -61,19 +60,12 @@ export async function reserveSingleTicketCheckout(
     const allocation = await tx.execute<TicketAllocation>(sql`
       select
         coalesce((
-          select sum(o.quantity)
-          from orders o
-          where o.ticket_id = ${input.ticketId} and o.status = 'completed'
-        ), 0) as "legacyCompletedQuantity",
-        coalesce((
           select sum(pi.quantity)
           from purchase_items pi
           join purchases p on p.id = pi.purchase_id
-          left join orders o on o.document_id = p.document_id
           where pi.ticket_id = ${input.ticketId}
             and p.status = ${PURCHASE_STATUS.CONFIRMED}
-            and o.id is null
-        ), 0) as "normalizedConfirmedQuantity",
+        ), 0) as "confirmedQuantity",
         coalesce((
           select sum(r.quantity)
           from inventory_reservations r
@@ -87,9 +79,7 @@ export async function reserveSingleTicketCheckout(
     if (!quantities) throw new Error('Ticket allocation query returned no row')
 
     const allocatedQuantity =
-      toQuantity(quantities.legacyCompletedQuantity) +
-      toQuantity(quantities.normalizedConfirmedQuantity) +
-      toQuantity(quantities.activeReservedQuantity)
+      toQuantity(quantities.confirmedQuantity) + toQuantity(quantities.activeReservedQuantity)
     if (ticket.quantity - allocatedQuantity < input.quantity) return null
 
     const lineTotal = ticket.price * input.quantity

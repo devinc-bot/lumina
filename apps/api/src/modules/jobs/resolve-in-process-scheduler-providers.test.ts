@@ -5,7 +5,6 @@ import { InvitationsCleanupScheduler } from './schedulers/invitations-cleanup.sc
 import { MercadoPagoOAuthStateCleanupScheduler } from './schedulers/mercado-pago-oauth-state-cleanup.scheduler.ts'
 import { OwnerRegistrationCleanupScheduler } from './schedulers/owner-registration-cleanup.scheduler.ts'
 import { PasswordResetCleanupScheduler } from './schedulers/password-reset-cleanup.scheduler.ts'
-import { PendingOrderCleanupScheduler } from './schedulers/pending-order-cleanup.scheduler.ts'
 import { PurchaseExpiryScheduler } from './schedulers/purchase-expiry.scheduler.ts'
 import { UserRegistrationCleanupScheduler } from './schedulers/user-registration-cleanup.scheduler.ts'
 import { resolveInProcessSchedulerProviders } from './resolve-in-process-scheduler-providers.ts'
@@ -24,7 +23,6 @@ test('registers no in-process schedulers when ENABLE_IN_PROCESS_SCHEDULERS is fa
 test('registers all catalog schedulers when ENABLE_IN_PROCESS_SCHEDULERS is true', () => {
   expect(resolveInProcessSchedulerProviders(true)).toEqual([
     PurchaseExpiryScheduler,
-    PendingOrderCleanupScheduler,
     ApiErrorRetentionScheduler,
     UserRegistrationCleanupScheduler,
     OwnerRegistrationCleanupScheduler,
