@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm } from '@tanstack/react-form'
 import { Crosshair } from 'lucide-react'
+import { useResolveFieldError } from '@repo/i18n/client'
 import type { LocationImageResponse } from '@repo/types'
 import { createLocationSchema, type CreateLocationInput } from '@repo/validators'
 import {
   Button,
   cn,
-  fieldErrorMessage,
   Input,
   Label,
   optionalFieldLabel,
@@ -137,6 +137,7 @@ export function LocationForm({
 }: LocationFormProps) {
   const { t } = useTranslation('locations')
   const { t: tCommon } = useTranslation('common')
+  const resolveFieldError = useResolveFieldError()
   const isCreate = mode === LOCATION_FORM_MODE.CREATE
   const initialSnapshotRef = useRef(
     snapshotLocationFormValues({ ...EMPTY_LOCATION_FORM_VALUES, ...defaultValues })
@@ -278,7 +279,7 @@ export function LocationForm({
                 label={requiredFieldLabel(t('form.fields.name'))}
                 placeholder={t('form.fields.namePlaceholder')}
                 value={field.state.value}
-                error={fieldErrorMessage(field.state.meta.errors)}
+                error={resolveFieldError(field.state.meta.errors)}
                 onBlur={field.handleBlur}
                 onChange={field.handleChange}
               />
@@ -297,7 +298,7 @@ export function LocationForm({
                 inputMode="numeric"
                 sanitize={sanitizeNonNegativeDigits}
                 value={field.state.value}
-                error={fieldErrorMessage(field.state.meta.errors)}
+                error={resolveFieldError(field.state.meta.errors)}
                 onBlur={field.handleBlur}
                 onChange={field.handleChange}
               />
@@ -309,7 +310,7 @@ export function LocationForm({
             validators={{ onSubmit: createLocationSchema.shape.description }}
           >
             {(field) => {
-              const error = fieldErrorMessage(field.state.meta.errors)
+              const error = resolveFieldError(field.state.meta.errors)
 
               return (
                 <div className="flex flex-col gap-2">
@@ -339,7 +340,7 @@ export function LocationForm({
         >
           <form.Field name="city" validators={{ onSubmit: createLocationSchema.shape.city }}>
             {(field) => {
-              const error = fieldErrorMessage(field.state.meta.errors) ?? ipLocateError
+              const error = resolveFieldError(field.state.meta.errors) ?? ipLocateError
 
               return (
                 <div className="flex flex-col gap-2">
@@ -408,7 +409,7 @@ export function LocationForm({
                   label={requiredFieldLabel(t('form.fields.address'))}
                   placeholder={t('form.fields.addressPlaceholder')}
                   value={field.state.value}
-                  error={fieldErrorMessage(field.state.meta.errors)}
+                  error={resolveFieldError(field.state.meta.errors)}
                   onBlur={field.handleBlur}
                   onChange={field.handleChange}
                   className="col-span-2"
@@ -427,7 +428,7 @@ export function LocationForm({
                   inputMode="numeric"
                   sanitize={sanitizeNonNegativeDigits}
                   value={field.state.value}
-                  error={fieldErrorMessage(field.state.meta.errors)}
+                  error={resolveFieldError(field.state.meta.errors)}
                   onBlur={field.handleBlur}
                   onChange={field.handleChange}
                   className="col-span-1"
@@ -443,7 +444,7 @@ export function LocationForm({
                 label={requiredFieldLabel(t('form.fields.state'))}
                 placeholder={t('form.fields.statePlaceholder')}
                 value={field.state.value}
-                error={fieldErrorMessage(field.state.meta.errors)}
+                error={resolveFieldError(field.state.meta.errors)}
                 onBlur={field.handleBlur}
                 onChange={field.handleChange}
               />
@@ -474,8 +475,8 @@ export function LocationForm({
                   >
                     {(lngField) => {
                       const coordsError =
-                        fieldErrorMessage(latField.state.meta.errors) ??
-                        fieldErrorMessage(lngField.state.meta.errors)
+                        resolveFieldError(latField.state.meta.errors) ??
+                        resolveFieldError(lngField.state.meta.errors)
 
                       return (
                         <div className="flex flex-col gap-2">
