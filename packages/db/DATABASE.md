@@ -45,6 +45,18 @@ pnpm db:studio
 `db:migrate` requires only `DATABASE_MIGRATION_URL`, applies committed migrations, exits when
 complete, and never runs a seed. The deployment migrator container runs the same Drizzle command.
 
+## Checkout data retention
+
+Checkout retention runs in dry-run mode by default. Before enabling an apply run, operators must review
+the reported aggregate counts, take a managed database backup, and obtain legal/accounting approval.
+No job log may include purchase IDs, provider identifiers, credentials, or webhook payloads.
+
+To place a purchase under hold, an authorized operator updates `purchases.legal_hold_at`; to release it,
+the operator clears that timestamp after the dispute or legal review has closed. A hold prevents
+reservation deletion, webhook payload minimization, and buyer dissociation for that purchase.
+The operator must record the actor, timestamp, and external case reference in the authorized operational
+system; do not store hold reasons, customer data, or case evidence in the database or job logs.
+
 ## Isolated database tests
 
 Preview owner accounts missing an organization with `pnpm db:repair:owner-organizations`.

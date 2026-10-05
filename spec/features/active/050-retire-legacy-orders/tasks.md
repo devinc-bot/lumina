@@ -22,6 +22,8 @@
       drops `orders`; update the Drizzle schema, exports, normalized fixtures, and migration integration tests.
 - [x] T6: Remove the now-obsolete legacy repository directory, audit command/script, repository-only types,
       and documentation references that require the deleted table.
+- [ ] T8: Cancel the pending payment attempt atomically when an expired active reservation and its pending
+      purchase transition to expired; add an isolated database regression test.
 - [ ] T7: Run focused DB/API tests, migration verification, `pnpm type-check`, `pnpm lint`,
       `pnpm format:check`, affected builds, and `git diff --check`; complete read-only quality review and
       resolve all findings before archive.

@@ -17,9 +17,7 @@ export const purchases = pgTable(
   'purchases',
   {
     ...createBaseColumns('purchases'),
-    userId: integer('user_id')
-      .notNull()
-      .references(() => users.id),
+    userId: integer('user_id').references(() => users.id),
     status: text('status', {
       enum: [
         PURCHASE_STATUS.PENDING,
@@ -44,6 +42,8 @@ export const purchases = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }),
     confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
     cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+    terminalAt: timestamp('terminal_at', { withTimezone: true }),
+    legalHoldAt: timestamp('legal_hold_at', { withTimezone: true }),
     stateVersion: integer('state_version').notNull().default(0),
   },
   (table) => [

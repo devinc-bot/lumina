@@ -1,10 +1,12 @@
 import { beforeEach, expect, test, vi } from 'vitest'
+import { Logger } from '@nestjs/common'
 
 const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000
 
 const db = vi.hoisted(() => ({
   findExpiredActiveReservationDocumentIds: vi.fn(),
   releaseReservationOnce: vi.fn(),
+  runCheckoutDataRetention: vi.fn(),
   deleteApiErrorRecordsBefore: vi.fn(),
   deleteExpiredUserRegistrationTokens: vi.fn(),
   deleteExpiredOwnerRegistrationTokens: vi.fn(),
@@ -21,6 +23,7 @@ import { RunInternalJobsUseCase } from './run-internal-jobs.use-case.ts'
 
 const EXPECTED_STEP_ORDER = [
   INTERNAL_JOB_STEP.EXPIRE_PURCHASE_RESERVATIONS,
+  INTERNAL_JOB_STEP.RETAIN_CHECKOUT_DATA,
   INTERNAL_JOB_STEP.CLEANUP_API_ERROR_RECORDS,
   INTERNAL_JOB_STEP.CLEANUP_USER_REGISTRATION_TOKENS,
   INTERNAL_JOB_STEP.CLEANUP_OWNER_REGISTRATION_TOKENS,
@@ -34,6 +37,11 @@ beforeEach(() => {
   vi.clearAllMocks()
   db.findExpiredActiveReservationDocumentIds.mockResolvedValue([])
   db.releaseReservationOnce.mockResolvedValue({ transitioned: false })
+  db.runCheckoutDataRetention.mockResolvedValue({
+    deletedReservations: 0,
+    minimizedWebhookPayloads: 0,
+    dissociatedPurchases: 0,
+  })
   db.deleteApiErrorRecordsBefore.mockResolvedValue(0)
   db.deleteExpiredUserRegistrationTokens.mockResolvedValue(0)
   db.deleteExpiredOwnerRegistrationTokens.mockResolvedValue(0)
@@ -50,6 +58,11 @@ test('exposes the normalized reservation maintenance pipeline order', () => {
 test('runs all hygiene steps after expiry and returns per-step results in catalog order', async () => {
   db.findExpiredActiveReservationDocumentIds.mockResolvedValue(['res-1'])
   db.releaseReservationOnce.mockResolvedValue({ transitioned: true })
+  db.runCheckoutDataRetention.mockResolvedValue({
+    deletedReservations: 2,
+    minimizedWebhookPayloads: 3,
+    dissociatedPurchases: 4,
+  })
   db.deleteApiErrorRecordsBefore.mockResolvedValue(2)
   db.deleteExpiredUserRegistrationTokens.mockResolvedValue(3)
   db.deleteExpiredOwnerRegistrationTokens.mockResolvedValue(4)
@@ -62,7 +75,30 @@ test('runs all hygiene steps after expiry and returns per-step results in catalo
 
   expect(result.steps.map((step) => step.name)).toEqual([...EXPECTED_STEP_ORDER])
   expect(result.steps.every((step) => step.status === 'success')).toBe(true)
-  expect(result.steps.map((step) => step.affected)).toEqual([1, 2, 3, 4, 5, 6, 0, 7])
+  expect(result.steps.map((step) => step.affected)).toEqual([1, 9, 2, 3, 4, 5, 6, 0, 7])
+})
+
+test('logs only aggregate dry-run checkout retention counts', async () => {
+  db.runCheckoutDataRetention.mockResolvedValue({
+    deletedReservations: 2,
+    minimizedWebhookPayloads: 3,
+    dissociatedPurchases: 4,
+  })
+  const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined)
+
+  try {
+    await new RunInternalJobsUseCase().execute()
+
+    expect(log).toHaveBeenCalledWith({
+      event: 'checkout_data_retention',
+      mode: 'dry-run',
+      deletedReservations: 2,
+      minimizedWebhookPayloads: 3,
+      dissociatedPurchases: 4,
+    })
+  } finally {
+    log.mockRestore()
+  }
 })
 
 test('expiry step requests a bounded batch of 100 expired active reservations', async () => {

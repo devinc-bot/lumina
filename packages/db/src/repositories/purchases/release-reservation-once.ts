@@ -1,11 +1,12 @@
 import { and, eq, sql } from 'drizzle-orm'
-import { INVENTORY_RESERVATION_STATUS, PURCHASE_STATUS } from '@repo/types'
+import { INVENTORY_RESERVATION_STATUS, PAYMENT_ATTEMPT_STATUS, PURCHASE_STATUS } from '@repo/types'
 import { db } from '../../client.ts'
 import {
   inventoryReservations,
   type InventoryReservationSelect,
 } from '../../schema/inventory-reservation.ts'
 import { purchases, type PurchaseSelect } from '../../schema/purchase.ts'
+import { payments } from '../../schema/payment.ts'
 
 export type ReleaseReservationOnceInput = {
   reservationDocumentId: string
@@ -27,15 +28,17 @@ export async function releaseReservationOnce(
     const locked = await tx.execute<{
       reservationId: number
       purchaseId: number
+      paymentId: number
     }>(sql`
-      select r.id as "reservationId", p.id as "purchaseId"
+      select r.id as "reservationId", p.id as "purchaseId", pay.id as "paymentId"
       from inventory_reservations r
       join purchase_items pi on pi.id = r.purchase_item_id
       join purchases p on p.id = pi.purchase_id
+      join payments pay on pay.purchase_id = p.id
       where r.document_id = ${input.reservationDocumentId}
         and r.status = ${INVENTORY_RESERVATION_STATUS.ACTIVE}
         and p.status = ${PURCHASE_STATUS.PENDING}
-      for update of r, pi, p
+      for update of r, pi, p, pay
     `)
     const candidate = locked.rows[0]
     if (!candidate) return { transitioned: false }
@@ -56,11 +59,25 @@ export async function releaseReservationOnce(
       .returning()
     if (!reservation) return { transitioned: false }
 
+    await tx
+      .update(payments)
+      .set({
+        status: PAYMENT_ATTEMPT_STATUS.CANCELLED,
+        updatedAt: input.now,
+      })
+      .where(
+        and(
+          eq(payments.id, candidate.paymentId),
+          eq(payments.status, PAYMENT_ATTEMPT_STATUS.PENDING)
+        )
+      )
+
     const [purchase] = await tx
       .update(purchases)
       .set({
         status: input.purchaseStatus,
-        ...(input.purchaseStatus === PURCHASE_STATUS.CANCELLED ? { cancelledAt: input.now } : {}),
+        ...(input.purchaseStatus === PURCHASE_STATUS.CANCELLED && { cancelledAt: input.now }),
+        terminalAt: input.now,
         updatedAt: input.now,
         stateVersion: sql`${purchases.stateVersion} + 1`,
       })
