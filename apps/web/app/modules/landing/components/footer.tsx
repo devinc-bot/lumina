@@ -19,11 +19,6 @@ const SOCIAL_LINKS = [
     href: 'https://www.instagram.com/repo',
     labelKey: 'footer.social.instagram',
   },
-  {
-    key: 'facebook',
-    href: 'https://www.facebook.com/repo',
-    labelKey: 'footer.social.facebook',
-  },
 ] as const
 
 const EXPLORE_SECTION_NAV = [
@@ -56,24 +51,8 @@ function InstagramIcon() {
   )
 }
 
-function FacebookIcon() {
-  return (
-    <svg
-      className={SOCIAL_ICON_CLASS}
-      width={28}
-      height={28}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden
-    >
-      <path d="M14 9h3V6h-3c-1.7 0-3 1.3-3 3v2H9v3h2v7h3v-7h2.2l.8-3H14V9z" />
-    </svg>
-  )
-}
-
 const SOCIAL_ICONS: Record<(typeof SOCIAL_LINKS)[number]['key'], ReactNode> = {
   instagram: <InstagramIcon />,
-  facebook: <FacebookIcon />,
 }
 
 export function LandingFooter() {
