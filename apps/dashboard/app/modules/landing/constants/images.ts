@@ -6,8 +6,8 @@ function localImage(path: string) {
 }
 
 export const LANDING_IMAGES = {
-  hero: localImage('/landing/hero.jpg'),
+  hero: localImage('/landing/hero.webp'),
   audiences: localImage('/landing/audiences.jpg'),
-  value: localImage('/landing/value.jpg'),
+  value: localImage('/landing/value.webp'),
   demoPoster: localImage('/landing/owner-promo-poster.jpg'),
 } as const

@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useRef, useState, type ReactNod
 import { useTranslation } from 'react-i18next'
 import type { ZodType } from 'zod'
 import type { BaseProfileResponse } from '@repo/types'
+import { useResolveFieldError } from '@repo/i18n/client'
 import { toast, useUnsavedChangesGuard } from '@repo/ui'
 import { toSessionUser } from '~/modules/common/formatters/session-user.formatter'
 import { useSessionStore } from '~/modules/common/stores/session.store'
@@ -58,6 +59,7 @@ export function createSettingsFormProvider<
 
   function Provider({ user, children }: { user: TUser; children: ReactNode }) {
     const { t } = useTranslation('settings')
+    const resolveFieldError = useResolveFieldError()
     const { refetch: refetchSettings } = useSettings()
     const { values, isDirty, updateValues, discard, commit } = useSettingsFormValues(
       user,
@@ -111,7 +113,10 @@ export function createSettingsFormProvider<
 
       const validation = validateSettingsForm(config.formSchema, values)
       if (!validation.success) {
-        const fieldErrors = mapSettingsFormErrors<TField>(validation.error)
+        const fieldErrors = mapSettingsFormErrors<TField>(
+          validation.error,
+          (message) => resolveFieldError([message]) ?? message
+        )
         setErrors(fieldErrors)
         setSaveStatus(SETTINGS_SAVE_STATUS.ERROR)
         toast.error(t('shared.messages.validationSummary'))
@@ -145,7 +150,7 @@ export function createSettingsFormProvider<
       } finally {
         isSavingRef.current = false
       }
-    }, [t, refetchSettings, commit, values])
+    }, [t, refetchSettings, commit, values, resolveFieldError])
 
     return (
       <SettingsFormContext
