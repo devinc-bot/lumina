@@ -5,7 +5,8 @@ export type SettingsFieldErrors<TField extends string = string> = {
 }
 
 export function mapSettingsFormErrors<TField extends string = string>(
-  error: ZodError
+  error: ZodError,
+  resolveMessage: (message: string) => string = (message) => message
 ): SettingsFieldErrors<TField> {
   const fieldErrors: SettingsFieldErrors<TField> = {}
 
@@ -18,7 +19,7 @@ export function mapSettingsFormErrors<TField extends string = string>(
 
     if (section === 'profile') {
       fieldErrors.profile ??= {}
-      fieldErrors.profile[field as TField] = issue.message
+      fieldErrors.profile[field as TField] = resolveMessage(issue.message)
     }
   }
 
