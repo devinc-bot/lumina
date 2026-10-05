@@ -33,6 +33,13 @@ names expected by each app's environment validation. Configure those values as G
 variables for the `staging` and `production` environments when building frontend images for an
 environment. They are public build inputs, not GitHub secrets.
 
+For local frontend development, copy the root `.env.local.example` to `.env.local` and set the
+values once for all three apps. The Vite configs load this workspace-root file; `VITE_API_URL` is
+shared by `web`, `dashboard`, and `admin`. `VITE_DASHBOARD_URL` and `VITE_SUPPORT_EMAIL` are only
+used by the apps that require them. Keep `.env.local` local and use it only for frontend
+configuration; API credentials belong in the API's own runtime configuration. Set an optional
+`SERVER_API_URL` override directly in the server process environment.
+
 ## Runtime Secrets
 
 The following runtime values are secrets and must not be supplied as Docker build arguments:

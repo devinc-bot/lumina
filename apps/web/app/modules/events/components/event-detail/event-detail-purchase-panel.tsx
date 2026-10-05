@@ -19,7 +19,7 @@ import { usePurchaseTicket } from '~/modules/checkout/hooks/use-purchase-ticket'
 import { getMarketplacePriceQuote } from '~/modules/checkout/services/marketplace-pricing.service'
 
 type EventDetailPurchasePanelProps = {
-  eventId: string
+  eventSlug: string
   startsAt: Date | string
   tickets: PublicPurchasableTicketResponse[]
   paymentsReady: boolean
@@ -38,7 +38,7 @@ function formatMinorCurrency(amount: number, locale: string): string {
 }
 
 export function EventDetailPurchasePanel({
-  eventId,
+  eventSlug,
   startsAt,
   tickets,
   paymentsReady,
@@ -46,7 +46,7 @@ export function EventDetailPurchasePanel({
 }: EventDetailPurchasePanelProps) {
   const { t, i18n } = useTranslation('events')
   const { purchaseTicket, purchasingTicketId, isSessionLoading, error } = usePurchaseTicket({
-    eventId,
+    eventSlug,
   })
   const whenCompact = formatEventWhenCompact(startsAt, i18n.language)
   const hasTickets = tickets.length > 0

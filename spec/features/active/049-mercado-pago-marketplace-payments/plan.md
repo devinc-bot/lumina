@@ -85,6 +85,10 @@ The test suite must retain fixtures for provider-fee plus VAT gross-up at zero p
 
 ## Web
 
+The unauthenticated purchase flow preserves the canonical public event URL through login. The
+event detail route is slug-based, so the checkout hook receives the event slug and uses it when
+building the `returnTo` destination.
+
 - Replace the one-click redirect from the event purchase panel with an accessible confirmation dialog or sheet that shows quantity, subtotal, Mercado Pago amount, Lumina fee, and total.
 - Require explicit confirmation before creating the reservation/preference. If the server response returns a newer quote than the one displayed, update the summary and require confirmation again instead of redirecting silently.
 - Render organization-specific payment readiness and localized unavailable/reconnect messaging. Do not imply the platform account is the recipient.

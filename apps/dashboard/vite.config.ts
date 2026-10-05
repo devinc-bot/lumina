@@ -3,8 +3,11 @@ import { cloudflare } from '@cloudflare/vite-plugin'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import { fileURLToPath } from 'node:url'
 import { z } from 'zod'
 import { NODE_SSR_BUILD_CONFIG } from '../../packages/common/src/config/node-ssr.ts'
+
+const WORKSPACE_ROOT = fileURLToPath(new URL('../../', import.meta.url))
 
 const DASHBOARD_BUILD_ENV_KEYS = {
   apiUrl: 'VITE_API_URL',
@@ -46,7 +49,7 @@ function validateBuildEmail(name: string, value: string | undefined) {
 }
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
+  const env = loadEnv(mode, WORKSPACE_ROOT, 'VITE_')
   validateBuildUrl(DASHBOARD_BUILD_ENV_KEYS.apiUrl, env[DASHBOARD_BUILD_ENV_KEYS.apiUrl])
   validateBuildEmail(
     DASHBOARD_BUILD_ENV_KEYS.supportEmail,
@@ -55,6 +58,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     ...NODE_SSR_BUILD_CONFIG,
+    envDir: WORKSPACE_ROOT,
     plugins: [
       cloudflare({
         inspectorPort: DASHBOARD_DEVELOPMENT_SERVER.inspectorPort,

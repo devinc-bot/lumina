@@ -12,6 +12,14 @@ The existing Dockerfiles and `deploy/tanstack-start-server.mjs` are not part of 
 staging task. Workers build from the workspace source, using only intentional public
 `VITE_*` environment variables supplied by the GitHub `staging` Environment.
 
+Local development uses one ignored workspace-root `.env.local` as the source for frontend
+environment values. The three Vite configs load this workspace-root env directory, and their
+existing app-local `.env` values are migrated into the shared file so app-specific public values
+remain available. The local `VITE_API_URL` is the same for web, dashboard, and admin; staging
+continues to receive the shared value from the GitHub `staging` Environment. The Vite dev-server
+proxy definitions remain available for `/api` requests but are not encoded as app-specific API
+origins.
+
 ## Architecture Decisions
 
 | Decision       | Choice                                                                                          | Rationale                                                                      |
@@ -21,6 +29,7 @@ staging task. Workers build from the workspace source, using only intentional pu
 | Deploy trigger | `workflow_run` after successful `CI` for a push to `staging`                                    | Deploys the exact verified `head_sha`, matching the API workflow.              |
 | Credentials    | GitHub `staging` Environment secret `CLOUDFLARE_API_TOKEN` and variable `CLOUDFLARE_ACCOUNT_ID` | Keeps Cloudflare credentials out of the repository and production scope.       |
 | Public config  | GitHub `staging` Environment variables                                                          | `VITE_*` values are compiled into client output and must contain no secrets.   |
+| Local config   | Workspace-root `.env.local`                                                                     | One ignored file supplies local values to all three frontend apps.             |
 
 ## Deployment Flow
 
