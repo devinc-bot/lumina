@@ -7,7 +7,7 @@ import {
   PAYMENT_WEBHOOK_EVENT_STATUS,
   PURCHASE_STATUS,
 } from '@repo/types'
-import { db } from '../../client.ts'
+import { db, type Transaction } from '../../client.ts'
 import { inventoryReservations } from '../../schema/inventory-reservation.ts'
 import { payments } from '../../schema/payment.ts'
 import { paymentWebhookEvents } from '../../schema/payment-webhook-event.ts'
@@ -43,6 +43,25 @@ type StoredMercadoPagoPaymentFacts = {
   marketplaceFeeAmount: number | null
 }
 
+type MercadoPagoReconciliationRow = {
+  receiptId: number
+  receiptStatus: string
+  paymentId: number
+  purchaseId: number
+  purchaseItemId: number
+  ticketId: number
+  purchaseDocumentId: string
+  paymentAmount: number | string
+  platformFeeAmount: number | string | null
+  paymentCurrency: string
+  providerSellerId: string | null
+  paymentStatus: string
+  providerPreferenceId: string | null
+  purchaseStatus: string
+  reservationStatus: string | null
+  reservationExpiresAt: Date | null
+}
+
 export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPaymentInput) {
   return db.transaction(async (tx) => {
     await tx
@@ -58,24 +77,7 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
         where: sql`${paymentWebhookEvents.providerPaymentId} is not null`,
       })
 
-    const receipt = await tx.execute<{
-      receiptId: number
-      receiptStatus: string
-      paymentId: number
-      purchaseId: number
-      purchaseItemId: number
-      ticketId: number
-      purchaseDocumentId: string
-      paymentAmount: number | string
-      platformFeeAmount: number | string | null
-      paymentCurrency: string
-      providerSellerId: string | null
-      paymentStatus: string
-      providerPreferenceId: string | null
-      purchaseStatus: string
-      reservationStatus: string
-      reservationExpiresAt: Date
-    }>(sql`
+    const receipt = await tx.execute<MercadoPagoReconciliationRow>(sql`
       select
         receipt.id as "receiptId",
         receipt.status as "receiptStatus",
@@ -97,12 +99,23 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
       join purchases p on p.document_id = ${input.externalReference}
       join payments pay on pay.purchase_id = p.id
       join purchase_items pi on pi.purchase_id = p.id
-      join inventory_reservations r on r.purchase_item_id = pi.id
+      left join inventory_reservations r on r.purchase_item_id = pi.id
       where receipt.provider = ${PAYMENT_PROVIDER.MERCADO_PAGO}
         and receipt.provider_payment_id = ${input.providerPaymentId}
         and pay.provider = ${PAYMENT_PROVIDER.MERCADO_PAGO}
         and pay.provider_preference_id is not null
-      for update of receipt, p, pay, pi, r
+        and (
+          pay.provider_preference_id = cast(${input.providerPreferenceId} as text)
+          or (
+            (
+              select count(*)
+              from payments matching_payment
+              where matching_payment.purchase_id = p.id
+                and matching_payment.provider = ${PAYMENT_PROVIDER.MERCADO_PAGO}
+            ) = 1
+          )
+        )
+      for update of receipt, p, pay, pi
     `)
 
     const row = receipt.rows[0]
@@ -150,15 +163,7 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
     }
 
     if (row.paymentStatus !== PAYMENT_ATTEMPT_STATUS.PENDING) {
-      await tx
-        .update(paymentWebhookEvents)
-        .set({
-          paymentId: row.paymentId,
-          status: PAYMENT_WEBHOOK_EVENT_STATUS.PROCESSED,
-          processedAt: input.now,
-          updatedAt: input.now,
-        })
-        .where(eq(paymentWebhookEvents.id, row.receiptId))
+      await reconcileNonPendingPayment(tx, row, input)
       return
     }
 
@@ -214,7 +219,9 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
     }
 
     // if the reservation has expired
-    const reservationExpiresAt = new Date(row.reservationExpiresAt).getTime()
+    const reservationExpiresAt = row.reservationExpiresAt
+      ? new Date(row.reservationExpiresAt).getTime()
+      : Number.NaN
 
     const canConfirm =
       row.purchaseStatus === PURCHASE_STATUS.PENDING &&
@@ -311,6 +318,72 @@ export async function reconcileMercadoPagoPayment(input: ReconcileMercadoPagoPay
       })
       .where(eq(paymentWebhookEvents.id, row.receiptId))
   })
+}
+
+async function reconcileNonPendingPayment(
+  tx: Transaction,
+  row: MercadoPagoReconciliationRow,
+  input: ReconcileMercadoPagoPaymentInput
+) {
+  const markReceiptProcessed = () =>
+    tx
+      .update(paymentWebhookEvents)
+      .set({
+        paymentId: row.paymentId,
+        status: PAYMENT_WEBHOOK_EVENT_STATUS.PROCESSED,
+        processedAt: input.now,
+        updatedAt: input.now,
+      })
+      .where(eq(paymentWebhookEvents.id, row.receiptId))
+
+  const isLateApproval =
+    input.providerStatus === MERCADO_PAGO_STATUS.APPROVED &&
+    row.paymentStatus !== PAYMENT_ATTEMPT_STATUS.APPROVED &&
+    row.purchaseStatus !== PURCHASE_STATUS.CONFIRMED
+
+  if (isLateApproval) {
+    await tx
+      .update(payments)
+      .set({
+        status: PAYMENT_ATTEMPT_STATUS.APPROVED,
+        providerPaymentId: input.providerPaymentId,
+        paidAt: input.now,
+        reconciledAt: input.now,
+        providerFeeActualAmount: input.providerFeeAmount,
+        marketplaceFeeActualAmount: input.marketplaceFeeAmount,
+        ownerNetAmount: input.netReceivedAmount,
+        reconciliationError: PAYMENT_RECONCILIATION_ERROR.LATE_APPROVED_REQUIRES_MANUAL_REVIEW,
+        updatedAt: input.now,
+      })
+      .where(eq(payments.id, row.paymentId))
+
+    await tx
+      .update(purchases)
+      .set({
+        updatedAt: input.now,
+        stateVersion: sql`${purchases.stateVersion} + 1`,
+      })
+      .where(eq(purchases.id, row.purchaseId))
+
+    await markReceiptProcessed()
+    return
+  }
+
+  if (!getTerminalPaymentStatus(input.providerStatus)) {
+    await markReceiptProcessed()
+    return
+  }
+
+  await tx
+    .update(payments)
+    .set({
+      providerPaymentId: input.providerPaymentId,
+      reconciledAt: input.now,
+      updatedAt: input.now,
+    })
+    .where(eq(payments.id, row.paymentId))
+
+  await markReceiptProcessed()
 }
 
 function getTerminalPaymentStatus(providerStatus: string) {

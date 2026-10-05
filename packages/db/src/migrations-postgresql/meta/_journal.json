@@ -120,6 +120,20 @@
       "when": 1790856000000,
       "tag": "20261001120000_retire_legacy_orders",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1790953200000,
+      "tag": "20261002150000_checkout_data_retention",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791028800000,
+      "tag": "20261003120000_purchase_terminal_at",
+      "breakpoints": true
     }
   ]
 }

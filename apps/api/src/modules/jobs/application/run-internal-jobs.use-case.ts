@@ -9,6 +9,7 @@ import {
   deleteExpiredUserRegistrationTokens,
   findExpiredActiveReservationDocumentIds,
   releaseReservationOnce,
+  runCheckoutDataRetention,
 } from '@repo/db'
 import { INVENTORY_RESERVATION_STATUS, PURCHASE_STATUS } from '@repo/types'
 import {
@@ -16,6 +17,7 @@ import {
   INTERNAL_JOB_STEP_ORDER,
   type InternalJobStepName,
 } from './internal-job-steps'
+import { CHECKOUT_DATA_RETENTION } from '../checkout-data-retention.constants'
 import { runInternalJobPipeline, type InternalJobPipelineResult } from './run-internal-job-pipeline'
 
 const EXPIRY_BATCH_SIZE = 100
@@ -33,6 +35,21 @@ export class RunInternalJobsUseCase {
     const now = new Date()
     const runners: Record<InternalJobStepName, () => Promise<number>> = {
       [INTERNAL_JOB_STEP.EXPIRE_PURCHASE_RESERVATIONS]: () => this.expirePurchaseReservations(now),
+      [INTERNAL_JOB_STEP.RETAIN_CHECKOUT_DATA]: async () => {
+        const result = await runCheckoutDataRetention({
+          now,
+          mode: CHECKOUT_DATA_RETENTION.mode,
+          batchSize: CHECKOUT_DATA_RETENTION.batchSize,
+        })
+        this.logger.log({
+          event: CHECKOUT_DATA_RETENTION.logEvent,
+          mode: CHECKOUT_DATA_RETENTION.mode,
+          ...result,
+        })
+        return (
+          result.deletedReservations + result.minimizedWebhookPayloads + result.dissociatedPurchases
+        )
+      },
       [INTERNAL_JOB_STEP.CLEANUP_API_ERROR_RECORDS]: () =>
         deleteApiErrorRecordsBefore(this.getApiErrorRetentionCutoff(now)),
       [INTERNAL_JOB_STEP.CLEANUP_USER_REGISTRATION_TOKENS]: () =>

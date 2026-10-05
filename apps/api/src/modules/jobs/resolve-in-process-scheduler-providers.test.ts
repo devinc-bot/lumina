@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest'
 import { AccountSessionCleanupScheduler } from './schedulers/account-session-cleanup.scheduler.ts'
 import { ApiErrorRetentionScheduler } from './schedulers/api-error-retention.scheduler.ts'
+import { CheckoutDataRetentionScheduler } from './schedulers/checkout-data-retention.scheduler.ts'
 import { InvitationsCleanupScheduler } from './schedulers/invitations-cleanup.scheduler.ts'
 import { MercadoPagoOAuthStateCleanupScheduler } from './schedulers/mercado-pago-oauth-state-cleanup.scheduler.ts'
 import { OwnerRegistrationCleanupScheduler } from './schedulers/owner-registration-cleanup.scheduler.ts'
@@ -23,6 +24,7 @@ test('registers no in-process schedulers when ENABLE_IN_PROCESS_SCHEDULERS is fa
 test('registers all catalog schedulers when ENABLE_IN_PROCESS_SCHEDULERS is true', () => {
   expect(resolveInProcessSchedulerProviders(true)).toEqual([
     PurchaseExpiryScheduler,
+    CheckoutDataRetentionScheduler,
     ApiErrorRetentionScheduler,
     UserRegistrationCleanupScheduler,
     OwnerRegistrationCleanupScheduler,

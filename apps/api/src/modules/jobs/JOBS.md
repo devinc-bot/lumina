@@ -12,6 +12,9 @@ stable names, purpose, and how production vs local scheduling differs.
 
 Operators accept that abandoned reservation holds may persist until the next run.
 
+The checkout-data retention step is dry-run only until legal and accounting approval,
+backup review, and dry-run counts are explicitly approved for production writes.
+
 ## Auth (OIDC)
 
 Production Cloud Scheduler must send a Google OIDC Bearer token. Configure:
@@ -37,6 +40,7 @@ curl -X POST "https://api.example.com/api/internal/jobs/run" \
 | Name                                | Local schedule              | What it does                                                                                                |
 | ----------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `expire-purchase-reservations`      | Every minute                | Finds up to 100 expired active inventory reservations and releases each (purchase + reservation → expired). |
+| `retain-checkout-data`              | Daily midnight              | Dry run: reports up to 100 eligible reservation, webhook-payload, and buyer-dissociation candidates.        |
 | `cleanup-api-error-records`         | Daily midnight              | Deletes API error records older than 30 days.                                                               |
 | `cleanup-user-registration-tokens`  | Daily midnight              | Deletes expired user registration tokens.                                                                   |
 | `cleanup-owner-registration-tokens` | Daily midnight              | Deletes expired owner registration tokens.                                                                  |

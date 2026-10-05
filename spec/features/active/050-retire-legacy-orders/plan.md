@@ -46,6 +46,8 @@ nullable `tickets_sold.order_id` foreign key.
   resolution and preference expiration behavior intact.
 - Remove the stale legacy pending-order cleanup repository, scheduler step, internal-job step, and job
   documentation. Normalized reservation expiration remains the cleanup mechanism.
+- Expire the pending payment attempt atomically with its pending purchase and active reservation, matching
+  the Mercado Pago preference expiration configured with the same checkout deadline.
 - In the compatibility release, remove legacy repository consumers but retain the schema and audit tool
   until the destructive migration has completed.
 - After the destructive migration, remove the legacy `orders` schema file, repository directory and

@@ -48,6 +48,8 @@ backfill, removes those runtime dependencies, and drops the legacy table without
 - RF-8: THE SYSTEM SHALL retain the term `orders` where it is part of the established customer-facing
   API route, UI feature name, localization namespace, or response contract and does not represent the
   removed database table.
+- RF-9: WHEN an expired active reservation transitions its pending purchase to expired, THE SYSTEM SHALL
+  transition its pending payment attempt to cancelled in the same transaction.
 
 ## Non-Functional Requirements
 
