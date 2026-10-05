@@ -1,5 +1,13 @@
 # Tasks 046 - Cloudflare Frontends
 
+- [x] T12: Centralize local frontend env loading in an ignored workspace-root
+      `.env.local`; migrate shared and app-specific frontend values there, use one
+      `VITE_API_URL` for all three apps, and document the local configuration source. Confirmed
+      `.env.local` is ignored, all app configs resolve the workspace root, and `git diff --check`
+      passes. Quality review found and corrected that `SERVER_API_URL` must be set in the process
+      environment rather than `.env.local`. No automated tests added (low-importance configuration
+      change); type-check/format could not run because Node.js and pnpm are unavailable.
+
 - [x] T11: Assign distinct local Worker inspector ports to web (9231), dashboard
       (9232), and admin (9233); verify concurrent startup and configuration checks.
       Verified concurrent Vite startup and all six HTTP/inspector listeners; type-check,

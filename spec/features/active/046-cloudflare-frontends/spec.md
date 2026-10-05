@@ -19,6 +19,8 @@ plane or deploy production.
   for a push to `staging` so that the staging release matches the API environment.
 - H2: As an operator, I want every staging frontend to use the matching Cloud Run
   API origin so clients never mix environments.
+- H3: As a local developer, I want shared frontend API configuration to come from one
+  local environment file so I can change it once for all three apps.
 
 ## Functional Requirements (EARS Acceptance Criteria)
 
@@ -31,6 +33,9 @@ plane or deploy production.
   Cloudflare-managed TLS.
 - RF-4: WHEN staging frontends use cookie authentication, THE SYSTEM SHALL use
   `https://api-staging.lumina-events.com` as their API origin so refresh requests remain same-site.
+- RF-5: WHEN a developer runs a frontend locally, THE SYSTEM SHALL load shared frontend
+  environment values from one ignored workspace-root file, while allowing app-specific values
+  and explicit local overrides.
 
 ## Non-Functional Requirements
 
@@ -38,6 +43,8 @@ plane or deploy production.
   use distinct Worker inspector ports while preserving debugging and HTTP ports 3001–3003.
 
 - No secrets in frontend bundles beyond intentional public `VITE_*` values.
+- The shared local frontend environment file SHALL be ignored by Git and SHALL contain no
+  credentials intended for server-only use.
 - Use GitHub Actions after successful CI for a push to `staging`, aligned with the Cloud Run staging
   branch model.
 - English ops docs under `deploy/`.

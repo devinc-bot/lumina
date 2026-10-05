@@ -45,6 +45,7 @@ Lumina currently creates every Checkout Pro preference with one platform Mercado
 - RF-18: WHEN a marketplace Checkout Pro preference is created, THE SYSTEM SHALL set the maximum installment count to one, exclude offline payment types, and retain supported account-balance, debit-card, and single-payment credit-card options.
 - RF-19: WHILE an organization's Mercado Pago connection is inactive, THE SYSTEM SHALL allow an owner to create and edit inactive tickets but SHALL reject ticket activation and new purchases for that organization.
 - RF-20: WHEN seller-connected marketplace checkout is enabled for an organization without an active Mercado Pago connection, THE SYSTEM SHALL disable sales of that organization's previously active tickets until the owner reconnects.
+- RF-21: WHEN an unauthenticated customer starts a purchase, THE SYSTEM SHALL return the customer after login to the same public event detail page using its slug.
 
 ## Non-Functional Requirements
 

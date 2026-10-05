@@ -3,7 +3,10 @@ import { cloudflare } from '@cloudflare/vite-plugin'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import { fileURLToPath } from 'node:url'
 import { NODE_SSR_BUILD_CONFIG } from '../../packages/common/src/config/node-ssr.ts'
+
+const WORKSPACE_ROOT = fileURLToPath(new URL('../../', import.meta.url))
 
 const ADMIN_BUILD_ENV_KEY = 'VITE_API_URL'
 
@@ -29,11 +32,12 @@ function validateAdminBuildEnv(value: string | undefined) {
 }
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
+  const env = loadEnv(mode, WORKSPACE_ROOT, 'VITE_')
   validateAdminBuildEnv(env[ADMIN_BUILD_ENV_KEY])
 
   return {
     ...NODE_SSR_BUILD_CONFIG,
+    envDir: WORKSPACE_ROOT,
     plugins: [
       cloudflare({
         inspectorPort: ADMIN_DEVELOPMENT_SERVER.inspectorPort,

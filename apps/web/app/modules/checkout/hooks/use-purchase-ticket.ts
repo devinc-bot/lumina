@@ -9,10 +9,10 @@ import { getMarketplacePriceQuote } from '~/modules/checkout/services/marketplac
 import type { PriceBreakdown } from '@repo/types'
 
 type UsePurchaseTicketOptions = {
-  eventId: string
+  eventSlug: string
 }
 
-export function usePurchaseTicket({ eventId }: UsePurchaseTicketOptions) {
+export function usePurchaseTicket({ eventSlug }: UsePurchaseTicketOptions) {
   const { t } = useTranslation('events')
   const { isAuthenticated, isLoading: isSessionLoading } = useSession()
   const navigate = useNavigate()
@@ -26,7 +26,7 @@ export function usePurchaseTicket({ eventId }: UsePurchaseTicketOptions) {
     if (!isAuthenticated) {
       await navigate({
         to: WEB_ROUTES.login(),
-        search: { returnTo: WEB_ROUTES.event(eventId) } as never,
+        search: { returnTo: WEB_ROUTES.event(eventSlug) } as never,
       })
       return { updatedQuote: null }
     }

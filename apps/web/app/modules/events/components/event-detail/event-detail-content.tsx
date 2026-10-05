@@ -147,7 +147,7 @@ export function EventDetailContent({ event }: EventDetailContentProps) {
         <div className="order-1 lg:order-2 lg:col-span-4">
           <div className="lg:sticky lg:top-24">
             <EventDetailPurchasePanel
-              eventId={event.documentId}
+              eventSlug={event.slug}
               startsAt={event.startsAt}
               tickets={event.tickets}
               paymentsReady={event.paymentsReady}
