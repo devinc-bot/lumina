@@ -1,9 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { USER_ROLE } from '@repo/types'
 import { Loader } from '@repo/ui'
 import { useSession } from '~/modules/common/hooks/use-session'
 import { OwnerPanelView } from '~/modules/owner'
-import { StaffPanelView } from '~/modules/staff-panel'
+import { DASHBOARD_ROUTES } from '~/modules/common/constants/routes'
 
 export const Route = createFileRoute('/_app/dashboard')({
   component: DashboardPage,
@@ -11,10 +12,13 @@ export const Route = createFileRoute('/_app/dashboard')({
 
 function DashboardPage() {
   const { user, isLoading } = useSession()
+  const navigate = useNavigate()
 
-  if (user?.role === USER_ROLE.STAFF) {
-    return <StaffPanelView />
-  }
+  useEffect(() => {
+    if (user?.role === USER_ROLE.STAFF) {
+      void navigate({ to: DASHBOARD_ROUTES.qrTicket(), replace: true })
+    }
+  }, [navigate, user?.role])
 
   if (user?.role === USER_ROLE.OWNER) {
     return <OwnerPanelView />

@@ -60,6 +60,7 @@
       "metaTitle": "Scan QR · {appNameAdmin}",
       "title": "QR Ticket",
       "description": "Scan the QR code to validate the ticket and mark it as used.",
+      "startScanning": "Start scanning",
       "tabs": {
         "scan": "Scan",
         "history": "History"

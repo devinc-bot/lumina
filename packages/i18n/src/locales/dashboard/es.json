@@ -59,6 +59,7 @@
       "metaTitle": "Escanear QR · {appNameAdmin}",
       "title": "QR Ticket",
       "description": "Escaneá el código QR para validar y marcar el ticket como usado.",
+      "startScanning": "Iniciar escaneo",
       "tabs": {
         "scan": "Escanear",
         "history": "Historial"
