@@ -1,16 +1,16 @@
-import { CalendarDays, ReceiptText, Ticket, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { formatCurrency, formatDate } from '@repo/common'
-import { Badge, Button, cn } from '@repo/ui'
+import { Badge, cn } from '@repo/ui'
 import type { BuyerOrderSummaryResponse } from '@repo/types'
 import { getOrderStatusBadgeVariant } from '../utils/order-display'
+import { HolographicOrderTicket } from './holographic-order-ticket'
 
 type OrderSummaryProps = {
   order: BuyerOrderSummaryResponse
-  onDelete?: (order: BuyerOrderSummaryResponse) => void
+  action?: React.ReactNode | null
 }
 
-export function OrderSummary({ order, onDelete }: OrderSummaryProps) {
+export function OrderSummary({ order, action }: OrderSummaryProps) {
   const { t, i18n } = useTranslation('orders')
   const orderDate = formatDate(order.createdAt, {
     locale: i18n.language,
@@ -26,81 +26,97 @@ export function OrderSummary({ order, onDelete }: OrderSummaryProps) {
     : null
 
   return (
-    <article className="grid gap-5 rounded-app-lg border border-hairline/35 bg-surface-card px-5 py-5 transition-colors hover:glass-panel sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-10">
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <p className="min-w-0 truncate font-display text-lg font-semibold tracking-tight text-on-surface">
-            {order.eventName ?? t('card.eventUnavailable')}
+    <HolographicOrderTicket>
+      <div className="px-5 pb-8 pt-7 text-sm leading-relaxed sm:px-7 sm:pb-9 sm:pt-8">
+        <header className="text-center">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <h2 className="min-w-0 wrap-break-word text-balance font-display text-xl font-bold leading-tight tracking-tight text-on-surface">
+              {order.eventName ?? t('card.eventUnavailable')}
+            </h2>
+            <Badge variant={getOrderStatusBadgeVariant(order.status)} size="sm">
+              {t(`status.${order.status}`)}
+            </Badge>
+          </div>
+          <p className="mt-2 wrap-break-word font-label text-xs tracking-label-sm text-on-surface-variant">
+            {order.ticketType.name}
+            <span className="px-2 text-outline" aria-hidden>
+              ·
+            </span>
+            {t('card.quantityValue', { count: order.quantity })}
           </p>
-          <Badge variant={getOrderStatusBadgeVariant(order.status)} size="sm">
-            {t(`status.${order.status}`)}
-          </Badge>
-        </div>
+        </header>
 
-        <div className="mt-4 flex flex-col gap-2.5 text-sm text-on-surface-variant sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-2">
-          <p className="flex min-w-0 items-start gap-2">
-            <Ticket className="mt-0.5 size-3.5 shrink-0" aria-hidden strokeWidth={1.75} />
-            <span className="min-w-0">
-              <span className="sr-only">{t('card.ticket')}: </span>
-              <span className="font-medium text-on-surface">{order.ticketType.name}</span>
-              <span className="px-1.5 text-outline-variant" aria-hidden>
-                ·
-              </span>
+        <dl className="space-y-3 text-on-surface-variant mt-8">
+          <div className="flex min-w-0 items-baseline gap-2">
+            <dt className="flex min-w-0 shrink items-center gap-2 font-label text-xs tracking-label-sm">
+              <span className="wrap-break-word">{order.ticketType.name}</span>
+            </dt>
+            <span
+              aria-hidden
+              className="mb-1 min-w-3 flex-1 border-b border-dotted border-hairline/80"
+            />
+            <dd className="shrink-0 text-xs">
               {t('card.quantityValue', { count: order.quantity })}
-            </span>
-          </p>
-          <p className="flex min-w-0 items-start gap-2">
-            <CalendarDays className="mt-0.5 size-3.5 shrink-0" aria-hidden strokeWidth={1.75} />
-            <span>
-              <span className="sr-only">{t('card.orderedAt')}: </span>
+            </dd>
+          </div>
+          <div className="flex min-w-0 items-baseline gap-2">
+            <dt className="flex min-w-0 shrink items-center gap-2 font-label text-xs tracking-label-sm">
+              <span className="wrap-break-word">{t('card.orderedAt')}</span>
+            </dt>
+            <span
+              aria-hidden
+              className="mb-1 min-w-3 flex-1 border-b border-dotted border-hairline/80"
+            />
+            <dd className="shrink-0 text-right text-xs">
               <time dateTime={String(order.createdAt)}>{orderDate}</time>
-            </span>
-          </p>
+            </dd>
+          </div>
           {eventDate ? (
-            <p className="flex min-w-0 items-start gap-2">
-              <ReceiptText className="mt-0.5 size-3.5 shrink-0" aria-hidden strokeWidth={1.75} />
-              <span>
-                <span className="sr-only">{t('card.eventDate')}: </span>
+            <div className="flex min-w-0 items-baseline gap-2">
+              <dt className="min-w-0 shrink font-label text-xs tracking-label-sm">
+                <span className="wrap-break-word">{t('card.eventDate')}</span>
+              </dt>
+              <span
+                aria-hidden
+                className="mb-1 min-w-3 flex-1 border-b border-dotted border-hairline/80"
+              />
+              <dd className="shrink-0 text-right text-xs">
                 <time dateTime={String(order.eventStartsAt)}>{eventDate}</time>
-              </span>
-            </p>
+              </dd>
+            </div>
           ) : null}
-        </div>
-      </div>
+        </dl>
 
-      <dl className="flex items-center justify-between gap-4 border-t border-hairline/25 pt-4 lg:min-w-36 lg:flex-col lg:items-end lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8">
-        <div className="min-w-0">
-          <dt className="font-label text-xs tracking-label-sm text-on-surface-variant">
-            {t('card.total')}
-          </dt>
-          <dd className="mt-1 font-display text-xl font-semibold tracking-tight text-on-surface">
-            {formatCurrency(order.amount, {
-              locale: i18n.language,
-              fallback: t('card.unavailable'),
-              options: { maximumFractionDigits: 0 },
-            })}
-          </dd>
-        </div>
-        <span
+        <span aria-hidden className="my-5 block border-t border-dashed border-hairline/75" />
+
+        <dl>
+          <div className="flex items-baseline justify-between gap-4">
+            <dt className="font-label text-sm tracking-label-sm text-on-surface-variant">
+              {t('card.total')}
+            </dt>
+            <dd className="font-display text-2xl font-bold leading-none tracking-tight text-on-surface tabular-nums">
+              {formatCurrency(order.amount, {
+                locale: i18n.language,
+                fallback: t('card.unavailable'),
+                options: { maximumFractionDigits: 0 },
+              })}
+            </dd>
+          </div>
+        </dl>
+
+        <span aria-hidden className="my-5 block border-t border-dashed border-hairline/75" />
+
+        <p
           className={cn(
-            'font-mono text-xs text-on-surface-variant',
-            'max-w-28 truncate text-right lg:max-w-36'
+            'truncate text-center font-mono text-xs tracking-label-sm text-on-surface-variant'
           )}
           title={order.documentId}
         >
-          {t('card.reference')}
-          {order.documentId.slice(-8)}
-        </span>
-      </dl>
+          {t('card.reference', { reference: order.documentId.slice(-8) })}
+        </p>
 
-      {order.status === 'pending' && onDelete ? (
-        <div className="flex justify-end border-t border-hairline/25 pt-4 lg:col-start-2 lg:border-t-0 lg:pt-0">
-          <Button type="button" variant="ghost" size="sm" onClick={() => onDelete(order)}>
-            <Trash2 className="size-3.5" aria-hidden strokeWidth={1.75} />
-            {t('actions.delete')}
-          </Button>
-        </div>
-      ) : null}
-    </article>
+        {action ? <>{action}</> : null}
+      </div>
+    </HolographicOrderTicket>
   )
 }

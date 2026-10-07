@@ -4,7 +4,7 @@
     "description": "Review the status and details of your purchases.",
     "metaTitle": "My orders · {appName}"
   },
-  "retentionNotice": "Pending orders older than one month are deleted automatically.",
+  "retentionNotice": "Cancelling an unfinished checkout does not delete the purchase record. The retention policy provides for eligible unsuccessful checkout data to be minimized after 90 days and eligible unsuccessful purchases to be dissociated from the buyer after 12 months.",
   "list": {
     "ariaLabel": "Order list"
   },
@@ -18,7 +18,7 @@
   "actions": {
     "retry": "Retry",
     "discoverEvents": "Discover events",
-    "delete": "Delete"
+    "cancelCheckout": "Cancel checkout"
   },
   "pagination": {
     "ariaLabel": "Order pagination",
@@ -43,13 +43,13 @@
     "reference": "Order #{reference}",
     "unavailable": "Unavailable"
   },
-  "delete": {
-    "title": "Delete pending order",
-    "description": "You are about to cancel checkout and delete the order for {{ticket}}. This action cannot be undone.",
-    "cancel": "Cancel",
-    "confirm": "Delete order",
-    "deleting": "Deleting…",
-    "success": "The pending order was deleted.",
-    "error": "We couldn't delete the order. Try again."
+  "cancelCheckout": {
+    "title": "Cancel unfinished checkout",
+    "description": "You are about to cancel checkout for {ticket}. This does not delete the purchase record.",
+    "dismiss": "Keep checkout",
+    "confirm": "Cancel checkout",
+    "cancelling": "Cancelling…",
+    "success": "Your unfinished checkout was cancelled.",
+    "error": "We couldn't cancel checkout. Try again."
   }
 }

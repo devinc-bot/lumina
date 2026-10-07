@@ -103,6 +103,16 @@ test('rejects deletion when an owned normalized purchase is not pending', async 
   })
 })
 
+test('rejects deletion when an owned purchase has already been cancelled', async () => {
+  resetState({ normalizedPurchase: { purchase: { status: 'cancelled' } } })
+  const useCase = await createUseCase({ expirePreference: async () => undefined })
+
+  await expect(useCase.execute('buyer-1', 'order-1')).rejects.toMatchObject({
+    name: 'ConflictException',
+    message: 'order.DELETE_NOT_PENDING',
+  })
+})
+
 test('retains the local order when preference expiration fails', async () => {
   resetState({
     pendingPurchase: {

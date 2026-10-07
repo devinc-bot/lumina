@@ -310,8 +310,10 @@ Use distinct staging credentials; do not reuse production credentials.
   after section 11 has activated the public mapping:
   `https://api-staging.lumina-events.com/api/auth/google/callback`. Store its client id and client secret in the matching
   Secret Manager secrets.
-- **AWS SES:** create a dedicated staging IAM user with `ses:SendEmail`; verify the `MAIL_FROM`
-  identity in `sa-east-1`. Store its access key pair in Secret Manager.
+- **AWS SES:** create a dedicated staging IAM user with `ses:SendEmail`; verify the `MAIL_DOMAIN`
+  identity in `sa-east-1` for the derived `no-reply@<domain>` and `support@<domain>` senders.
+  Store its access key pair in Secret Manager. Provision the `MAIL_REPLY_TO` support inbox and
+  configure receiving infrastructure to reject or discard unattended no-reply responses.
 - **Mercado Pago:** use test credentials and configure the test webhook URL only after section 11
   as `https://api-staging.lumina-events.com/api/mercado-pago/webhook`. Store credentials in Secret
   Manager. Keep `MERCADOPAGO_TEST_MODE=true` and `MERCADOPAGO_MARKETPLACE_ENABLED=false` until the
@@ -378,7 +380,8 @@ Deploy the public API. The prompt values are ordinary configuration, not credent
 
 ```powershell
 $SERVICE_NAME = "lumina-api-staging"
-$MAIL_FROM = Read-Host "MAIL_FROM (verified in SES)"
+$MAIL_DOMAIN = Read-Host "MAIL_DOMAIN (verified in SES)"
+$MAIL_REPLY_TO = Read-Host "MAIL_REPLY_TO (support inbox)"
 $MAIL_SMOKE_TO = Read-Host "MAIL_SMOKE_TO"
 $R2_ACCOUNT_ID = Read-Host "R2_ACCOUNT_ID"
 $MERCADOPAGO_MARKETPLACE_ENABLED = "false"
@@ -402,7 +405,7 @@ gcloud run deploy $SERVICE_NAME `
   --memory=512Mi `
   --concurrency=40 `
   --timeout=180s `
-  --set-env-vars="NODE_ENV=production,ENABLE_IN_PROCESS_SCHEDULERS=false,DATABASE_POOL_MAX=3,API_PUBLIC_URL=$API_PUBLIC_URL,WEB_URL=https://staging.lumina-events.com,DASHBOARD_URL=https://staging-dash.lumina-events.com,ADMIN_URL=https://admin-staging.lumina-events.com,TRUST_PROXY_HOPS=1,AWS_REGION=sa-east-1,MAIL_FROM=$MAIL_FROM,MAIL_SMOKE_TO=$MAIL_SMOKE_TO,R2_ACCOUNT_ID=$R2_ACCOUNT_ID,R2_BUCKET=lumina-staging,R2_PUBLIC_BASE_URL=https://assets-staging.lumina-events.com,MERCADOPAGO_MARKETPLACE_ENABLED=$MERCADOPAGO_MARKETPLACE_ENABLED,MERCADOPAGO_MARKETPLACE_CLIENT_ID=$MERCADOPAGO_MARKETPLACE_CLIENT_ID,MERCADOPAGO_OAUTH_REDIRECT_URI=$MERCADOPAGO_OAUTH_REDIRECT_URI,MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION=$MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION" `
+  --set-env-vars="NODE_ENV=production,ENABLE_IN_PROCESS_SCHEDULERS=false,DATABASE_POOL_MAX=3,API_PUBLIC_URL=$API_PUBLIC_URL,WEB_URL=https://staging.lumina-events.com,DASHBOARD_URL=https://staging-dash.lumina-events.com,ADMIN_URL=https://admin-staging.lumina-events.com,TRUST_PROXY_HOPS=1,AWS_REGION=sa-east-1,MAIL_DOMAIN=$MAIL_DOMAIN,MAIL_REPLY_TO=$MAIL_REPLY_TO,MAIL_SMOKE_TO=$MAIL_SMOKE_TO,R2_ACCOUNT_ID=$R2_ACCOUNT_ID,R2_BUCKET=lumina-staging,R2_PUBLIC_BASE_URL=https://assets-staging.lumina-events.com,MERCADOPAGO_MARKETPLACE_ENABLED=$MERCADOPAGO_MARKETPLACE_ENABLED,MERCADOPAGO_MARKETPLACE_CLIENT_ID=$MERCADOPAGO_MARKETPLACE_CLIENT_ID,MERCADOPAGO_OAUTH_REDIRECT_URI=$MERCADOPAGO_OAUTH_REDIRECT_URI,MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION=$MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY_VERSION" `
   --set-secrets="DATABASE_URL=lumina-staging-database-url:latest,JWT_SECRET=lumina-staging-jwt-secret:latest,REFRESH_TOKEN_SECRET=lumina-staging-refresh-token-secret:latest,GOOGLE_CLIENT_ID=lumina-staging-google-client-id:latest,GOOGLE_CLIENT_SECRET=lumina-staging-google-client-secret:latest,AWS_ACCESS_KEY_ID=lumina-staging-aws-access-key-id:latest,AWS_SECRET_ACCESS_KEY=lumina-staging-aws-secret-access-key:latest,MERCADOPAGO_ACCESS_TOKEN=lumina-staging-mercadopago-access-token:latest,MERCADOPAGO_WEBHOOK_SECRET=lumina-staging-mercadopago-webhook-secret:latest,MERCADOPAGO_TEST_MODE=lumina-staging-mercadopago-test-mode:latest,MERCADOPAGO_MARKETPLACE_CLIENT_SECRET=lumina-staging-mercadopago-marketplace-client-secret:latest,MERCADOPAGO_CREDENTIAL_ENCRYPTION_KEY=lumina-staging-mercadopago-credential-encryption-key:latest,R2_ACCESS_KEY_ID=lumina-staging-r2-access-key-id:latest,R2_SECRET_ACCESS_KEY=lumina-staging-r2-secret-access-key:latest,INTERNAL_JOBS_OIDC_AUDIENCE=lumina-staging-internal-jobs-oidc-audience:latest,INTERNAL_JOBS_OIDC_ALLOWED_SERVICE_ACCOUNTS=lumina-staging-internal-jobs-oidc-allowed-service-accounts:latest"
 ```
 

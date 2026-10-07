@@ -82,9 +82,8 @@ const SelectContent = React.forwardRef<
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport
         className={cn(
-          'p-1',
-          position === 'popper' &&
-            'h-(--radix-select-trigger-height) w-full min-w-(--radix-select-trigger-width)'
+          'max-h-(--radix-select-content-available-height)',
+          position === 'popper' && 'w-full min-w-(--radix-select-trigger-width)'
         )}
       >
         {children}
@@ -109,12 +108,14 @@ SelectLabel.displayName = SelectPrimitive.Label.displayName
 
 const SelectItem = React.forwardRef<
   React.ComponentRef<typeof SelectPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item> & {
+    leadingContent?: React.ReactNode
+  }
+>(({ className, children, leadingContent, ...props }, ref) => (
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex w-full cursor-default select-none items-center rounded-app-xs py-1.5 pl-8 pr-2 text-base text-ink outline-none focus:bg-surface-container-high data-disabled:pointer-events-none data-disabled:opacity-50',
+      'relative flex w-full cursor-pointer select-none items-center rounded-app-xs py-1.5 pl-8 pr-2 text-base text-ink outline-none focus:bg-surface-container-high data-disabled:pointer-events-none data-disabled:opacity-50',
       className
     )}
     {...props}
@@ -124,6 +125,14 @@ const SelectItem = React.forwardRef<
         <Check className="size-6" />
       </SelectPrimitive.ItemIndicator>
     </span>
+    {leadingContent ? (
+      <span
+        aria-hidden="true"
+        className="mr-2 flex shrink-0 size-8 items-center justify-center overflow-hidden rounded-md bg-surface-container-low"
+      >
+        {leadingContent}
+      </span>
+    ) : null}
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
   </SelectPrimitive.Item>
 ))
@@ -148,6 +157,7 @@ export interface SelectFieldProps extends React.ComponentPropsWithoutRef<typeof 
   placeholder?: string
   triggerClassName?: string
   containerClassName?: string
+  valueContent?: React.ReactNode
   children: React.ReactNode
 }
 
@@ -158,6 +168,7 @@ function SelectField({
   placeholder,
   triggerClassName,
   containerClassName,
+  valueContent,
   disabled,
   children,
   ...selectProps
@@ -184,7 +195,7 @@ function SelectField({
             aria-describedby={errorId}
             className={triggerClassName}
           >
-            <SelectValue placeholder={placeholder} />
+            <SelectValue placeholder={placeholder}>{valueContent}</SelectValue>
           </SelectTrigger>
           <SelectContent>{children}</SelectContent>
         </Select>

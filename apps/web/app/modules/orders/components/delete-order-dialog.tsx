@@ -46,9 +46,9 @@ export function DeleteOrderDialog({
         showCloseButton={!isDeleting}
       >
         <DialogHeader>
-          <DialogTitle>{t('delete.title')}</DialogTitle>
+          <DialogTitle>{t('cancelCheckout.title')}</DialogTitle>
           <DialogDescription>
-            {t('delete.description', { ticket: order?.ticketType.name ?? '' })}
+            {t('cancelCheckout.description', { ticket: order?.ticketType.name ?? '' })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-4">
@@ -58,10 +58,10 @@ export function DeleteOrderDialog({
             disabled={isDeleting}
             onClick={() => handleOpenChange(false)}
           >
-            {t('delete.cancel')}
+            {t('cancelCheckout.dismiss')}
           </Button>
           <Button type="button" variant="destructive" loading={isDeleting} onClick={handleConfirm}>
-            {isDeleting ? t('delete.deleting') : t('delete.confirm')}
+            {isDeleting ? t('cancelCheckout.cancelling') : t('cancelCheckout.confirm')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Clock } from 'lucide-react'
+import { Clock, MapPin } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import type { LocationResponse } from '@repo/types'
 import { Button, requiredFieldLabel, SelectField, SelectItem } from '@repo/ui'
@@ -25,6 +25,8 @@ export function EventLocationField({
 }: EventLocationFieldProps) {
   const { t } = useTranslation('events')
   const isEmpty = !isLoading && !isError && locations.length === 0
+  const selectedLocation = locations.find((location) => location.documentId === locationId)
+  const selectedLocationImage = selectedLocation?.images[0]
 
   return (
     <FormSection
@@ -48,9 +50,47 @@ export function EventLocationField({
             placeholder={isLoading ? t('form.locationLoading') : t('form.locationPlaceholder')}
             error={isError ? t('form.locationsLoadError') : undefined}
             disabled={isLoading || isError}
+            valueContent={
+              selectedLocation ? (
+                <span className="flex min-w-0 items-center gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-container-high"
+                  >
+                    {selectedLocationImage?.url ? (
+                      <img
+                        src={selectedLocationImage.url}
+                        alt=""
+                        className="size-full object-cover"
+                      />
+                    ) : (
+                      <MapPin className="size-6 text-ink-muted-soft" />
+                    )}
+                  </span>
+                  <span className="truncate">{selectedLocation.name}</span>
+                </span>
+              ) : undefined
+            }
           >
             {locations.map((location) => (
-              <SelectItem key={location.documentId} value={location.documentId}>
+              <SelectItem
+                key={location.documentId}
+                value={location.documentId}
+                textValue={location.name}
+                leadingContent={
+                  location.images[0]?.url ? (
+                    <img
+                      src={location.images[0].url}
+                      alt=""
+                      className="object-cover p-0"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <MapPin className="size-6 text-ink-muted-soft" />
+                  )
+                }
+              >
                 {location.name}
               </SelectItem>
             ))}

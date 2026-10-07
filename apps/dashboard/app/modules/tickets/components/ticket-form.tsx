@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
+import { Image } from 'lucide-react'
 import { TICKET_STATUS, type TicketStatus } from '@repo/types'
 import {
   parseTicketFormToCreateInput,
@@ -18,7 +19,6 @@ import {
   DateTimeInput,
   Field,
   Input,
-  optionalFieldLabel,
   requiredFieldLabel,
   SelectField,
   SelectItem,
@@ -171,7 +171,6 @@ export function TicketForm({
   onDirtyChange,
 }: TicketFormProps) {
   const { t } = useTranslation('tickets')
-  const { t: tCommon } = useTranslation('common')
   const resolveFieldError = useResolveFieldError()
   const createTicketMutation = useCreateTicket()
   const updateTicketMutation = useUpdateTicket()
@@ -208,8 +207,9 @@ export function TicketForm({
 
         form.reset()
         onSuccess()
-      } catch {
-        toast.error(isEdit ? t('form.errorEdit') : t('form.errorCreate'))
+      } catch (error) {
+        const fallbackMessage = isEdit ? t('form.errorEdit') : t('form.errorCreate')
+        toast.error(error instanceof Error ? error.message : fallbackMessage)
       }
     },
   })
@@ -259,6 +259,8 @@ export function TicketForm({
                     fieldError: error,
                     t,
                   })
+                const selectedEvent = events.find((event) => event.documentId === field.state.value)
+                const selectedEventImage = selectedEvent?.images[0]
 
                 return (
                   <SelectField
@@ -268,12 +270,56 @@ export function TicketForm({
                     placeholder={eventPlaceholder}
                     error={eventFieldError}
                     disabled={isEventsLoading || events.length === 0}
+                    valueContent={
+                      selectedEvent ? (
+                        <span className="flex min-w-0 items-center gap-3">
+                          <span
+                            aria-hidden="true"
+                            className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-container-high"
+                          >
+                            {selectedEventImage?.url ? (
+                              <img
+                                src={selectedEventImage.url}
+                                alt=""
+                                className="size-full object-cover"
+                              />
+                            ) : (
+                              <Image className="size-5 text-ink-muted" />
+                            )}
+                          </span>
+                          <span className="truncate">
+                            {`${selectedEvent.name} - ${selectedEvent.locationName}`}
+                          </span>
+                        </span>
+                      ) : undefined
+                    }
                   >
-                    {events.map((event) => (
-                      <SelectItem key={event.documentId} value={event.documentId}>
-                        {`${event.name} - ${event.locationName}`}
-                      </SelectItem>
-                    ))}
+                    {events.map((event) => {
+                      const eventLabel = `${event.name} - ${event.locationName}`
+
+                      return (
+                        <SelectItem
+                          key={event.documentId}
+                          value={event.documentId}
+                          textValue={eventLabel}
+                          leadingContent={
+                            event.images[0]?.url ? (
+                              <img
+                                src={event.images[0].url}
+                                alt=""
+                                className="object-cover p-0"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            ) : (
+                              <Image className="size-5 text-ink-muted" />
+                            )
+                          }
+                        >
+                          <span className="block min-w-0 truncate">{eventLabel}</span>
+                        </SelectItem>
+                      )
+                    })}
                   </SelectField>
                 )
               }}
@@ -444,95 +490,61 @@ export function TicketForm({
               </form.Field>
             </div>
 
-            <form.Subscribe
-              selector={(state) => ({
-                saleStartsAt: state.values.saleStartsAt,
-                saleEndsAt: state.values.saleEndsAt,
-              })}
-            >
-              {({ saleStartsAt, saleEndsAt }) => {
-                const hasSaleDates = Boolean(saleStartsAt?.trim()) || Boolean(saleEndsAt?.trim())
+            <p className="text-xs text-ink-muted">{t('form.saleDatesHint')}</p>
 
-                return (
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-xs text-ink-muted">{t('form.saleDatesHint')}</p>
-                      {hasSaleDates ? (
-                        <Button
-                          type="button"
-                          variant="link"
-                          size="sm"
-                          className="h-auto shrink-0 px-0 py-0 text-xs font-medium text-ink-muted hover:text-ink"
-                          onClick={() => {
-                            form.setFieldValue('saleStartsAt', '')
-                            form.setFieldValue('saleEndsAt', '')
-                          }}
-                        >
-                          {t('form.clearDates')}
-                        </Button>
-                      ) : null}
-                    </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <form.Field
+                name="saleStartsAt"
+                validators={{ onSubmit: ticketFormSchema.shape.saleStartsAt }}
+              >
+                {(field) => {
+                  const error = resolveFieldError(field.state.meta.errors)
 
-                    <div className="grid gap-5 sm:grid-cols-2">
-                      <form.Field
-                        name="saleStartsAt"
-                        validators={{ onSubmit: ticketFormSchema.shape.saleStartsAt }}
-                      >
-                        {(field) => {
-                          const error = resolveFieldError(field.state.meta.errors)
+                  return (
+                    <Field
+                      label={requiredFieldLabel(t('form.saleStartsAt'))}
+                      htmlFor={field.name}
+                      error={error}
+                    >
+                      <DateTimeInput
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        aria-invalid={error ? true : undefined}
+                      />
+                    </Field>
+                  )
+                }}
+              </form.Field>
 
-                          return (
-                            <Field
-                              label={optionalFieldLabel(
-                                t('form.saleStartsAt'),
-                                tCommon('optional')
-                              )}
-                              htmlFor={field.name}
-                              error={error}
-                            >
-                              <DateTimeInput
-                                id={field.name}
-                                name={field.name}
-                                value={field.state.value ?? ''}
-                                onBlur={field.handleBlur}
-                                onChange={(event) => field.handleChange(event.target.value)}
-                                aria-invalid={error ? true : undefined}
-                              />
-                            </Field>
-                          )
-                        }}
-                      </form.Field>
+              <form.Field
+                name="saleEndsAt"
+                validators={{ onSubmit: ticketFormSchema.shape.saleEndsAt }}
+              >
+                {(field) => {
+                  const error = resolveFieldError(field.state.meta.errors)
 
-                      <form.Field
-                        name="saleEndsAt"
-                        validators={{ onSubmit: ticketFormSchema.shape.saleEndsAt }}
-                      >
-                        {(field) => {
-                          const error = resolveFieldError(field.state.meta.errors)
-
-                          return (
-                            <Field
-                              label={optionalFieldLabel(t('form.saleEndsAt'), tCommon('optional'))}
-                              htmlFor={field.name}
-                              error={error}
-                            >
-                              <DateTimeInput
-                                id={field.name}
-                                name={field.name}
-                                value={field.state.value ?? ''}
-                                onBlur={field.handleBlur}
-                                onChange={(event) => field.handleChange(event.target.value)}
-                                aria-invalid={error ? true : undefined}
-                              />
-                            </Field>
-                          )
-                        }}
-                      </form.Field>
-                    </div>
-                  </div>
-                )
-              }}
-            </form.Subscribe>
+                  return (
+                    <Field
+                      label={requiredFieldLabel(t('form.saleEndsAt'))}
+                      htmlFor={field.name}
+                      error={error}
+                    >
+                      <DateTimeInput
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(event) => field.handleChange(event.target.value)}
+                        aria-invalid={error ? true : undefined}
+                      />
+                    </Field>
+                  )
+                }}
+              </form.Field>
+            </div>
             <form.Subscribe selector={(state) => state.values.price}>
               {(price) => <TicketCommercialBreakdown price={price} />}
             </form.Subscribe>

@@ -27,7 +27,7 @@ export function useLogin(returnTo?: string) {
     onSuccess: async (session) => {
       saveAuthSession(session)
       await useSessionStore.getState().loadSession()
-      const to = await resolvePostAuthPath(returnTo ?? WEB_ROUTES.home())
+      const to = await resolvePostAuthPath(returnTo ?? WEB_ROUTES.events())
       await navigate({ to: to as '/', replace: true })
     },
   })
@@ -47,7 +47,7 @@ export function useConfirmUserRegistration() {
     onSuccess: async (session) => {
       saveAuthSession(session)
       await useSessionStore.getState().loadSession()
-      const to = await resolvePostAuthPath(WEB_ROUTES.home())
+      const to = await resolvePostAuthPath(WEB_ROUTES.events())
       await navigate({ to: to as '/', replace: true })
     },
   })

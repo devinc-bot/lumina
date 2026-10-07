@@ -38,10 +38,6 @@ const appShellUserModuleUrl = new URL(
   '../app/modules/common/components/app-shell-user.tsx',
   import.meta.url
 )
-const appShellThemeModuleUrl = new URL(
-  '../app/modules/common/components/app-shell-theme-switcher.tsx',
-  import.meta.url
-)
 const appShellLanguageModuleUrl = new URL(
   '../app/modules/common/components/app-shell-language-switcher.tsx',
   import.meta.url
@@ -130,10 +126,9 @@ test('admin protected root redirects to users and exposes section routes', async
 })
 
 test('admin shell provides navigation, account identity, and sign-out without mock metrics', async () => {
-  const [shellSource, userSource, themeSource, languageSource] = await Promise.all([
+  const [shellSource, userSource, languageSource] = await Promise.all([
     readFile(appShellModuleUrl, 'utf8'),
     readFile(appShellUserModuleUrl, 'utf8'),
-    readFile(appShellThemeModuleUrl, 'utf8'),
     readFile(appShellLanguageModuleUrl, 'utf8'),
   ])
 
@@ -146,8 +141,6 @@ test('admin shell provides navigation, account identity, and sign-out without mo
   expect(shellSource.includes("t('brand.subtitle')")).toBe(true)
   expect(userSource.includes('user.email')).toBe(true)
   expect(userSource.includes("t('nav.signOut')")).toBe(true)
-  expect(themeSource.includes('useTheme')).toBe(true)
-  expect(themeSource.includes("t('nav.theme')")).toBe(true)
   expect(languageSource.includes('useLanguage')).toBe(true)
   expect(shellSource.includes('KPI')).toBe(false)
 })

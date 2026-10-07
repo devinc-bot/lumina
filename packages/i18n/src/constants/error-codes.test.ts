@@ -1,5 +1,10 @@
 import { expect, test } from 'vitest'
-import { AUTH_ERROR_CODE, LEGAL_DOCUMENT_ERROR_CODE, RATE_LIMIT_ERROR_CODE } from './error-codes.ts'
+import {
+  AUTH_ERROR_CODE,
+  LEGAL_DOCUMENT_ERROR_CODE,
+  RATE_LIMIT_ERROR_CODE,
+  TICKET_ERROR_CODE,
+} from './error-codes.ts'
 import enErrors from '../locales/errors/en.json' with { type: 'json' }
 import esErrors from '../locales/errors/es.json' with { type: 'json' }
 
@@ -78,5 +83,15 @@ test('exposes invalid legal acceptance types in Spanish and English', () => {
   )
   expect(nestedCopy(enErrors, LEGAL_DOCUMENT_ERROR_CODE.INVALID_TYPES)).toBe(
     'Those documents do not apply to your account.'
+  )
+})
+
+test('localizes ticket capacity validation in Spanish and English', () => {
+  expect(TICKET_ERROR_CODE.CAPACITY_EXCEEDED).toBe('ticket.CAPACITY_EXCEEDED')
+  expect(nestedCopy(esErrors, TICKET_ERROR_CODE.CAPACITY_EXCEEDED)).toBe(
+    'La cantidad total de tickets supera la capacidad de la ubicación.'
+  )
+  expect(nestedCopy(enErrors, TICKET_ERROR_CODE.CAPACITY_EXCEEDED)).toBe(
+    'The total ticket quantity exceeds the location capacity.'
   )
 })

@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { MAIL_ERROR_CODE } from '@repo/i18n/constants'
 import type { TranslationService } from '@repo/i18n/server'
+import { MAIL_SENDER_TYPE } from '@repo/types'
 
 const envState = vi.hoisted(() => ({
-  MAIL_FROM: 'no-reply@example.test',
+  MAIL_DOMAIN: 'dev.lumina-events.com',
+  MAIL_REPLY_TO: 'luminaeventssupport@gmail.com',
 }))
 
 vi.mock('../../../../config/env', () => ({
@@ -17,26 +20,50 @@ const translationService = {
 
 describe('MailConfigService', () => {
   beforeEach(() => {
-    envState.MAIL_FROM = 'no-reply@example.test'
+    envState.MAIL_DOMAIN = 'dev.lumina-events.com'
+    envState.MAIL_REPLY_TO = 'luminaeventssupport@gmail.com'
   })
 
-  test('isConfigured is true when MAIL_FROM is non-empty', () => {
+  test('isConfigured is true for no-reply when MAIL_DOMAIN is non-empty', () => {
     const service = new MailConfigService(translationService)
 
-    expect(service.isConfigured()).toBe(true)
+    expect(service.isConfigured(MAIL_SENDER_TYPE.NO_REPLY)).toBe(true)
   })
 
-  test('isConfigured is false when MAIL_FROM is empty', () => {
-    envState.MAIL_FROM = ''
+  test('isConfigured is false for no-reply when MAIL_DOMAIN is empty', () => {
+    envState.MAIL_DOMAIN = ''
     const service = new MailConfigService(translationService)
 
-    expect(service.isConfigured()).toBe(false)
+    expect(service.isConfigured(MAIL_SENDER_TYPE.NO_REPLY)).toBe(false)
   })
 
-  test('isConfigured is false when MAIL_FROM is whitespace only', () => {
-    envState.MAIL_FROM = '   '
+  test('isConfigured is false for no-reply when MAIL_DOMAIN is whitespace only', () => {
+    envState.MAIL_DOMAIN = '   '
     const service = new MailConfigService(translationService)
 
-    expect(service.isConfigured()).toBe(false)
+    expect(service.isConfigured(MAIL_SENDER_TYPE.NO_REPLY)).toBe(false)
+  })
+
+  test('isConfigured is false for support when MAIL_REPLY_TO is blank', () => {
+    envState.MAIL_REPLY_TO = '   '
+    const service = new MailConfigService(translationService)
+
+    expect(service.isConfigured(MAIL_SENDER_TYPE.SUPPORT)).toBe(false)
+  })
+
+  test('assertConfigured keeps no-reply configured when MAIL_REPLY_TO is blank', () => {
+    envState.MAIL_REPLY_TO = ''
+    const service = new MailConfigService(translationService)
+
+    expect(() => service.assertConfigured(MAIL_SENDER_TYPE.NO_REPLY)).not.toThrow()
+  })
+
+  test('assertConfigured rejects support when MAIL_REPLY_TO is blank', () => {
+    envState.MAIL_REPLY_TO = ''
+    const service = new MailConfigService(translationService)
+
+    expect(() => service.assertConfigured(MAIL_SENDER_TYPE.SUPPORT)).toThrow(
+      MAIL_ERROR_CODE.NOT_CONFIGURED
+    )
   })
 })

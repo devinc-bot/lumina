@@ -1,12 +1,18 @@
 import { z } from 'zod'
 import { TICKET_SALES_FILTER, TICKET_STATUS } from '@repo/types'
-import { paginationSchema, optionalCoercedDateSchema, uuidSchema } from './common.ts'
+import { paginationSchema, uuidSchema } from './common.ts'
 
 export const ticketSoldDocumentIdSchema = z.string().trim().min(1).max(255)
 
 export const ticketStatusSchema = z.enum([TICKET_STATUS.ACTIVE, TICKET_STATUS.INACTIVE])
 
 export const ticketTypeDocumentIdSchema = uuidSchema
+
+const ticketFormTypeDocumentIdSchema = z
+  .string()
+  .trim()
+  .min(1, 'validation:field.ticket.typeRequired')
+  .pipe(ticketTypeDocumentIdSchema)
 
 export const createTicketTypeSchema = z.object({
   name: z.string().trim().min(1).max(100),
@@ -19,33 +25,32 @@ export const ticketSalesFilterSchema = z.enum([
   TICKET_SALES_FILTER.UNSOLD,
 ])
 
-const optionalDateTimeStringSchema = z.union([z.string(), z.undefined()]).transform((value) => {
-  const trimmed = value?.trim() ?? ''
-  return trimmed.length === 0 ? undefined : trimmed
-})
-
-const ticketSaleDatePairRefine = {
-  refine: (data: { saleStartsAt?: string; saleEndsAt?: string }) => {
-    const hasStart = Boolean(data.saleStartsAt)
-    const hasEnd = Boolean(data.saleEndsAt)
-    return hasStart === hasEnd
-  },
-  message: 'validation:field.ticket.saleDatesPair' as const,
-  path: ['saleEndsAt'] as const,
+function isValidDateTimeString(value: string): boolean {
+  return !Number.isNaN(new Date(value).getTime())
 }
 
-const ticketSaleDatePairRefineApi = {
-  refine: (data: { saleStartsAt?: Date; saleEndsAt?: Date }) => {
-    const hasStart = Boolean(data.saleStartsAt)
-    const hasEnd = Boolean(data.saleEndsAt)
-    return hasStart === hasEnd
-  },
-  message: 'validation:field.ticket.saleDatesPair' as const,
-  path: ['saleEndsAt'] as const,
+function isEmptyOrValidDateTimeString(value: string): boolean {
+  return value.length === 0 || isValidDateTimeString(value)
 }
+
+const saleStartDateTimeStringSchema = z
+  .string()
+  .trim()
+  .min(1, 'validation:field.ticket.saleStartRequired')
+  .refine(isEmptyOrValidDateTimeString, 'validation:field.ticket.saleDateInvalid')
+
+const saleEndDateTimeStringSchema = z
+  .string()
+  .trim()
+  .min(1, 'validation:field.ticket.saleEndRequired')
+  .refine(isEmptyOrValidDateTimeString, 'validation:field.ticket.saleDateInvalid')
+
+const saleStartDateSchema = z.coerce.date({ message: 'validation:field.ticket.saleStartRequired' })
+
+const saleEndDateSchema = z.coerce.date({ message: 'validation:field.ticket.saleEndRequired' })
 
 const ticketSaleDateRangeRefine = {
-  refine: (data: { saleStartsAt?: string; saleEndsAt?: string }) => {
+  refine: (data: { saleStartsAt: string; saleEndsAt: string }) => {
     if (!data.saleStartsAt || !data.saleEndsAt) {
       return true
     }
@@ -53,23 +58,15 @@ const ticketSaleDateRangeRefine = {
     const start = new Date(data.saleStartsAt)
     const end = new Date(data.saleEndsAt)
 
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-      return true
-    }
-
-    return end > start
+    return end >= start
   },
   message: 'validation:field.ticket.saleEndAfterStart' as const,
   path: ['saleEndsAt'] as const,
 }
 
 const ticketSaleDateRangeRefineApi = {
-  refine: (data: { saleStartsAt?: Date; saleEndsAt?: Date }) => {
-    if (!data.saleStartsAt || !data.saleEndsAt) {
-      return true
-    }
-
-    return data.saleEndsAt > data.saleStartsAt
+  refine: (data: { saleStartsAt: Date; saleEndsAt: Date }) => {
+    return data.saleEndsAt >= data.saleStartsAt
   },
   message: 'validation:field.ticket.saleEndAfterStart' as const,
   path: ['saleEndsAt'] as const,
@@ -81,15 +78,11 @@ const ticketBaseSchema = z
     price: z.coerce.number().positive('validation:field.ticket.price'),
     quantity: z.coerce.number().int().positive('validation:field.ticket.quantity'),
     description: z.string().trim().min(1, 'validation:field.ticket.description'),
-    saleStartsAt: optionalCoercedDateSchema,
-    saleEndsAt: optionalCoercedDateSchema,
+    saleStartsAt: saleStartDateSchema,
+    saleEndsAt: saleEndDateSchema,
     status: ticketStatusSchema.default(TICKET_STATUS.ACTIVE),
     // Seed and real rows use documentId strings; not all seeds are UUID-shaped.
     eventId: z.string().trim().min(1, 'validation:field.ticket.event'),
-  })
-  .refine(ticketSaleDatePairRefineApi.refine, {
-    message: ticketSaleDatePairRefineApi.message,
-    path: [...ticketSaleDatePairRefineApi.path],
   })
   .refine(ticketSaleDateRangeRefineApi.refine, {
     message: ticketSaleDateRangeRefineApi.message,
@@ -107,17 +100,13 @@ const priceStringSchema = z.string().trim().min(1, 'validation:field.ticket.pric
 export const ticketFormSchema = z
   .object({
     eventId: z.string().trim().min(1, 'validation:field.ticket.event'),
-    ticketTypeId: ticketTypeDocumentIdSchema,
+    ticketTypeId: ticketFormTypeDocumentIdSchema,
     price: priceStringSchema,
     quantity: quantityStringSchema,
     description: z.string().trim().min(1, 'validation:field.ticket.description'),
-    saleStartsAt: optionalDateTimeStringSchema,
-    saleEndsAt: optionalDateTimeStringSchema,
+    saleStartsAt: saleStartDateTimeStringSchema,
+    saleEndsAt: saleEndDateTimeStringSchema,
     status: ticketStatusSchema,
-  })
-  .refine(ticketSaleDatePairRefine.refine, {
-    message: ticketSaleDatePairRefine.message,
-    path: [...ticketSaleDatePairRefine.path],
   })
   .refine(ticketSaleDateRangeRefine.refine, {
     message: ticketSaleDateRangeRefine.message,
@@ -125,6 +114,13 @@ export const ticketFormSchema = z
   })
 
 export type TicketFormValues = z.infer<typeof ticketFormSchema>
+
+export function isTicketSaleEndAtOrBeforeEventStart(
+  saleEndsAt: Date,
+  eventStartsAt: Date
+): boolean {
+  return saleEndsAt <= eventStartsAt
+}
 
 export function parseTicketFormToCreateInput(values: TicketFormValues): CreateTicketInput {
   return createTicketSchema.parse(values)

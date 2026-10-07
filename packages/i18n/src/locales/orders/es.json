@@ -4,7 +4,7 @@
     "description": "Revisá el estado y los detalles de tus compras.",
     "metaTitle": "Mis órdenes · {appName}"
   },
-  "retentionNotice": "Las órdenes pendientes con más de un mes de antigüedad se eliminarán automáticamente.",
+  "retentionNotice": "Cancelar un checkout sin finalizar no elimina el registro de la compra. La política de conservación prevé minimizar los datos elegibles de checkouts no exitosos después de 90 días y disociar de la persona compradora las compras no exitosas elegibles después de 12 meses.",
   "list": {
     "ariaLabel": "Lista de órdenes"
   },
@@ -18,7 +18,7 @@
   "actions": {
     "retry": "Reintentar",
     "discoverEvents": "Descubrir eventos",
-    "delete": "Eliminar"
+    "cancelCheckout": "Cancelar checkout"
   },
   "pagination": {
     "ariaLabel": "Paginación de órdenes",
@@ -43,13 +43,13 @@
     "reference": "Orden #{reference}",
     "unavailable": "No disponible"
   },
-  "delete": {
-    "title": "Eliminar orden pendiente",
-    "description": "Vas a cancelar el checkout y eliminar la orden de {{ticket}}. Esta acción no se puede revertir.",
-    "cancel": "Cancelar",
-    "confirm": "Eliminar orden",
-    "deleting": "Eliminando…",
-    "success": "La orden pendiente fue eliminada.",
-    "error": "No pudimos eliminar la orden. Intentá de nuevo."
+  "cancelCheckout": {
+    "title": "Cancelar checkout sin finalizar",
+    "description": "Vas a cancelar el checkout de {ticket}. Esto no elimina el registro de la compra.",
+    "dismiss": "Conservar checkout",
+    "confirm": "Cancelar checkout",
+    "cancelling": "Cancelando…",
+    "success": "Tu checkout sin finalizar fue cancelado.",
+    "error": "No pudimos cancelar el checkout. Intentá de nuevo."
   }
 }

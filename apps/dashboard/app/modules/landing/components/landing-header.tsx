@@ -13,7 +13,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  ThemeToggle,
   cn,
   linkVariants,
 } from '@repo/ui'
@@ -92,7 +91,6 @@ export function LandingHeader() {
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <LanguageToggle className={iconButton} languageLabel={t('header.language')} />
-            <ThemeToggle className={iconButton} />
             <Link to={DASHBOARD_ROUTES.login()} className={cn(authLink, 'px-2 font-label text-sm')}>
               {t('header.login')}
             </Link>

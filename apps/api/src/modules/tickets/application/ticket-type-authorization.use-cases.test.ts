@@ -1,20 +1,14 @@
 import { expect, test, vi } from 'vitest'
 import { NotFoundException } from '@nestjs/common'
 
-const state = vi.hoisted(() => ({ createCalls: 0, updateCalls: 0 }))
-
 vi.mock('@repo/db', () => ({
-  createTicket: async () => {
-    state.createCalls += 1
-    return null
-  },
   findAvailableTicketTypeByDocumentId: async () => null,
-  findEventOwnedByOwnerDocumentId: async () => ({ id: 1 }),
+  findEventOwnedByOwnerDocumentId: async () => ({
+    id: 1,
+    organizationId: 1,
+    startsAt: new Date('2026-09-01T22:00:00.000Z'),
+  }),
   findTicketWithRelationsOwnedByOwner: async () => ({ id: 1 }),
-  updateTicketByDocumentId: async () => {
-    state.updateCalls += 1
-    return null
-  },
 }))
 
 const translationService = { translateError: (code: string) => code } as never
@@ -28,22 +22,18 @@ const input = {
   description: 'Private access',
   status: 'active' as const,
   eventId: 'event-id',
+  saleStartsAt: new Date('2026-09-01T20:00:00.000Z'),
+  saleEndsAt: new Date('2026-09-01T22:00:00.000Z'),
 }
 
 test('does not create a ticket with another owner ticket type', async () => {
-  state.createCalls = 0
-
   await expect(
     new CreateTicketUseCase(translationService).execute('owner-id', input)
   ).rejects.toBeInstanceOf(NotFoundException)
-  expect(state.createCalls).toBe(0)
 })
 
 test('does not update a ticket with another owner ticket type', async () => {
-  state.updateCalls = 0
-
   await expect(
     new UpdateTicketUseCase(translationService).execute('owner-id', 'ticket-id', input)
   ).rejects.toBeInstanceOf(NotFoundException)
-  expect(state.updateCalls).toBe(0)
 })

@@ -1,5 +1,9 @@
 import { PAYMENT_STATUS, type PaymentStatus } from '@repo/types'
 
+export function canCancelOrder(status: PaymentStatus) {
+  return status === PAYMENT_STATUS.PENDING
+}
+
 export function getOrderStatusBadgeVariant(status: PaymentStatus) {
   switch (status) {
     case PAYMENT_STATUS.COMPLETED:

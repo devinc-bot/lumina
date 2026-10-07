@@ -282,7 +282,8 @@
       "pendingTitle": "Estamos confirmando tu pago",
       "pending": "La confirmación puede demorar unos instantes. Te avisaremos cuando tus entradas estén listas.",
       "errorTitle": "No pudimos completar el pago",
-      "error": "No se emitieron entradas. Podés volver a intentarlo desde el evento."
+      "error": "No se emitieron entradas. Podés volver a intentarlo desde el evento.",
+      "reference": "Referencia de la operación"
     }
   }
 }

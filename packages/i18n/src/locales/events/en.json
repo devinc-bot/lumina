@@ -282,7 +282,8 @@
       "pendingTitle": "We are confirming your payment",
       "pending": "Confirmation can take a few moments. We will let you know when your tickets are ready.",
       "errorTitle": "We could not complete the payment",
-      "error": "No tickets were issued. You can try again from the event."
+      "error": "No tickets were issued. You can try again from the event.",
+      "reference": "Transaction reference"
     }
   }
 }

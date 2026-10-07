@@ -29,6 +29,12 @@
       "invalid": "Ingresá un teléfono válido.",
       "tooLong": "El teléfono admite hasta {max} caracteres."
     },
+    "mailDomain": {
+      "invalid": "Ingresá un dominio de correo válido."
+    },
+    "mailReplyTo": {
+      "invalid": "Ingresá una dirección de respuesta válida."
+    },
     "birthday": {
       "format": "Usá el formato AAAA-MM-DD."
     },
@@ -81,12 +87,15 @@
     },
     "ticket": {
       "name": "El tipo de entrada es requerido.",
+      "typeRequired": "Seleccioná un tipo de ticket.",
       "price": "Ingresá un precio válido mayor a cero.",
       "quantity": "Ingresá una cantidad válida mayor a cero.",
       "description": "La descripción es requerida.",
       "event": "Seleccioná un evento.",
-      "saleDatesPair": "Completá la fecha de inicio y fin de venta, o dejá ambas vacías.",
-      "saleEndAfterStart": "La fecha de fin de venta debe ser posterior al inicio de venta."
+      "saleStartRequired": "La fecha de inicio de venta es requerida.",
+      "saleEndRequired": "La fecha de fin de venta es requerida.",
+      "saleDateInvalid": "Ingresá una fecha y hora de venta válida.",
+      "saleEndAfterStart": "La fecha de fin de venta debe ser igual o posterior al inicio de venta."
     },
     "event": {
       "name": "El nombre del evento es requerido.",

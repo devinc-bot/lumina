@@ -26,7 +26,7 @@ export function RequireCurrentLegalAcceptance({ children }: { children: React.Re
       void navigate({ to: WEB_ROUTES.legalAcceptance(), replace: true })
     }
     if (!isStale && isAcceptancePage) {
-      void navigate({ to: WEB_ROUTES.home(), replace: true })
+      void navigate({ to: WEB_ROUTES.events(), replace: true })
     }
   }, [isAcceptancePage, navigate, pending.data, pending.isSuccess])
 

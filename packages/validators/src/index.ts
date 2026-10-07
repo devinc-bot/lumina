@@ -1,4 +1,5 @@
 export * from './common.ts'
+export * from './mail.ts'
 export * from './api-error-record.ts'
 export * from './auth.ts'
 export * from './location.ts'

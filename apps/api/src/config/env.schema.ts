@@ -1,4 +1,10 @@
-import { booleanStringSchema, IMAGE_OPTIMIZATION, IMAGE_UPLOAD_MAX_BYTES } from '@repo/validators'
+import {
+  booleanStringSchema,
+  IMAGE_OPTIMIZATION,
+  IMAGE_UPLOAD_MAX_BYTES,
+  mailDomainSchema,
+  mailReplyToSchema,
+} from '@repo/validators'
 import { z } from 'zod'
 import { RATE_LIMIT_POLICY_DEFAULTS, RATE_LIMIT_PROFILE } from './rate-limit.policy'
 
@@ -12,8 +18,8 @@ export const mailEnvSchema = z
     AWS_REGION: z.string().min(1),
     AWS_ACCESS_KEY_ID: z.string().default(''),
     AWS_SECRET_ACCESS_KEY: z.string().default(''),
-    MAIL_FROM: z.string(),
-    MAIL_REPLY_TO: z.string().default(''),
+    MAIL_DOMAIN: mailDomainSchema.default(''),
+    MAIL_REPLY_TO: mailReplyToSchema.default(''),
     MAIL_SMOKE_TO: z.string(),
   })
   .superRefine((config, context) => {
