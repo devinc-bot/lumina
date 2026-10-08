@@ -39,7 +39,7 @@ export function SectionHero() {
           decoding="async"
         />
         <div
-          className="pointer-events-none absolute inset-0 bg-linear-to-t from-surface-dim via-surface-dim/80 to-surface-dim/35"
+          className="pointer-events-none absolute inset-0 bg-linear-to-t from-surface-dim via-surface-dim/80 to-surface-dim/30"
           aria-hidden
         />
         <div

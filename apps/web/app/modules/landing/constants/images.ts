@@ -6,6 +6,6 @@ function localImage(path: string) {
 }
 
 export const LANDING_IMAGES = {
-  hero: localImage('/landing/hero.png'),
+  hero: localImage('/landing/hero.webp'),
   about: localImage('/landing/about.png'),
 } as const

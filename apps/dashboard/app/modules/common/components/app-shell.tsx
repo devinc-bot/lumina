@@ -77,7 +77,11 @@ function buildPrimaryNav(t: TFunction<'dashboard'>, role?: UserRole): AppShellNa
   ]
 
   if (role === USER_ROLE.STAFF || role === USER_ROLE.OWNER) {
-    return items.filter((item) => isRouteAllowedForRole(role, item.url))
+    return items.filter(
+      (item) =>
+        (role !== USER_ROLE.STAFF || item.url !== DASHBOARD_ROUTES.home()) &&
+        isRouteAllowedForRole(role, item.url)
+    )
   }
 
   return []

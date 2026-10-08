@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui'
+import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@repo/ui'
+import { ScanLine } from 'lucide-react'
 import { PageLayout } from '~/modules/common/components/page-layout'
 import { ScannedTicketsHistory } from './scanned-tickets-history'
 import { TicketScanner } from './ticket-scanner'
@@ -15,12 +16,17 @@ type QrTicketTab = (typeof QR_TICKET_TAB)[keyof typeof QR_TICKET_TAB]
 export function TicketCheckInPage() {
   const { t } = useTranslation('dashboard')
   const [activeTab, setActiveTab] = useState<QrTicketTab>(QR_TICKET_TAB.SCAN)
+  const [isScannerStarted, setIsScannerStarted] = useState(false)
 
   return (
     <PageLayout title={t('pages.qrTicket.title')} description={t('pages.qrTicket.description')}>
       <Tabs
         value={activeTab}
-        onValueChange={(value) => setActiveTab(value as QrTicketTab)}
+        onValueChange={(value) => {
+          const nextTab = value as QrTicketTab
+          setActiveTab(nextTab)
+          if (nextTab !== QR_TICKET_TAB.SCAN) setIsScannerStarted(false)
+        }}
         className="flex flex-col gap-4"
       >
         <TabsList variant="line">
@@ -34,7 +40,14 @@ export function TicketCheckInPage() {
 
         <TabsContent value={QR_TICKET_TAB.SCAN} className="mt-0">
           <div className="mx-auto w-full max-w-xl">
-            <TicketScanner />
+            {isScannerStarted ? (
+              <TicketScanner />
+            ) : (
+              <Button onClick={() => setIsScannerStarted(true)}>
+                <ScanLine aria-hidden="true" />
+                {t('pages.qrTicket.startScanning')}
+              </Button>
+            )}
           </div>
         </TabsContent>
 
