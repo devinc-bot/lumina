@@ -62,6 +62,19 @@
       "reconnect": "Volver a conectar Mercado Pago",
       "disconnect": "Desconectar",
       "error": "No pudimos actualizar la conexión de Mercado Pago.",
+      "otp": {
+        "title": "Confirmá el cambio",
+        "sent": "Enviamos un código a {email}.",
+        "expires": "El código vence a las {date}.",
+        "label": "Código de 6 dígitos",
+        "verify": "Verificar código",
+        "resend": "Reenviar código",
+        "cancel": "Cancelar",
+        "errors": {
+          "invalidOrExpired": "El código es inválido o venció. Solicitá uno nuevo e intentá otra vez.",
+          "requestLimitReached": "Alcanzaste el límite de solicitudes de código. Esperá unos minutos e intentá otra vez."
+        }
+      },
       "settlementTerm": {
         "label": "Cuándo se acredita el dinero",
         "hint": "Elegí el mismo plazo que configuraste en Mercado Pago. Este porcentaje se usa solo para estimar el cargo; el importe final puede variar.",

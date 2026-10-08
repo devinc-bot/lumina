@@ -25,7 +25,6 @@ import { ADMIN_ROUTES } from '~/modules/common/constants/routes'
 import { useSession } from '~/modules/common/hooks/use-session'
 import { logoutAuthSession } from '~/modules/common/services/session.service'
 import { AppShellLanguageSwitcher } from './app-shell-language-switcher'
-import { AppShellThemeSwitcher } from './app-shell-theme-switcher'
 import { AppShellUser } from './app-shell-user'
 
 type AppShellNavItem = {
@@ -112,7 +111,6 @@ function AppShellLayout({ children }: { children: React.ReactNode }) {
         navMain={navMain}
         footerExtra={
           <>
-            <AppShellThemeSwitcher />
             <AppShellLanguageSwitcher />
             <AppShellUser user={user} onSettings={goToSettings} onSignOut={handleSignOut} />
           </>

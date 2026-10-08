@@ -11,7 +11,7 @@ const validMailEnv = {
   AWS_REGION: 'sa-east-1',
   AWS_ACCESS_KEY_ID: '',
   AWS_SECRET_ACCESS_KEY: '',
-  MAIL_FROM: 'no-reply@example.test',
+  MAIL_DOMAIN: 'dev.lumina-events.com',
   MAIL_SMOKE_TO: 'smoke@example.test',
 }
 
@@ -22,7 +22,7 @@ test('mail env accepts AWS_REGION with empty paired AWS keys', () => {
     AWS_REGION: 'sa-east-1',
     AWS_ACCESS_KEY_ID: '',
     AWS_SECRET_ACCESS_KEY: '',
-    MAIL_FROM: 'no-reply@example.test',
+    MAIL_DOMAIN: 'dev.lumina-events.com',
     MAIL_SMOKE_TO: 'smoke@example.test',
   })
   expect(env).not.toHaveProperty('RESEND_API_KEY')
@@ -104,7 +104,8 @@ test('mail env schema does not include RESEND_API_KEY', () => {
   expect(mailEnvSchema.shape).toHaveProperty('AWS_REGION')
   expect(mailEnvSchema.shape).toHaveProperty('AWS_ACCESS_KEY_ID')
   expect(mailEnvSchema.shape).toHaveProperty('AWS_SECRET_ACCESS_KEY')
-  expect(mailEnvSchema.shape).toHaveProperty('MAIL_FROM')
+  expect(mailEnvSchema.shape).toHaveProperty('MAIL_DOMAIN')
+  expect(mailEnvSchema.shape).not.toHaveProperty('MAIL_FROM')
   expect(mailEnvSchema.shape).toHaveProperty('MAIL_SMOKE_TO')
   expect(mailEnvSchema.shape).toHaveProperty('MAIL_REPLY_TO')
 })
@@ -118,11 +119,49 @@ test('mail env defaults MAIL_REPLY_TO to empty string when omitted', () => {
 test('mail env accepts an explicit MAIL_REPLY_TO value', () => {
   const env = mailEnvSchema.parse({
     ...validMailEnv,
-    MAIL_REPLY_TO: 'support@example.test',
+    MAIL_REPLY_TO: '  luminaeventssupport@gmail.com  ',
   })
 
-  expect(env.MAIL_REPLY_TO).toBe('support@example.test')
+  expect(env.MAIL_REPLY_TO).toBe('luminaeventssupport@gmail.com')
 })
+
+test('mail env normalizes a configured MAIL_DOMAIN', () => {
+  const env = mailEnvSchema.parse({
+    ...validMailEnv,
+    MAIL_DOMAIN: '  DEV.Lumina-Events.Com  ',
+  })
+
+  expect(env.MAIL_DOMAIN).toBe('dev.lumina-events.com')
+})
+
+test.each([
+  'support@example.com',
+  'https://dev.lumina-events.com',
+  'dev.lumina-events.com:2525',
+  'dev.lumina-events.com/path',
+  'dev lumina-events.com',
+  '-dev.lumina-events.com',
+  'dev..lumina-events.com',
+])('mail env rejects invalid nonblank MAIL_DOMAIN %s', (MAIL_DOMAIN) => {
+  expect(mailEnvSchema.safeParse({ ...validMailEnv, MAIL_DOMAIN }).success).toBe(false)
+})
+
+test('mail env permits blank MAIL_DOMAIN so mail can remain disabled', () => {
+  expect(mailEnvSchema.parse({ ...validMailEnv, MAIL_DOMAIN: '   ' }).MAIL_DOMAIN).toBe('')
+})
+
+test('mail env defaults an omitted MAIL_DOMAIN to disabled mail', () => {
+  const { MAIL_DOMAIN: _mailDomain, ...withoutMailDomain } = validMailEnv
+
+  expect(mailEnvSchema.parse(withoutMailDomain).MAIL_DOMAIN).toBe('')
+})
+
+test.each(['support@example', 'support@example.com,other@example.com'])(
+  'mail env rejects invalid MAIL_REPLY_TO %s',
+  (MAIL_REPLY_TO) => {
+    expect(mailEnvSchema.safeParse({ ...validMailEnv, MAIL_REPLY_TO }).success).toBe(false)
+  }
+)
 
 test('mail env rejects an empty AWS_REGION', () => {
   expect(mailEnvSchema.safeParse({ ...validMailEnv, AWS_REGION: '' }).success).toBe(false)
@@ -134,7 +173,7 @@ test('runtime env schema rejects unpaired AWS credentials', () => {
     AWS_REGION: 'sa-east-1',
     AWS_ACCESS_KEY_ID: 'AKIATESTACCESSKEY',
     AWS_SECRET_ACCESS_KEY: '',
-    MAIL_FROM: 'no-reply@example.test',
+    MAIL_DOMAIN: 'dev.lumina-events.com',
     MAIL_SMOKE_TO: 'smoke@example.test',
   })
 

@@ -5,6 +5,14 @@ export const TICKET_STATUS = {
 
 export type TicketStatus = (typeof TICKET_STATUS)[keyof typeof TICKET_STATUS]
 
+export const TICKET_CAPACITY_RESULT = {
+  SAVED: 'saved',
+  CAPACITY_EXCEEDED: 'capacity-exceeded',
+} as const
+
+export type TicketCapacityResult =
+  (typeof TICKET_CAPACITY_RESULT)[keyof typeof TICKET_CAPACITY_RESULT]
+
 export const TICKET_TYPE = {
   GENERAL: 'general',
   VIP: 'vip',

@@ -9,6 +9,7 @@ import { SESv2Client, SendEmailCommand } from '@aws-sdk/client-sesv2'
 import { MAIL_ERROR_CODE } from '@repo/i18n/constants'
 import { TranslationService } from '@repo/i18n/server'
 import { ENV } from '../../../config/env'
+import { resolveMailSenderPolicy } from '../mail-sender-policy'
 import type { MailSender } from '../mail-sender.port'
 import type { SendMailInput, SendMailResult } from '../types'
 
@@ -35,19 +36,17 @@ export class SesMailSender implements MailSender {
   }
 
   async send(input: SendMailInput): Promise<SendMailResult> {
-    const from = ENV.MAIL_FROM.trim()
-    if (from === '') {
+    const policy = resolveMailSenderPolicy(input.senderType, ENV.MAIL_DOMAIN, ENV.MAIL_REPLY_TO)
+    if (policy === null) {
       throw new ServiceUnavailableException(this.ts.translateError(MAIL_ERROR_CODE.NOT_CONFIGURED))
     }
 
-    const replyTo = ENV.MAIL_REPLY_TO.trim()
-
     const command = new SendEmailCommand({
-      FromEmailAddress: from,
+      FromEmailAddress: policy.from,
       Destination: {
         ToAddresses: Array.isArray(input.to) ? input.to : [input.to],
       },
-      ...(replyTo !== '' ? { ReplyToAddresses: [replyTo] } : {}),
+      ...(policy.replyTo !== undefined ? { ReplyToAddresses: [policy.replyTo] } : {}),
       Content: {
         Simple: {
           Subject: { Data: input.subject, Charset: 'UTF-8' },

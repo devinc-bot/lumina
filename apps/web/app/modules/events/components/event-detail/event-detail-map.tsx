@@ -1,14 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Map,
-  MapControls,
-  MapMarker,
-  MapPinMarker,
-  MarkerContent,
-  MarkerPopup,
-  useTheme,
-} from '@repo/ui'
+import { Map, MapControls, MapMarker, MapPinMarker, MarkerContent, MarkerPopup } from '@repo/ui'
 import { EVENTS_DISCOVER_MAP_SINGLE_ZOOM } from '../../constants/events-discover-map'
 
 type EventDetailMapProps = {
@@ -27,7 +19,6 @@ export function EventDetailMap({
   addressText,
 }: EventDetailMapProps) {
   const { t } = useTranslation('events')
-  const { theme } = useTheme()
   const mounted = useSyncExternalStore(
     subscribeToClient,
     () => true,
@@ -54,7 +45,7 @@ export function EventDetailMap({
       aria-label={t('discover.detail.mapAriaLabel')}
     >
       <Map
-        theme={theme}
+        theme="dark"
         center={[longitude, latitude]}
         zoom={EVENTS_DISCOVER_MAP_SINGLE_ZOOM}
         className="h-full w-full"

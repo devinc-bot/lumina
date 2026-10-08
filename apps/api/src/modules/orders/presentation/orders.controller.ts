@@ -17,7 +17,6 @@ import {
   type BuyerOrderSummaryResponse,
   type CreateOrderResponse,
   type JwtPayload,
-  type OrderResponse,
   type PaginatedResponse,
 } from '@repo/types'
 import {
@@ -94,7 +93,7 @@ export class OrdersController {
   get(
     @CurrentUser() user: JwtPayload,
     @Param('documentId', new ZodValidationPipe(uuidSchema)) documentId: string
-  ): Promise<OrderResponse> {
+  ): Promise<BuyerOrderSummaryResponse> {
     return this.getOrderByDocumentIdUseCase.execute(user.sub, documentId)
   }
 }

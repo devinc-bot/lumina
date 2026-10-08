@@ -85,6 +85,12 @@ export {
   type FormLayoutSpanSize,
 } from './components/ui/form-layout.tsx'
 export { Input, type InputProps } from './components/ui/input.tsx'
+export {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+  InputOTPSeparator,
+} from './components/ui/input-otp.tsx'
 export { DateInput, type DateInputProps } from './components/ui/date-input.tsx'
 export { DateTimeInput, type DateTimeInputProps } from './components/ui/datetime-input.tsx'
 export {

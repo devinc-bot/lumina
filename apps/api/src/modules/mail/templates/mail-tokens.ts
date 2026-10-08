@@ -80,3 +80,17 @@ export const mailCalloutStyle: CSSProperties = {
   margin: `0 0 ${MAIL_SPACE.md}`,
   padding: `${MAIL_SPACE.sm} ${MAIL_SPACE.md}`,
 }
+
+export const mailOtpCodeStyle: CSSProperties = {
+  backgroundColor: MAIL_COLOR.surfaceHigh,
+  borderRadius: MAIL_RADIUS.control,
+  color: MAIL_COLOR.primary,
+  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+  fontSize: '28px',
+  fontWeight: 700,
+  letterSpacing: '0.2em',
+  lineHeight: '36px',
+  margin: `0 0 ${MAIL_SPACE.md}`,
+  padding: `${MAIL_SPACE.md} ${MAIL_SPACE.lg}`,
+  textAlign: 'center',
+}

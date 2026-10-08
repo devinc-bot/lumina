@@ -8,14 +8,7 @@ import {
 } from '@tanstack/react-router'
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import {
-  APP_FAVICON_SRC,
-  ErrorBoundaryView,
-  NotFoundView,
-  THEME_BOOT_SCRIPT,
-  ThemeProvider,
-  Toaster,
-} from '@repo/ui'
+import { APP_FAVICON_SRC, ErrorBoundaryView, NotFoundView, Toaster } from '@repo/ui'
 import { I18nProvider } from '@repo/i18n/client'
 import { installZodI18n } from '@repo/i18n'
 import commonEs from '@repo/i18n/locales/common/es.json' with { type: 'json' }
@@ -40,7 +33,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { rel: 'stylesheet', href: globalsCssUrl },
       { rel: 'stylesheet', href: viewTransitionsCssUrl },
     ],
-    scripts: [{ children: THEME_BOOT_SCRIPT }],
   }),
   errorComponent: RootErrorBoundary,
   notFoundComponent: RootNotFound,
@@ -118,27 +110,20 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext()
   return (
     <I18nProvider>
-      <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
-          <ZodI18nBridge />
-          <DocumentLang />
-          <html
-            lang="es"
-            data-theme="dark"
-            style={{ colorScheme: 'dark' }}
-            suppressHydrationWarning
-          >
-            <head>
-              <HeadContent />
-            </head>
-            <body>
-              <Outlet />
-              <Toaster position="top-right" />
-              <Scripts />
-            </body>
-          </html>
-        </QueryClientProvider>
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ZodI18nBridge />
+        <DocumentLang />
+        <html lang="es" data-theme="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
+          <head>
+            <HeadContent />
+          </head>
+          <body>
+            <Outlet />
+            <Toaster position="top-right" />
+            <Scripts />
+          </body>
+        </html>
+      </QueryClientProvider>
     </I18nProvider>
   )
 }

@@ -10,7 +10,7 @@ export function RequireGuest({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      void navigate({ to: WEB_ROUTES.home(), replace: true })
+      void navigate({ to: WEB_ROUTES.events(), replace: true })
     }
   }, [isAuthenticated, isLoading, navigate])
 

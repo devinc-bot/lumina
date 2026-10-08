@@ -3,8 +3,10 @@ import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common
 import { render } from 'react-email'
 import { DEFAULT_LANGUAGE, type Language } from '@repo/i18n'
 import { MAIL_ERROR_CODE } from '@repo/i18n/constants'
+import { OTP_TTL_MINUTES, OTP_TYPE } from '@repo/types'
 import { TranslationService } from '@repo/i18n/server'
 import type {
+  MercadoPagoConnectionOtpRenderInput,
   PasswordResetRenderInput,
   RenderedMail,
   StaffInvitationRenderInput,
@@ -12,6 +14,7 @@ import type {
   WelcomeRenderInput,
 } from '../../types'
 import { PasswordResetEmail } from '../../templates/password-reset'
+import { MercadoPagoConnectionOtpEmail } from '../../templates/mercado-pago-connection-otp'
 import { StaffInvitationEmail } from '../../templates/staff-invitation'
 import { UserRegistrationEmail } from '../../templates/user-registration'
 import { WelcomeEmail } from '../../templates/welcome'
@@ -63,6 +66,44 @@ export class MailTemplatesService {
       [body, expires, securityWordNote, `${cta}: ${input.url}`, ignore, footer]
         .filter(Boolean)
         .join('\n\n')
+    )
+  }
+
+  async renderMercadoPagoConnectionOtp(
+    input: MercadoPagoConnectionOtpRenderInput,
+    language: Language = DEFAULT_LANGUAGE
+  ): Promise<RenderedMail> {
+    const t = (key: string, vars?: Record<string, unknown>) =>
+      this.ts.translateEmail(key, vars, language)
+    const actionKey =
+      input.type === OTP_TYPE.MERCADO_PAGO_DISCONNECTION ? 'disconnection' : 'connection'
+    const keyPrefix = `mercadoPagoConnectionOtp.${actionKey}`
+    const subject = t(`${keyPrefix}.subject`)
+    const title = t(`${keyPrefix}.title`)
+    const brand = t('common.brand')
+    const body = t(`${keyPrefix}.body`)
+    const codeLabel = t('mercadoPagoConnectionOtp.codeLabel')
+    const expires = t('mercadoPagoConnectionOtp.expires', { minutes: OTP_TTL_MINUTES })
+    const ignore = t('mercadoPagoConnectionOtp.ignore')
+    const footer = t('common.footer')
+    const copyright = t('common.copyright', { year: new Date().getFullYear() })
+
+    return this.renderEmail(
+      createElement(MercadoPagoConnectionOtpEmail, {
+        preview: subject,
+        title,
+        brand,
+        body,
+        codeLabel,
+        code: input.code,
+        expires,
+        ignore,
+        footer,
+        copyright,
+        lang: language,
+      }),
+      subject,
+      [body, `${codeLabel}: ${input.code}`, expires, ignore, footer].join('\n\n')
     )
   }
 

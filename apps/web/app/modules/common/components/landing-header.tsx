@@ -16,7 +16,6 @@ import {
   SheetTrigger,
   Skeleton,
   cn,
-  ThemeToggle,
   linkVariants,
 } from '@repo/ui'
 import { UserMenu } from '~/modules/common/components/user-menu'
@@ -124,7 +123,6 @@ export function LandingHeader() {
 
           <div className="flex shrink-0 items-center gap-0 sm:gap-2">
             <LanguageToggle className={iconButton} languageLabel={t('nav.language')} />
-            <ThemeToggle className={iconButton} />
             {isLoading ? (
               <Skeleton className="size-9 rounded-full bg-surface-container-high" aria-hidden />
             ) : showAuthChrome && user ? (

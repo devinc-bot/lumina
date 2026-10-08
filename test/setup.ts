@@ -48,7 +48,7 @@ Object.assign(process.env, {
   AWS_REGION: 'sa-east-1',
   AWS_ACCESS_KEY_ID: '',
   AWS_SECRET_ACCESS_KEY: '',
-  MAIL_FROM: 'no-reply@example.test',
+  MAIL_DOMAIN: 'example.test',
   MAIL_REPLY_TO: '',
   MAIL_SMOKE_TO: 'smoke@example.test',
   GOOGLE_CLIENT_ID: 'test-google-client-id',

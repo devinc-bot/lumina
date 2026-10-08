@@ -11,14 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { installZodI18n } from '@repo/i18n'
 import { I18nProvider } from '@repo/i18n/client'
 import commonEs from '@repo/i18n/locales/common/es.json' with { type: 'json' }
-import {
-  APP_LOGO_SRC,
-  ErrorBoundaryView,
-  NotFoundView,
-  THEME_BOOT_SCRIPT,
-  ThemeProvider,
-  Toaster,
-} from '@repo/ui'
+import { APP_LOGO_SRC, ErrorBoundaryView, NotFoundView, Toaster } from '@repo/ui'
 import globalsCssUrl from '@repo/ui/globals.css?url'
 import viewTransitionsCssUrl from '@repo/ui/view-transitions.css?url'
 
@@ -39,7 +32,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { rel: 'stylesheet', href: globalsCssUrl },
       { rel: 'stylesheet', href: viewTransitionsCssUrl },
     ],
-    scripts: [{ children: THEME_BOOT_SCRIPT }],
   }),
   errorComponent: RootErrorBoundary,
   notFoundComponent: RootNotFound,
@@ -97,9 +89,7 @@ function RootErrorBoundary({ error, reset }: ErrorComponentProps) {
       </head>
       <body>
         <I18nProvider>
-          <ThemeProvider>
-            <ErrorContent error={routeError} reset={reset} />
-          </ThemeProvider>
+          <ErrorContent error={routeError} reset={reset} />
         </I18nProvider>
         <Scripts />
       </body>
@@ -129,9 +119,7 @@ function RootNotFound() {
       </head>
       <body>
         <I18nProvider>
-          <ThemeProvider>
-            <NotFoundContent />
-          </ThemeProvider>
+          <NotFoundContent />
         </I18nProvider>
         <Scripts />
       </body>
@@ -144,27 +132,20 @@ function RootComponent() {
 
   return (
     <I18nProvider>
-      <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
-          <ZodI18nBridge />
-          <DocumentLang />
-          <html
-            lang="es"
-            data-theme="dark"
-            style={{ colorScheme: 'dark' }}
-            suppressHydrationWarning
-          >
-            <head>
-              <HeadContent />
-            </head>
-            <body>
-              <Outlet />
-              <Toaster position="top-right" />
-              <Scripts />
-            </body>
-          </html>
-        </QueryClientProvider>
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ZodI18nBridge />
+        <DocumentLang />
+        <html lang="es" data-theme="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
+          <head>
+            <HeadContent />
+          </head>
+          <body>
+            <Outlet />
+            <Toaster position="top-right" />
+            <Scripts />
+          </body>
+        </html>
+      </QueryClientProvider>
     </I18nProvider>
   )
 }

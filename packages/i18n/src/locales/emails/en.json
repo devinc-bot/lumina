@@ -31,6 +31,21 @@
     "expires": "This link expires in {minutes} minutes.",
     "ignore": "If you didn't create an account, ignore this email."
   },
+  "mercadoPagoConnectionOtp": {
+    "connection": {
+      "subject": "Code to connect Mercado Pago",
+      "title": "Confirm your Mercado Pago connection",
+      "body": "Use this code to connect your Mercado Pago account."
+    },
+    "disconnection": {
+      "subject": "Code to disconnect Mercado Pago",
+      "title": "Confirm your Mercado Pago disconnection",
+      "body": "Use this code to disconnect your Mercado Pago account."
+    },
+    "codeLabel": "Your verification code",
+    "expires": "This code expires in {minutes} minutes.",
+    "ignore": "If you didn't request this action, ignore this email."
+  },
   "welcome": {
     "subject": "Welcome to {appNameDisplay}",
     "title": "Welcome, {name}!",

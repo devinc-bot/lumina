@@ -12,7 +12,7 @@ export class SendMailUseCase {
   ) {}
 
   async execute(input: SendMailInput): Promise<SendMailResult> {
-    this.mailConfig.assertConfigured()
+    this.mailConfig.assertConfigured(input.senderType)
     return this.mailSender.send(input)
   }
 }

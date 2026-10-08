@@ -31,7 +31,7 @@ export function EventDetailBuyButton({
       onClick={onClick}
       iconLeft={<Ticket aria-hidden strokeWidth={1.75} />}
       className={cn(
-        'shrink-0',
+        'min-h-11 w-full text-on-primary-container',
         disabled && 'border-hairline/60 bg-surface-muted text-on-surface-variant',
         className
       )}

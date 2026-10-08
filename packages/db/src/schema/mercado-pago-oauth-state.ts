@@ -13,6 +13,7 @@ export const mercadoPagoOAuthStates = pgTable(
     stateHash: text('state_hash').notNull().unique('mercado_pago_oauth_states_hash_unique'),
     codeVerifierEncrypted: text('code_verifier_encrypted').notNull(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    otpVerifiedAt: timestamp('otp_verified_at', { withTimezone: true }),
     consumedAt: timestamp('consumed_at', { withTimezone: true }),
   },
   (table) => [index('mercado_pago_oauth_states_expiry_idx').on(table.expiresAt)]

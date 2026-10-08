@@ -2,6 +2,7 @@ import { buildApiPath } from '@repo/common'
 import type {
   MercadoPagoConnectionResponse,
   MercadoPagoSettlementTerm,
+  OtpChallengeResponse,
   PriceBreakdown,
 } from '@repo/types'
 import { api, API_ROUTES } from '~/config/api'
@@ -10,12 +11,32 @@ export function getMercadoPagoConnection(): Promise<MercadoPagoConnectionRespons
   return api.get(buildApiPath(API_ROUTES.mercadoPago, API_ROUTES.mercadoPago.path.connection()))
 }
 
-export function startMercadoPagoConnection(): Promise<{ authorizationUrl: string }> {
-  return api.post(buildApiPath(API_ROUTES.mercadoPago, API_ROUTES.mercadoPago.path.connect()), {})
+export function requestMercadoPagoConnectionOtp(): Promise<OtpChallengeResponse> {
+  return api.post(
+    buildApiPath(API_ROUTES.mercadoPago, API_ROUTES.mercadoPago.path.connectOtp()),
+    {}
+  )
 }
 
-export function disconnectMercadoPagoConnection(): Promise<void> {
-  return api.delete(buildApiPath(API_ROUTES.mercadoPago, API_ROUTES.mercadoPago.path.disconnect()))
+export function verifyMercadoPagoConnectionOtp(input: { otpDocumentId: string; code: string }) {
+  return api.post(
+    buildApiPath(API_ROUTES.mercadoPago, API_ROUTES.mercadoPago.path.connectOtpVerify()),
+    input
+  ) as Promise<{ authorizationUrl: string }>
+}
+
+export function requestMercadoPagoDisconnectionOtp(): Promise<OtpChallengeResponse> {
+  return api.post(
+    buildApiPath(API_ROUTES.mercadoPago, API_ROUTES.mercadoPago.path.disconnectOtp()),
+    {}
+  )
+}
+
+export function verifyMercadoPagoDisconnectionOtp(input: { otpDocumentId: string; code: string }) {
+  return api.post(
+    buildApiPath(API_ROUTES.mercadoPago, API_ROUTES.mercadoPago.path.disconnectOtpVerify()),
+    input
+  ) as Promise<void>
 }
 
 export function updateMercadoPagoSettlementTerm(

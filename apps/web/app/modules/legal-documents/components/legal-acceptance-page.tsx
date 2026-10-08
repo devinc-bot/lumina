@@ -74,7 +74,7 @@ export function LegalAcceptancePage() {
     onSuccess: async (result) => {
       await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.pendingLegalAcceptance })
       if (result.staleTypes.length === 0) {
-        await navigate({ to: WEB_ROUTES.home(), replace: true })
+        await navigate({ to: WEB_ROUTES.events(), replace: true })
       }
     },
   })

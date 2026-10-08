@@ -51,30 +51,8 @@ beforeEach(() => {
   repositories.toMercadoPagoConnectionResponse.mockReturnValue({ status: 'connected' })
 })
 
-test('persists an encrypted one-time PKCE verifier and sends its raw value only to the authorization URL builder', async () => {
-  const oauth = {
-    getAuthorizationUrl: vi.fn().mockReturnValue('https://auth.mercadopago.test/authorize'),
-    exchangeAuthorizationCode: vi.fn(),
-  }
-  const useCase = new ManageMercadoPagoConnectionUseCase(oauth as never)
-
-  await expect(useCase.start(OWNER_DOCUMENT_ID)).resolves.toEqual({
-    authorizationUrl: 'https://auth.mercadopago.test/authorize',
-  })
-
-  const [[opaqueState, codeVerifier]] = oauth.getAuthorizationUrl.mock.calls
-  expect(opaqueState).toEqual(expect.any(String))
-  expect(codeVerifier).toEqual(expect.any(String))
-  expect(codeVerifier).toHaveLength(43)
-  expect(repositories.createMercadoPagoOAuthState).toHaveBeenCalledWith(
-    expect.objectContaining({
-      organizationId: 44,
-      ownerDocumentId: OWNER_DOCUMENT_ID,
-      codeVerifierEncrypted: `encrypted:${codeVerifier}`,
-    })
-  )
-  const persistedState = repositories.createMercadoPagoOAuthState.mock.calls[0]?.[0]
-  expect(persistedState).not.toHaveProperty('codeVerifier')
+test('does not expose an ungated OAuth-start method', () => {
+  expect(ManageMercadoPagoConnectionUseCase.prototype).not.toHaveProperty('start')
 })
 
 test('exchanges an authorization code with the verifier from the atomically consumed state only once', async () => {

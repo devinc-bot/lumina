@@ -96,7 +96,7 @@ export function EventDetailPurchasePanel({
       </div>
 
       {hasTickets ? (
-        <div className="w-full border-t border-hairline/35 pt-4 sm:max-w-sm">
+        <div className="w-full border-t border-hairline/35 pt-4 lg:max-w-sm">
           <ul
             className="flex flex-col divide-y divide-hairline/35"
             aria-label={t('discover.detail.ticketsReady')}

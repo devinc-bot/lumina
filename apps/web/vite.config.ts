@@ -77,7 +77,7 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       host: WEB_DEVELOPMENT_SERVER.host,
-      allowedHosts: [WEB_DEVELOPMENT_SERVER.hostname],
+      allowedHosts: [WEB_DEVELOPMENT_SERVER.hostname, 'web-dev.lumina-events.com'],
       port: WEB_DEVELOPMENT_SERVER.port,
       strictPort: true,
       proxy: {

@@ -29,6 +29,12 @@
       "invalid": "Enter a valid phone number.",
       "tooLong": "Phone cannot exceed {max} characters."
     },
+    "mailDomain": {
+      "invalid": "Enter a valid mail domain."
+    },
+    "mailReplyTo": {
+      "invalid": "Enter a valid reply-to email address."
+    },
     "birthday": {
       "format": "Use the YYYY-MM-DD format."
     },
@@ -81,12 +87,15 @@
     },
     "ticket": {
       "name": "Ticket type is required.",
+      "typeRequired": "Select a ticket type.",
       "price": "Enter a valid price greater than zero.",
       "quantity": "Enter a valid quantity greater than zero.",
       "description": "Description is required.",
       "event": "Select an event.",
-      "saleDatesPair": "Enter both sale start and end dates, or leave both empty.",
-      "saleEndAfterStart": "Sale end date must be after the sale start date."
+      "saleStartRequired": "Sale start date is required.",
+      "saleEndRequired": "Sale end date is required.",
+      "saleDateInvalid": "Enter a valid sale date and time.",
+      "saleEndAfterStart": "Sale end date must be the same as or later than the sale start date."
     },
     "event": {
       "name": "Event name is required.",

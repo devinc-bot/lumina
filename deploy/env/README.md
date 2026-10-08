@@ -60,10 +60,13 @@ The following runtime values are secrets and must not be supplied as Docker buil
 Leave both AWS key variables empty to use the AWS default credential provider chain (for example an
 IAM role). When either key is set, both must be set together.
 
-`GOOGLE_CLIENT_ID`, `AWS_REGION`, `MAIL_FROM`, `MAIL_REPLY_TO`, `R2_ACCOUNT_ID`, `R2_BUCKET`, and
+`GOOGLE_CLIENT_ID`, `AWS_REGION`, `MAIL_DOMAIN`, `MAIL_REPLY_TO`, `R2_ACCOUNT_ID`, `R2_BUCKET`, and
 public URLs are not credentials, but they remain runtime configuration because the API validates and
-uses them. `MAIL_REPLY_TO` is an optional Reply-To address for a corporate inbox; leave it empty to
-omit Reply-To. It is not SES inbound receiving.
+uses them. `MAIL_DOMAIN` produces `no-reply@<domain>` for automated mail and
+`support@<domain>` for support mail. `MAIL_REPLY_TO` is optional for no-reply-only deployments and
+is required only for support mail; it routes support replies to the configured inbox and is not SES
+inbound receiving. Replace `MAIL_FROM` with `MAIL_DOMAIN` together in local and deployed runtime
+configuration; there is no fallback to `MAIL_FROM`.
 
 `CORS_ALLOWED_ORIGINS` is optional. The API always allows `WEB_URL`, `DASHBOARD_URL`, and `ADMIN_URL`;
 set this variable as a comma-separated list only when additional origins are required.
@@ -103,11 +106,17 @@ Deploy index and frontend target (Cloudflare): [`../OPERATIONS.md`](../OPERATION
 
 ## Amazon SES (transactional mail)
 
-1. In the SES console (`sa-east-1`), verify the domain or email used by `MAIL_FROM`.
+1. In the SES console (`sa-east-1`), verify `MAIL_DOMAIN` so SES can send from both
+   `no-reply@<domain>` and `support@<domain>`.
 2. Until production access is approved, verify each smoke/test recipient (or remain in the SES sandbox).
 3. Prefer an IAM task/instance role in deployed environments; use explicit AWS keys only for
    local/dev when needed (both empty = default credential chain; both set together).
-4. After env is set, run `pnpm --filter @repo/api mail:smoke` in development.
+4. Provision and monitor the inbox in `MAIL_REPLY_TO` before sending support mail. A mailbox for
+   `support@<domain>` is unnecessary for replies routed with Reply-To, but direct mail to that
+   address needs separate receiving configuration.
+5. Configure receiving infrastructure to reject or discard messages sent to `no-reply@<domain>` if
+   those replies are unattended; the sender header alone cannot prevent replies.
+6. After env is set, run `pnpm --filter @repo/api mail:smoke` in development.
 
 ## Local Compose (optional)
 

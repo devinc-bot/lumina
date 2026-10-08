@@ -24,7 +24,7 @@ function AuthCallbackPage() {
       try {
         saveAuthSession(await refreshAuthSession())
         await useSessionStore.getState().loadSession()
-        const to = await resolvePostAuthPath(WEB_ROUTES.home())
+        const to = await resolvePostAuthPath(WEB_ROUTES.events())
         await navigate({ to: to as '/', replace: true })
       } catch {
         await navigate({

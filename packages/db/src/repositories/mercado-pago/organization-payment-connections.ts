@@ -7,7 +7,7 @@ import {
   type MercadoPagoSettlementTerm,
   type OrganizationPaymentConnectionStatus,
 } from '@repo/types'
-import { db } from '../../client.ts'
+import { db, type Transaction } from '../../client.ts'
 import { organizationPaymentConnections } from '../../schema/organization-payment-connection.ts'
 
 export async function findMercadoPagoConnectionByOrganizationId(organizationId: number) {
@@ -228,8 +228,12 @@ export async function releaseMercadoPagoConnectionRefreshLease(input: {
     )
 }
 
-export async function disconnectMercadoPagoConnection(organizationId: number, now: Date) {
-  await db
+export async function disconnectMercadoPagoConnection(
+  organizationId: number,
+  now: Date,
+  transaction?: Pick<Transaction, 'update'>
+) {
+  await (transaction ?? db)
     .update(organizationPaymentConnections)
     .set({
       status: ORGANIZATION_PAYMENT_CONNECTION_STATUS.DISCONNECTED,
