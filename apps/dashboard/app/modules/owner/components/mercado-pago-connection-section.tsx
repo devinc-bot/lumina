@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
@@ -13,16 +14,22 @@ import {
 import {
   MERCADO_PAGO_SETTLEMENT_FEE_BPS,
   MERCADO_PAGO_SETTLEMENT_TERM,
+  MERCADO_PAGO_OTP_ERROR_MESSAGE,
+  OTP_TYPE,
   ORGANIZATION_PAYMENT_CONNECTION_STATUS,
   type MercadoPagoSettlementTerm,
+  type OtpChallengeResponse,
   type OrganizationPaymentConnectionStatus,
 } from '@repo/types'
 import { FormSection } from '~/modules/common/components/form-section'
+import { MercadoPagoOtpDialog } from './mercado-pago-otp-dialog'
 import {
-  disconnectMercadoPagoConnection,
   getMercadoPagoConnection,
-  startMercadoPagoConnection,
+  requestMercadoPagoConnectionOtp,
+  requestMercadoPagoDisconnectionOtp,
   updateMercadoPagoSettlementTerm,
+  verifyMercadoPagoConnectionOtp,
+  verifyMercadoPagoDisconnectionOtp,
 } from '~/modules/owner/services/mercado-pago-connection.service'
 
 const MERCADO_PAGO_CONNECTION_QUERY_KEY = ['mercado-pago', 'connection'] as const
@@ -44,6 +51,21 @@ function getConnectionStatusKey(status: OrganizationPaymentConnectionStatus | un
   return 'disconnected'
 }
 
+function getErrorMessage(
+  error: unknown,
+  messages: { fallback: string; invalidOrExpired: string; requestLimitReached: string }
+): string {
+  if (!(error instanceof Error)) return messages.fallback
+
+  if (error.message === MERCADO_PAGO_OTP_ERROR_MESSAGE.INVALID_OR_EXPIRED) {
+    return messages.invalidOrExpired
+  }
+  if (error.message === MERCADO_PAGO_OTP_ERROR_MESSAGE.REQUEST_LIMIT_REACHED) {
+    return messages.requestLimitReached
+  }
+  return messages.fallback
+}
+
 export function MercadoPagoConnectionSection() {
   const { t, i18n } = useTranslation('settings')
   const queryClient = useQueryClient()
@@ -51,13 +73,31 @@ export function MercadoPagoConnectionSection() {
     queryKey: MERCADO_PAGO_CONNECTION_QUERY_KEY,
     queryFn: getMercadoPagoConnection,
   })
+  const [challenge, setChallenge] = useState<OtpChallengeResponse | null>(null)
   const connectMutation = useMutation({
-    mutationFn: startMercadoPagoConnection,
-    onSuccess: ({ authorizationUrl }) => window.location.assign(authorizationUrl),
+    mutationFn: requestMercadoPagoConnectionOtp,
+    onSuccess: setChallenge,
   })
   const disconnectMutation = useMutation({
-    mutationFn: disconnectMercadoPagoConnection,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: MERCADO_PAGO_CONNECTION_QUERY_KEY }),
+    mutationFn: requestMercadoPagoDisconnectionOtp,
+    onSuccess: setChallenge,
+  })
+  const verifyMutation = useMutation({
+    mutationFn: async (code: string) => {
+      if (!challenge) throw new Error('Missing OTP challenge')
+      const input = { otpDocumentId: challenge.otpDocumentId, code }
+      return challenge.type === OTP_TYPE.MERCADO_PAGO_CONNECTION
+        ? verifyMercadoPagoConnectionOtp(input)
+        : verifyMercadoPagoDisconnectionOtp(input)
+    },
+    onSuccess: (result) => {
+      if (challenge?.type === OTP_TYPE.MERCADO_PAGO_CONNECTION) {
+        window.location.assign((result as { authorizationUrl: string }).authorizationUrl)
+        return
+      }
+      setChallenge(null)
+      queryClient.invalidateQueries({ queryKey: MERCADO_PAGO_CONNECTION_QUERY_KEY })
+    },
   })
   const settlementTermMutation = useMutation({
     mutationFn: updateMercadoPagoSettlementTerm,
@@ -66,6 +106,17 @@ export function MercadoPagoConnectionSection() {
   const statusKey = getConnectionStatusKey(connectionQuery.data?.status)
   const isConnected =
     connectionQuery.data?.status === ORGANIZATION_PAYMENT_CONNECTION_STATUS.CONNECTED
+  const connectionError =
+    connectionQuery.error ??
+    connectMutation.error ??
+    disconnectMutation.error ??
+    verifyMutation.error ??
+    settlementTermMutation.error
+  const errorMessage = getErrorMessage(connectionError, {
+    fallback: t('owner.mercadoPago.error'),
+    invalidOrExpired: t('owner.mercadoPago.otp.errors.invalidOrExpired'),
+    requestLimitReached: t('owner.mercadoPago.otp.errors.requestLimitReached'),
+  })
 
   return (
     <FormSection
@@ -118,16 +169,13 @@ export function MercadoPagoConnectionSection() {
               </p>
             </div>
           ) : null}
-          {connectionQuery.isError ||
-          connectMutation.isError ||
-          disconnectMutation.isError ||
-          settlementTermMutation.isError ? (
+          {connectionError ? (
             <p role="alert" className="mt-2 text-sm text-error">
-              {t('owner.mercadoPago.error')}
+              {errorMessage}
             </p>
           ) : null}
         </div>
-        {isConnected ? (
+        {challenge ? null : isConnected ? (
           <Button
             type="button"
             variant="outline"
@@ -148,6 +196,24 @@ export function MercadoPagoConnectionSection() {
           </Button>
         )}
       </Card>
+      {challenge ? (
+        <MercadoPagoOtpDialog
+          key={challenge.otpDocumentId}
+          challenge={challenge}
+          isVerifying={verifyMutation.isPending}
+          isResending={connectMutation.isPending || disconnectMutation.isPending}
+          hasError={verifyMutation.isError || connectMutation.isError || disconnectMutation.isError}
+          errorMessage={errorMessage}
+          onCancel={() => setChallenge(null)}
+          onCodeChange={verifyMutation.reset}
+          onResend={() =>
+            challenge.type === OTP_TYPE.MERCADO_PAGO_CONNECTION
+              ? connectMutation.mutate()
+              : disconnectMutation.mutate()
+          }
+          onVerify={(code) => verifyMutation.mutate(code)}
+        />
+      ) : null}
     </FormSection>
   )
 }

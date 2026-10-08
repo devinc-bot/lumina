@@ -31,6 +31,21 @@
     "expires": "Este enlace vence en {minutes} minutos.",
     "ignore": "Si no creaste una cuenta, ignorá este correo."
   },
+  "mercadoPagoConnectionOtp": {
+    "connection": {
+      "subject": "Código para conectar Mercado Pago",
+      "title": "Confirmá la conexión de Mercado Pago",
+      "body": "Usá este código para conectar tu cuenta de Mercado Pago."
+    },
+    "disconnection": {
+      "subject": "Código para desconectar Mercado Pago",
+      "title": "Confirmá la desconexión de Mercado Pago",
+      "body": "Usá este código para desconectar tu cuenta de Mercado Pago."
+    },
+    "codeLabel": "Tu código de verificación",
+    "expires": "Este código vence en {minutes} minutos.",
+    "ignore": "Si no solicitaste esta acción, ignorá este correo."
+  },
   "welcome": {
     "subject": "Bienvenido a {appNameDisplay}",
     "title": "¡Bienvenido, {name}!",

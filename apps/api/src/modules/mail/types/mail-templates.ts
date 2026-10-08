@@ -1,3 +1,10 @@
+import type { OtpType } from '@repo/types'
+
+export type MercadoPagoConnectionOtpRenderInput = {
+  type: OtpType
+  code: string
+}
+
 export type StaffInvitationRenderInput = {
   inviterName: string
   clubName: string

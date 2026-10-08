@@ -285,7 +285,9 @@ export function StaffInvitationAcceptView({ invitation, token }: StaffInvitation
                         confirmPassword: value,
                       })
                       if (!result.success) {
-                        return result.error.issues.map((issue) => issue.message)
+                        return result.error.issues
+                          .filter((issue) => issue.path[0] === 'confirmPassword')
+                          .map((issue) => issue.message)
                       }
                       return undefined
                     },

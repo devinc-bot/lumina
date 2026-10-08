@@ -62,6 +62,19 @@
       "reconnect": "Reconnect Mercado Pago",
       "disconnect": "Disconnect",
       "error": "We could not update the Mercado Pago connection.",
+      "otp": {
+        "title": "Confirm this change",
+        "sent": "We sent a code to {email}.",
+        "expires": "The code expires at {date}.",
+        "label": "6-digit code",
+        "verify": "Verify code",
+        "resend": "Resend code",
+        "cancel": "Cancel",
+        "errors": {
+          "invalidOrExpired": "The code is invalid or expired. Request a new one and try again.",
+          "requestLimitReached": "You have reached the code request limit. Wait a few minutes and try again."
+        }
+      },
       "settlementTerm": {
         "label": "When funds are released",
         "hint": "Choose the same term configured in Mercado Pago. This percentage is only used to estimate the fee; the final amount may vary.",

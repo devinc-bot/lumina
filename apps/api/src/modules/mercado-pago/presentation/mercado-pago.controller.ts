@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Headers,
   HttpCode,
@@ -17,6 +16,7 @@ import { SkipThrottle } from '@nestjs/throttler'
 import { API_ROUTES } from '@repo/common'
 import {
   USER_ROLE,
+  OTP_TYPE,
   type JwtPayload,
   type MercadoPagoConnectionResponse,
   type PriceBreakdown,
@@ -26,17 +26,22 @@ import {
   mercadoPagoOAuthCallbackSchema,
   ownerMarketplacePriceQuoteSchema,
   updateMercadoPagoSettlementTermSchema,
+  verifyOtpSchema,
   type MarketplacePriceQuoteInput,
   type MercadoPagoOAuthCallbackInput,
   type OwnerMarketplacePriceQuoteInput,
   type UpdateMercadoPagoSettlementTermInput,
+  type VerifyOtpInput,
 } from '@repo/validators'
+import { RATE_LIMIT_PROFILE } from '../../../config/rate-limit.policy'
+import { ApiRateLimit } from '../../common/decorators/api-rate-limit.decorator'
 import { CurrentUser } from '../../common/decorators/current-user.decorator'
 import { Roles } from '../../common/decorators/roles.decorator'
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard'
 import { RolesGuard } from '../../common/guards/roles.guard'
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe'
 import { ManageMercadoPagoConnectionUseCase } from '../application/manage-mercado-pago-connection.use-case'
+import { MercadoPagoConnectionOtpUseCase } from '../application/mercado-pago-connection-otp.use-case'
 import { QuoteMercadoPagoPriceUseCase } from '../application/quote-mercado-pago-price.use-case'
 import { ReconcileMercadoPagoWebhookUseCase } from '../application/reconcile-webhook.use-case'
 import { ENV } from '../../../config/env'
@@ -48,6 +53,8 @@ export class MercadoPagoController {
     private readonly reconcileWebhookUseCase: ReconcileMercadoPagoWebhookUseCase,
     @Inject(ManageMercadoPagoConnectionUseCase)
     private readonly manageConnectionUseCase: ManageMercadoPagoConnectionUseCase,
+    @Inject(MercadoPagoConnectionOtpUseCase)
+    private readonly connectionOtpUseCase: MercadoPagoConnectionOtpUseCase,
     @Inject(QuoteMercadoPagoPriceUseCase)
     private readonly quoteMercadoPagoPriceUseCase: QuoteMercadoPagoPriceUseCase
   ) {}
@@ -59,11 +66,23 @@ export class MercadoPagoController {
     return this.manageConnectionUseCase.getStatus(user.sub)
   }
 
-  @Post(API_ROUTES.mercadoPago.path.connect())
+  @Post(API_ROUTES.mercadoPago.path.connectOtp())
   @Roles([USER_ROLE.OWNER])
   @UseGuards(JwtAuthGuard, RolesGuard)
-  startConnection(@CurrentUser() user: JwtPayload): Promise<{ authorizationUrl: string }> {
-    return this.manageConnectionUseCase.start(user.sub)
+  @ApiRateLimit(RATE_LIMIT_PROFILE.AUTH_SENSITIVE)
+  requestConnectionOtp(@CurrentUser() user: JwtPayload) {
+    return this.connectionOtpUseCase.request(user.sub, OTP_TYPE.MERCADO_PAGO_CONNECTION)
+  }
+
+  @Post(API_ROUTES.mercadoPago.path.connectOtpVerify())
+  @ApiRateLimit(RATE_LIMIT_PROFILE.AUTH_CONFIRM)
+  @Roles([USER_ROLE.OWNER])
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  verifyConnectionOtp(
+    @CurrentUser() user: JwtPayload,
+    @Body(new ZodValidationPipe(verifyOtpSchema)) input: VerifyOtpInput
+  ): Promise<{ authorizationUrl: string }> {
+    return this.connectionOtpUseCase.verifyConnection(user.sub, input)
   }
 
   @Get(API_ROUTES.mercadoPago.path.callback())
@@ -78,12 +97,24 @@ export class MercadoPagoController {
     }
   }
 
-  @Delete(API_ROUTES.mercadoPago.path.disconnect())
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post(API_ROUTES.mercadoPago.path.disconnectOtp())
+  @ApiRateLimit(RATE_LIMIT_PROFILE.AUTH_SENSITIVE)
   @Roles([USER_ROLE.OWNER])
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async disconnectConnection(@CurrentUser() user: JwtPayload): Promise<void> {
-    await this.manageConnectionUseCase.disconnect(user.sub)
+  requestDisconnectOtp(@CurrentUser() user: JwtPayload) {
+    return this.connectionOtpUseCase.request(user.sub, OTP_TYPE.MERCADO_PAGO_DISCONNECTION)
+  }
+
+  @Post(API_ROUTES.mercadoPago.path.disconnectOtpVerify())
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiRateLimit(RATE_LIMIT_PROFILE.AUTH_CONFIRM)
+  @Roles([USER_ROLE.OWNER])
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async verifyDisconnectOtp(
+    @CurrentUser() user: JwtPayload,
+    @Body(new ZodValidationPipe(verifyOtpSchema)) input: VerifyOtpInput
+  ): Promise<void> {
+    await this.connectionOtpUseCase.verifyDisconnection(user.sub, input)
   }
 
   @Patch(API_ROUTES.mercadoPago.path.connectionSettlement())

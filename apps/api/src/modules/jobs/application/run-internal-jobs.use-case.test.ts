@@ -13,6 +13,7 @@ const db = vi.hoisted(() => ({
   deleteExpiredPasswordResetTokens: vi.fn(),
   deleteExpiredOrRevokedAccountSessionsBefore: vi.fn(),
   deleteExpiredAndCancelledInvitations: vi.fn(),
+  deleteExpiredMercadoPagoConnectionOtpBatch: vi.fn(),
   deleteExpiredMercadoPagoOAuthStatesBefore: vi.fn(),
 }))
 
@@ -31,6 +32,7 @@ const EXPECTED_STEP_ORDER = [
   INTERNAL_JOB_STEP.CLEANUP_ACCOUNT_SESSIONS,
   INTERNAL_JOB_STEP.CLEANUP_STAFF_INVITATIONS,
   INTERNAL_JOB_STEP.CLEANUP_MERCADO_PAGO_OAUTH_STATES,
+  INTERNAL_JOB_STEP.CLEANUP_MERCADO_PAGO_CONNECTION_OTPS,
 ] as const
 
 beforeEach(() => {
@@ -48,6 +50,10 @@ beforeEach(() => {
   db.deleteExpiredPasswordResetTokens.mockResolvedValue(0)
   db.deleteExpiredOrRevokedAccountSessionsBefore.mockResolvedValue(0)
   db.deleteExpiredAndCancelledInvitations.mockResolvedValue(0)
+  db.deleteExpiredMercadoPagoConnectionOtpBatch.mockResolvedValue({
+    deletedCount: 0,
+    hasMore: false,
+  })
   db.deleteExpiredMercadoPagoOAuthStatesBefore.mockResolvedValue(0)
 })
 
@@ -70,12 +76,48 @@ test('runs all hygiene steps after expiry and returns per-step results in catalo
   db.deleteExpiredOrRevokedAccountSessionsBefore.mockResolvedValue(6)
   db.deleteExpiredAndCancelledInvitations.mockResolvedValue(undefined)
   db.deleteExpiredMercadoPagoOAuthStatesBefore.mockResolvedValue(7)
+  db.deleteExpiredMercadoPagoConnectionOtpBatch.mockResolvedValue({
+    deletedCount: 8,
+    hasMore: true,
+  })
 
   const result = await new RunInternalJobsUseCase().execute()
 
   expect(result.steps.map((step) => step.name)).toEqual([...EXPECTED_STEP_ORDER])
   expect(result.steps.every((step) => step.status === 'success')).toBe(true)
-  expect(result.steps.map((step) => step.affected)).toEqual([1, 9, 2, 3, 4, 5, 6, 0, 7])
+  expect(result.steps.map((step) => step.affected)).toEqual([1, 9, 2, 3, 4, 5, 6, 0, 7, 8])
+})
+
+test('runs the bounded OTP cleanup step again on a safe aggregate-job retry', async () => {
+  const now = new Date('2026-10-07T00:00:00.000Z')
+  db.deleteExpiredMercadoPagoConnectionOtpBatch
+    .mockResolvedValueOnce({ deletedCount: 3, hasMore: true })
+    .mockResolvedValueOnce({ deletedCount: 0, hasMore: false })
+  vi.useFakeTimers()
+  vi.setSystemTime(now)
+
+  try {
+    const first = await new RunInternalJobsUseCase().execute()
+    const second = await new RunInternalJobsUseCase().execute()
+
+    expect(first.steps.at(-1)).toMatchObject({
+      name: INTERNAL_JOB_STEP.CLEANUP_MERCADO_PAGO_CONNECTION_OTPS,
+      status: 'success',
+      affected: 3,
+    })
+    expect(second.steps.at(-1)).toMatchObject({
+      name: INTERNAL_JOB_STEP.CLEANUP_MERCADO_PAGO_CONNECTION_OTPS,
+      status: 'success',
+      affected: 0,
+    })
+    expect(db.deleteExpiredMercadoPagoConnectionOtpBatch).toHaveBeenCalledTimes(2)
+    for (const [input] of db.deleteExpiredMercadoPagoConnectionOtpBatch.mock.calls) {
+      expect(input).toMatchObject({ cutoff: now, limit: expect.any(Number) })
+      expect(input.limit).toBeGreaterThan(0)
+    }
+  } finally {
+    vi.useRealTimers()
+  }
 })
 
 test('logs only aggregate dry-run checkout retention counts', async () => {
@@ -201,6 +243,7 @@ test('propagates the first step failure without running later repository cleanup
   expect(db.deleteExpiredOrRevokedAccountSessionsBefore).not.toHaveBeenCalled()
   expect(db.deleteExpiredAndCancelledInvitations).not.toHaveBeenCalled()
   expect(db.deleteExpiredMercadoPagoOAuthStatesBefore).not.toHaveBeenCalled()
+  expect(db.deleteExpiredMercadoPagoConnectionOtpBatch).not.toHaveBeenCalled()
 })
 
 test('propagates a mid-pipeline failure after earlier steps succeeded', async () => {

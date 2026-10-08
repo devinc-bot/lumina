@@ -1,4 +1,5 @@
 export type {
+  MercadoPagoConnectionOtpRenderInput,
   PasswordResetRenderInput,
   StaffInvitationRenderInput,
   UserRegistrationRenderInput,

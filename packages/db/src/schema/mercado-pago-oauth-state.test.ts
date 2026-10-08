@@ -6,4 +6,5 @@ test('persists only an encrypted PKCE verifier on the one-time Mercado Pago OAut
   expect(mercadoPagoOAuthStates).not.toHaveProperty('codeVerifier')
   expect(mercadoPagoOAuthStates.stateHash).toBeDefined()
   expect(mercadoPagoOAuthStates.consumedAt).toBeDefined()
+  expect(mercadoPagoOAuthStates.otpVerifiedAt).toBeDefined()
 })

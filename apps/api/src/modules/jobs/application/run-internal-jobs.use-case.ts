@@ -3,6 +3,7 @@ import {
   deleteApiErrorRecordsBefore,
   deleteExpiredAndCancelledInvitations,
   deleteExpiredMercadoPagoOAuthStatesBefore,
+  deleteExpiredMercadoPagoConnectionOtpBatch,
   deleteExpiredOrRevokedAccountSessionsBefore,
   deleteExpiredOwnerRegistrationTokens,
   deleteExpiredPasswordResetTokens,
@@ -26,6 +27,7 @@ const ACCOUNT_SESSION_RETENTION_DAYS = 7
 const MERCADO_PAGO_OAUTH_STATE_RETENTION_DAYS = 1
 const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000
 const JOB_NAME = 'run'
+const OTP_CLEANUP_BATCH_SIZE = 100
 
 @Injectable()
 export class RunInternalJobsUseCase {
@@ -67,6 +69,13 @@ export class RunInternalJobsUseCase {
         deleteExpiredMercadoPagoOAuthStatesBefore(
           this.getMercadoPagoOAuthStateRetentionCutoff(now)
         ),
+      [INTERNAL_JOB_STEP.CLEANUP_MERCADO_PAGO_CONNECTION_OTPS]: async () =>
+        (
+          await deleteExpiredMercadoPagoConnectionOtpBatch({
+            cutoff: now,
+            limit: OTP_CLEANUP_BATCH_SIZE,
+          })
+        ).deletedCount,
     }
 
     return runInternalJobPipeline(

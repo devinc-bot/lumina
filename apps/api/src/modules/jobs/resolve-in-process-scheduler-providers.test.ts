@@ -3,6 +3,7 @@ import { AccountSessionCleanupScheduler } from './schedulers/account-session-cle
 import { ApiErrorRetentionScheduler } from './schedulers/api-error-retention.scheduler.ts'
 import { CheckoutDataRetentionScheduler } from './schedulers/checkout-data-retention.scheduler.ts'
 import { InvitationsCleanupScheduler } from './schedulers/invitations-cleanup.scheduler.ts'
+import { MercadoPagoConnectionOtpCleanupScheduler } from './schedulers/mercado-pago-connection-otp-cleanup.scheduler.ts'
 import { MercadoPagoOAuthStateCleanupScheduler } from './schedulers/mercado-pago-oauth-state-cleanup.scheduler.ts'
 import { OwnerRegistrationCleanupScheduler } from './schedulers/owner-registration-cleanup.scheduler.ts'
 import { PasswordResetCleanupScheduler } from './schedulers/password-reset-cleanup.scheduler.ts'
@@ -32,5 +33,6 @@ test('registers all catalog schedulers when ENABLE_IN_PROCESS_SCHEDULERS is true
     AccountSessionCleanupScheduler,
     InvitationsCleanupScheduler,
     MercadoPagoOAuthStateCleanupScheduler,
+    MercadoPagoConnectionOtpCleanupScheduler,
   ])
 })

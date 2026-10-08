@@ -213,14 +213,7 @@ export class ReconcileMercadoPagoWebhookUseCase {
   ): Promise<T> {
     try {
       return await operation()
-    } catch (error) {
-      console.error(WEBHOOK_PROCESSING_FAILURE_MESSAGE, {
-        stage,
-        paymentId,
-        sellerId,
-        requestId,
-        error,
-      })
+    } catch {
       this.logger.error(WEBHOOK_PROCESSING_FAILURE_MESSAGE, {
         stage,
         paymentId,

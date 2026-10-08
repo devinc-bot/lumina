@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common'
 import { AuthModule } from '../auth/auth.module'
+import { MailModule } from '../mail'
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
 import { RolesGuard } from '../common/guards/roles.guard'
 import { MercadoPagoCheckoutProSdkAdapter } from './adapters/mercado-pago-checkout-pro.sdk-adapter'
 import { MercadoPagoOAuthHttpAdapter } from './adapters/mercado-pago-oauth.http-adapter'
 import { ManageMercadoPagoConnectionUseCase } from './application/manage-mercado-pago-connection.use-case'
+import { MercadoPagoConnectionOtpUseCase } from './application/mercado-pago-connection-otp.use-case'
 import { MercadoPagoCredentialResolver } from './application/mercado-pago-credential-resolver'
 import { QuoteMercadoPagoPriceUseCase } from './application/quote-mercado-pago-price.use-case'
 import { ReconcileMercadoPagoWebhookUseCase } from './application/reconcile-webhook.use-case'
@@ -16,7 +18,7 @@ import {
 import { MercadoPagoController } from './presentation/mercado-pago.controller'
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, MailModule],
   controllers: [MercadoPagoController],
   providers: [
     MercadoPagoCheckoutProSdkAdapter,
@@ -36,6 +38,7 @@ import { MercadoPagoController } from './presentation/mercado-pago.controller'
     },
     ReconcileMercadoPagoWebhookUseCase,
     ManageMercadoPagoConnectionUseCase,
+    MercadoPagoConnectionOtpUseCase,
     QuoteMercadoPagoPriceUseCase,
     JwtAuthGuard,
     RolesGuard,

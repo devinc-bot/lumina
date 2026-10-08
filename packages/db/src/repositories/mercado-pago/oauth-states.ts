@@ -1,16 +1,21 @@
-import { and, eq, gt, isNull, lte } from 'drizzle-orm'
-import { db } from '../../client.ts'
+import { and, eq, gt, isNotNull, isNull, lte } from 'drizzle-orm'
+import { db, type Transaction } from '../../client.ts'
 import { mercadoPagoOAuthStates } from '../../schema/mercado-pago-oauth-state.ts'
 
-export async function createMercadoPagoOAuthState(input: {
-  organizationId: number
-  ownerDocumentId: string
-  stateHash: string
-  codeVerifierEncrypted: string
-  expiresAt: Date
-  now: Date
-}) {
-  const [state] = await db
+export async function createMercadoPagoOAuthState(
+  input: {
+    organizationId: number
+    ownerDocumentId: string
+    stateHash: string
+    codeVerifierEncrypted: string
+    expiresAt: Date
+    otpVerifiedAt?: Date
+    now: Date
+  },
+  transaction?: Pick<Transaction, 'insert'>
+) {
+  const client = transaction ?? db
+  const [state] = await client
     .insert(mercadoPagoOAuthStates)
     .values({ ...input, updatedAt: input.now })
     .returning()
@@ -26,6 +31,7 @@ export async function consumeMercadoPagoOAuthState(input: { stateHash: string; n
     .where(
       and(
         eq(mercadoPagoOAuthStates.stateHash, input.stateHash),
+        isNotNull(mercadoPagoOAuthStates.otpVerifiedAt),
         isNull(mercadoPagoOAuthStates.consumedAt),
         gt(mercadoPagoOAuthStates.expiresAt, input.now)
       )
@@ -41,4 +47,25 @@ export async function deleteExpiredMercadoPagoOAuthStatesBefore(cutoff: Date): P
     .where(lte(mercadoPagoOAuthStates.expiresAt, cutoff))
     .returning({ id: mercadoPagoOAuthStates.id })
   return deleted.length
+}
+
+/** Creates an OAuth state within the caller's transaction when OTP consumption must be atomic. */
+export async function createMercadoPagoOAuthStateInTransaction(
+  transaction: import('../../client.ts').Transaction,
+  input: {
+    organizationId: number
+    ownerDocumentId: string
+    stateHash: string
+    codeVerifierEncrypted: string
+    expiresAt: Date
+    otpVerifiedAt: Date
+    now: Date
+  }
+) {
+  const [state] = await transaction
+    .insert(mercadoPagoOAuthStates)
+    .values({ ...input, updatedAt: input.now })
+    .returning()
+  if (!state) throw new Error('Mercado Pago OAuth state insert did not return a row')
+  return state
 }

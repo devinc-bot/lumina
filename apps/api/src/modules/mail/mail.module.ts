@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { SesMailSender } from './adapters/ses.mail-sender'
 import { SendMailUseCase } from './application/send-mail.use-case'
+import { SendMercadoPagoConnectionOtpUseCase } from './application/send-mercado-pago-connection-otp.use-case'
 import { SendPasswordResetUseCase } from './application/send-password-reset.use-case'
 import { SendSmokeUseCase } from './application/send-smoke.use-case'
 import { SendStaffInvitationUseCase } from './application/send-staff-invitation.use-case'
@@ -15,6 +16,7 @@ import { MAIL_SENDER } from './mail.tokens'
     MailConfigService,
     MailTemplatesService,
     SendMailUseCase,
+    SendMercadoPagoConnectionOtpUseCase,
     SendStaffInvitationUseCase,
     SendPasswordResetUseCase,
     SendUserRegistrationUseCase,
@@ -27,6 +29,7 @@ import { MAIL_SENDER } from './mail.tokens'
   ],
   exports: [
     SendMailUseCase,
+    SendMercadoPagoConnectionOtpUseCase,
     SendStaffInvitationUseCase,
     SendPasswordResetUseCase,
     SendUserRegistrationUseCase,
