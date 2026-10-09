@@ -4,6 +4,20 @@
     "description": "Manage ticket types, prices, availability and sale status per club.",
     "metaTitle": "Ticket management · {appNameAdmin}"
   },
+  "preview": {
+    "title": "Ticket preview",
+    "description": "Details of the selected ticket type.",
+    "close": "Close",
+    "event": "Event",
+    "location": "Location",
+    "ticketType": "Ticket type",
+    "price": "Price",
+    "stub": "Preview",
+    "qrNotValid": "Sample: not valid for admission",
+    "ticketDescription": "Ticket description",
+    "ticketDescriptionToggle": "Show ticket description",
+    "hideTicketDescription": "Hide ticket description"
+  },
   "checkIn": {
     "cameraLoading": "Preparing the camera…",
     "cameraInstruction": "Place the QR code inside the frame.",

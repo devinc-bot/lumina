@@ -1,0 +1,25 @@
+# Tasks 054 - Dashboard Ticket Preview
+
+- [x] T1: Replace the inventory View visual with a reusable horizontal ticket component using real row data, theme tokens, localized copy, and accessible responsive dialog presentation. Verify the affected dashboard.
+- [x] T2: Match the supplied animated ticket with a moving dithered texture and pointer tilt, preserving theme colors and reduced-motion/WebGL fallbacks. Verify the affected dashboard.
+- [x] T3: Switch the preview to dark charcoal with animated citrus-green texture and add a clearly invalid sample QR with accessible labeling. Verify the affected dashboard.
+- [x] T4: Brighten the ticket's charcoal base and render animated regions in full `#dcff02` while preserving text and QR contrast. Verify the affected dashboard.
+- [x] T5: Restore the original near-black ticket background without changing the full-green animation or sample QR. Verify the affected dashboard.
+- [x] T6: Remove only the broad dark main-content overlay while preserving the green dither points, and identify their source code for the user. Verify the affected dashboard.
+- [ ] T7: Remove the dark backing boxes behind ticket text and layer the text above the animation, preserving legibility and the QR quiet zone. Verify the affected dashboard.
+- [x] T8: Enlarge both circular edge notches and strengthen the dashed divider between the ticket body and stub. Verify the affected dashboard.
+- [x] T9: Remove opaque dark fills from the seam notches so the animated ticket surface shows through them. Verify the affected dashboard.
+- [x] T10: Restore visible circular cutouts at both seam endpoints and all four outer corners using the surrounding dialog surface. Verify the affected dashboard.
+- [x] T11: Enlarge outer corner cutouts, precisely center the dashed divider with its seam cutouts, and match all cutouts to the dialog's opaque surface color. Verify both themes.
+- [x] T12: Center the dashed divider exactly on the seam cutouts and layer the circles above its endpoints. Verify the ticket layout.
+- [x] T13: Reduce the outer corner cutouts to the seam cutout diameter and confirm the divider remains centered on its endpoints. Verify the ticket layout.
+- [x] T14: Add a subtle inset double-line frame inspired by the reference ticket edges. Verify layering and responsiveness.
+- [x] T15: Clarify the inset perimeter with two parallel lines, making the second line thinner and leaving cutout circles unoutlined. Verify both themes and endpoint alignment.
+- [x] T16: Make the thinner inner perimeter line clearly visible beside the outer line over both animated colors without outlining the cutouts. Verify at the dialog's narrow and wide sizes.
+- [x] T17: Reduce the title size, center the divider on both seam holes, and replace the pixel dither with a smooth moving wave. Verify the dashboard and motion fallbacks.
+- [x] T18: Carry the ticket description into the preview record and make the ticket itself conditionally flip to and from its reverse description face, without separate flip actions. Mirror the front face's cutouts, perforation divider, and double-line frame on the reverse. Verify responsive layout, keyboard/accessibility behavior, and reduced motion.
+- [x] T19: Extract the ticket surface, frame, corner/seam cutouts, and dashed divider to a reusable ticket-face component with background, content, and optional stub slots. Use it for both preview faces. Verify the dashboard preview.
+- [x] T20: Render ticket corner and seam cutouts as true transparent holes through the reusable ticket-face surface, preserving responsive seam alignment and both themes. Verify the dashboard preview.
+- [x] T21: Keep the flipped ticket's dashed divider precisely centered on its seam cutouts by deriving the mask coordinate from the shared layout axis. Verify both faces.
+- [x] T22: Widen the preview dialog and use a 2:1 ticket aspect ratio from the small breakpoint while preserving mobile content space. Verify the ticket reads as a ticket rather than a card.
+- [x] T23: Increase the desktop preview dialog maximum width to 4xl while retaining the 2:1 ticket proportion and the mobile viewport constraint. Verify the ticket layout.

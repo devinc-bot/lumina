@@ -40,6 +40,7 @@ export function ticketResponseToRecordItem(ticket: TicketResponse): TicketRecord
     eventName: ticket.eventName ?? '—',
     eventImageUrl: ticket.eventImageUrl,
     ticketType: ticket.ticketType.name,
+    description: ticket.description,
     price: ticket.price,
     quantity: ticket.quantity,
     totalSold: ticket.totalSold,
