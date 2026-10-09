@@ -41,6 +41,7 @@ export type TicketRecordItem = {
   eventName: string
   eventImageUrl: string | null
   ticketType: string
+  description: string
   price: number
   quantity: number
   totalSold: number

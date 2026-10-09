@@ -4,6 +4,20 @@
     "description": "Administrá los tipos de entrada, precios, disponibilidad y estado de venta por club.",
     "metaTitle": "Gestión de tickets · {appNameAdmin}"
   },
+  "preview": {
+    "title": "Vista previa del ticket",
+    "description": "Datos del tipo de entrada seleccionado.",
+    "close": "Cerrar",
+    "event": "Evento",
+    "location": "Ubicación",
+    "ticketType": "Tipo de entrada",
+    "price": "Precio",
+    "stub": "Vista previa",
+    "qrNotValid": "Muestra: no válido para ingresar",
+    "ticketDescription": "Descripción del ticket",
+    "ticketDescriptionToggle": "Mostrar descripción del ticket",
+    "hideTicketDescription": "Ocultar descripción del ticket"
+  },
   "checkIn": {
     "cameraLoading": "Preparando la cámara…",
     "cameraInstruction": "Ubicá el código QR dentro del recuadro.",

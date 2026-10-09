@@ -131,6 +131,10 @@
   --color-primary-fixed-dim: #d4e85a;
   --color-on-primary-fixed: #1a2004;
   --color-on-primary-fixed-variant: #4a5514;
+  --color-ticket-preview-background: #121311;
+  --color-ticket-preview-pattern: #dcff02;
+  --color-ticket-preview-ink: #e6e7e2;
+  --color-ticket-preview-muted: #c5c8b8;
 
   --color-secondary: #c6c7c2;
   --color-on-secondary: #2e302a;
@@ -547,6 +551,14 @@ html[data-theme='light'] {
 }
 
 @layer utilities {
+  .ticket-preview-copy {
+    text-shadow:
+      0 1px 1px var(--color-ticket-preview-background),
+      0 -1px 1px var(--color-ticket-preview-background),
+      1px 0 1px var(--color-ticket-preview-background),
+      -1px 0 1px var(--color-ticket-preview-background);
+  }
+
   .nebula-bg {
     background:
       radial-gradient(circle at 20% 30%, rgba(236, 177, 255, 0.06) 0%, transparent 42%),
